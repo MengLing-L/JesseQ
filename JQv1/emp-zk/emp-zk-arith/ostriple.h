@@ -74,23 +74,19 @@ public:
   }
 
   uint64_t auth_compute_mul_send_with_setup(__uint128_t &Ma, __uint128_t &Mb, __uint128_t &Mc,
-                                               uint64_t Mabc, uint64_t wa, uint64_t wb, __uint128_t &MaMb_My) {
+                                               uint64_t Mabc, uint64_t wa, uint64_t wb, __uint128_t &MaMb_My, uint64_t *d) {
     uint64_t wc = mult_mod(wa,wb);
     uint64_t sa = PR - wa, sb = PR - wb, sc = PR - wc;
-    sa = add_mod(HIGH64(Ma), sa);
-    sb = add_mod(HIGH64(Mb), sb);
-    sc = add_mod(HIGH64(Mc), sc);
-
-    // uint64_t M1 = mult_mod(sa, LOW64(Mb)), M2 = mult_mod(sb, LOW64(Ma));
-    // M1 = add_mod(M1,M2);
-    // M1 = add_mod(M1,Mabc);
-    uint64_t M1 = add_mod(sb, LOW64(Mb)), M2 = add_mod(sa, LOW64(Ma));
+    // uint64_t *d = new uint64_t[3];
+    d[0] = add_mod(HIGH64(Ma), sa);
+    d[1] = add_mod(HIGH64(Mb), sb);
+    d[2] = add_mod(HIGH64(Mc), sc);
+  
+    uint64_t M1 = add_mod(d[1], LOW64(Mb)), M2 = add_mod(d[0], LOW64(Ma));
     M1 = mult_mod(M1,M2);
     M1 = add_mod(M1,MaMb_My);
 
-    io->send_data(&sa, sizeof(uint64_t));
-    io->send_data(&sb, sizeof(uint64_t));
-    io->send_data(&sc, sizeof(uint64_t));
+    // io->send_data(d, 3 * sizeof(uint64_t));
     Ma = (__uint128_t)makeBlock(wa, LOW64(Ma));
     Mb = (__uint128_t)makeBlock(wb, LOW64(Mb));
     Mc = (__uint128_t)makeBlock(wc, LOW64(Mc));
@@ -98,28 +94,25 @@ public:
     return M1;
   }
 
-  uint64_t auth_compute_mul_recv_with_setup(__uint128_t &Ka, __uint128_t &Kb, __uint128_t &Kc, __uint128_t Kab,__uint128_t &KaKb_Ky) {
-    uint64_t da, db, dc;
-    io->recv_data(&da, sizeof(uint64_t));
-    io->recv_data(&db, sizeof(uint64_t));
-    io->recv_data(&dc, sizeof(uint64_t));
+  uint64_t auth_compute_mul_recv_with_setup(__uint128_t &Ka, __uint128_t &Kb, __uint128_t &Kc, __uint128_t Kab,__uint128_t &KaKb_Ky, uint64_t *d) {
+    // uint64_t *d = new uint64_t[3];
+    // io->recv_data(d, 3 * sizeof(uint64_t));
 
-    dc = mult_mod(dc, delta);
-    Kc = add_mod(Kc, dc);
+    d[2] = mult_mod(d[2], delta);
+    Kc = add_mod(Kc, d[2]);
 
-    // uint64_t K1 = mult_mod(da, Kb), K2 = mult_mod(db, Ka);
-    uint64_t K1 = add_mod(db, Kb), K2 = add_mod(da, Ka);
+    uint64_t K1 = add_mod(d[1], Kb), K2 = add_mod(d[0], Ka);
     K1 = mult_mod(K1, K2);
     K1 = add_mod(K1, Kc);
-    K2 = mult_mod(da, db);
+    K2 = mult_mod(d[0], d[1]);
     K2 = mult_mod(K2, delta);
     K1 = add_mod(K1, K2);
     K1 = add_mod(K1, KaKb_Ky);
 
-    da = mult_mod(da, delta);
-    db = mult_mod(db, delta);
-    Ka = add_mod(Ka, da);
-    Kb = add_mod(Kb, db);
+    d[0] = mult_mod(d[0], delta);
+    d[1] = mult_mod(d[1], delta);
+    Ka = add_mod(Ka, d[0]);
+    Kb = add_mod(Kb, d[1]);
 
     return K1;
   }

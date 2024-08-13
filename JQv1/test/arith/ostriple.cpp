@@ -104,6 +104,7 @@ void test_compute_and_gate_check_JQv1(NetIO *ios[threads + 1], int party) {
   __uint128_t *ab = new __uint128_t[len];
   __uint128_t *ab_y = new __uint128_t[len];
   uint64_t *hash_input = new uint64_t[len];
+  uint64_t (*d)[3] = new uint64_t[len][3];
   if (party == ALICE) {
     for (int i = 0; i < len; i++) {
       a[i] = os.random_val_input();
@@ -124,15 +125,16 @@ void test_compute_and_gate_check_JQv1(NetIO *ios[threads + 1], int party) {
     __uint128_t *bin = new __uint128_t[len];
     prg.random_block((block *)ain, len);
     prg.random_block((block *)bin, len);
-
+    
     for (int i = 0; i < len; ++i) {
       ain[i] = ain[i] & (__uint128_t)0xFFFFFFFFFFFFFFFFLL;
       ain[i] = mod(ain[i], pr);
       bin[i] = bin[i] & (__uint128_t)0xFFFFFFFFFFFFFFFFLL;
       bin[i] = mod(bin[i], pr);
-
-      hash_input[i] = os.auth_compute_mul_send_with_setup(a[i], b[i], c[i], ab[i], ain[i], bin[i], ab_y[i]);
+      hash_input[i] = os.auth_compute_mul_send_with_setup(a[i], b[i], c[i], ab[i], ain[i], bin[i], ab_y[i], d[i]);
     }
+
+    ios[0]->send_data(d, len * 3 * sizeof(uint64_t));
 
     block hash_output = Hash::hash_for_block(hash_input, len * 8);
     ios[0]->send_data(&hash_output, sizeof(block));
@@ -158,8 +160,9 @@ void test_compute_and_gate_check_JQv1(NetIO *ios[threads + 1], int party) {
     std::cout << "recver time for setup: " << time_from(t2)<<" us" << std::endl;
 
     auto start = clock_start();
+    ios[0]->recv_data(d, len * 3 * sizeof(uint64_t));
     for (int i = 0; i < len; ++i) 
-      hash_input[i] = os.auth_compute_mul_recv_with_setup(a[i], b[i], c[i], ab[i], ab_y[i]);
+      hash_input[i] = os.auth_compute_mul_recv_with_setup(a[i], b[i], c[i], ab[i], ab_y[i], d[i]);
     
     block hash_output = Hash::hash_for_block(hash_input, len * 8), output_recv;
     ios[0]->recv_data(&output_recv, sizeof(block));
@@ -180,6 +183,8 @@ void test_compute_and_gate_check_JQv1(NetIO *ios[threads + 1], int party) {
   delete[] c;
   delete[] ab;
   delete[] hash_input;
+  delete[] ab_y;
+  delete[] d;
 }
 
 int main(int argc, char **argv) {
@@ -187,6 +192,7 @@ int main(int argc, char **argv) {
   NetIO *ios[threads];
   for (int i = 0; i < threads; ++i)
     ios[i] = new NetIO(party == ALICE ? nullptr : "127.0.0.1", port + i);
+    // ios[i] = new NetIO(party == ALICE ? "localhost" : "localhost", port + i);
 
   std::cout << std::endl
             << "------------ triple generation test ------------" << std::endl
@@ -194,8 +200,8 @@ int main(int argc, char **argv) {
   ;
 
 
-  // test_ostriple(ios, party);
-  test_compute_and_gate_check_JQv1(ios, party);
+  test_ostriple(ios, party);
+  // test_compute_and_gate_check_JQv1(ios, party);
 
   for (int i = 0; i < threads; ++i) {
     delete ios[i];
