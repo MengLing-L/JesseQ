@@ -102,6 +102,7 @@ void test_compute_and_gate_check_JQv1(NetIO *ios[threads + 1], int party) {
   __uint128_t *b = new __uint128_t[len];
   __uint128_t *c = new __uint128_t[len];
   __uint128_t *ab = new __uint128_t[len];
+  __uint128_t *ab_y = new __uint128_t[len];
   uint64_t *hash_input = new uint64_t[len];
   if (party == ALICE) {
     for (int i = 0; i < len; i++) {
@@ -111,6 +112,9 @@ void test_compute_and_gate_check_JQv1(NetIO *ios[threads + 1], int party) {
       ab[i] = os.auth_compute_mul_send(a[i],b[i]);
       ab[i] = PR - LOW64(ab[i]);
       ab[i] = add_mod(ab[i], LOW64(c[i]));
+      ab_y[i] = mult_mod(LOW64(a[i]), LOW64(b[i]));
+      ab_y[i] = PR - LOW64(ab_y[i]);
+      ab_y[i] = add_mod(ab[i], LOW64(ab_y[i]));
     }
     os.andgate_correctness_check_manage();
     std::cout << "sender time for setup: " << time_from(t2)<<" us" << std::endl;
@@ -127,7 +131,7 @@ void test_compute_and_gate_check_JQv1(NetIO *ios[threads + 1], int party) {
       bin[i] = bin[i] & (__uint128_t)0xFFFFFFFFFFFFFFFFLL;
       bin[i] = mod(bin[i], pr);
 
-      hash_input[i] = os.auth_compute_mul_send_with_setup(a[i], b[i], c[i], ab[i], ain[i], bin[i]);
+      hash_input[i] = os.auth_compute_mul_send_with_setup(a[i], b[i], c[i], ab[i], ain[i], bin[i], ab_y[i]);
     }
 
     block hash_output = Hash::hash_for_block(hash_input, len * 8);
@@ -146,13 +150,16 @@ void test_compute_and_gate_check_JQv1(NetIO *ios[threads + 1], int party) {
       c[i] = os.random_val_input();
       ab[i] = os.auth_compute_mul_recv(a[i],b[i]);
       ab[i] = PR - ab[i];
+      ab_y[i] = mult_mod(a[i], b[i]);
+      ab_y[i] = PR - ab_y[i];
+      ab_y[i] = add_mod(ab[i], ab_y[i]);
     }
     os.andgate_correctness_check_manage();
     std::cout << "recver time for setup: " << time_from(t2)<<" us" << std::endl;
 
     auto start = clock_start();
     for (int i = 0; i < len; ++i) 
-      hash_input[i] = os.auth_compute_mul_recv_with_setup(a[i], b[i], c[i], ab[i]);
+      hash_input[i] = os.auth_compute_mul_recv_with_setup(a[i], b[i], c[i], ab[i], ab_y[i]);
     
     block hash_output = Hash::hash_for_block(hash_input, len * 8), output_recv;
     ios[0]->recv_data(&output_recv, sizeof(block));
@@ -187,8 +194,8 @@ int main(int argc, char **argv) {
   ;
 
 
-  test_ostriple(ios, party);
-  //test_compute_and_gate_check_JQv1(ios, party);
+  // test_ostriple(ios, party);
+  test_compute_and_gate_check_JQv1(ios, party);
 
   for (int i = 0; i < threads; ++i) {
     delete ios[i];
