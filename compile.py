@@ -20,6 +20,7 @@ parser.add_argument('--ag2pc', nargs='?', const='master')
 parser.add_argument('--agmpc', nargs='?', const='master')
 parser.add_argument('--zk', nargs='?', const='master')
 parser.add_argument('--JQv1', nargs='?', const='master')
+parser.add_argument('--JQv2', nargs='?', const='master')
 args = parser.parse_args()
 
 
@@ -37,7 +38,7 @@ sudo make install
 cd ..
 '''
 
-for k in ['JQv1']:
+for k in ['JQv1','JQv2']:
 	if vars(args)[k]:
 		template = JQ_install_template.replace("X", k)
 		print(template)
