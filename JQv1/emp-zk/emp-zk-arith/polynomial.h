@@ -199,7 +199,6 @@ public:
         K2 = mult_mod(da[i], db[i]);
         dadb = add_mod(dadb, K2);
         kzero = add_mod(kzero, K1);
-        // kzero = add_mod(kzero, K2);
         kzero = add_mod(kzero, aby[i]);
       }
       tmp = add_mod(dadb, constant);
