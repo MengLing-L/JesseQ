@@ -16,6 +16,8 @@ public:
   ZKFpExec() {}
   virtual ~ZKFpExec() {}
 
+  virtual void feed(__uint128_t &label, const uint64_t &val, uint64_t &d) = 0;
+
   virtual void feed(__uint128_t &label, const uint64_t &value) = 0;
 
   virtual void feed(__uint128_t *label, const uint64_t *value, int len) = 0;
@@ -35,6 +37,10 @@ public:
                                      const uint64_t &b) = 0;
 
   virtual __uint128_t pub_label(const uint64_t &a) = 0;
+
+  virtual void random_val_input(__uint128_t &label) = 0;
+
+  virtual __uint128_t auth_compute_mul(__uint128_t &a, __uint128_t &b) = 0;
 };
 
 // ZKFpExec * ZKFpExec::zk_exec = nullptr;

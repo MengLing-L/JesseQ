@@ -80,6 +80,23 @@ public:
     delete[] chi;
   }
 
+  void batch_check(int flag) {
+    if (num == 0)
+      return;
+    io->flush();
+    if (party == ALICE) {
+      block hash_output = Hash::hash_for_block(buffer, num * 8);
+      io->send_data(&hash_output, sizeof(block));
+    } else {
+      block hash_output = Hash::hash_for_block(buffer, num * 8), output_recv;
+      io->recv_data(&output_recv, sizeof(block));
+      if (HIGH64(hash_output) == HIGH64(output_recv) && LOW64(hash_output) == LOW64(output_recv))
+        std::cout<<"JQv1 success!\n";
+      else std::cout<<"JQv1 fail!\n";
+    }
+    num = 0;
+  }
+
   inline void zkp_poly_deg2(const __uint128_t *polyx, const __uint128_t *polyy,
                             const uint64_t *coeff, int len) {
     if (num >= buffer_sz)
@@ -155,6 +172,44 @@ public:
       buffer[num] = B;
     }
     num++;
+  }
+
+  inline void zkp_inner_prdt(const __uint128_t *au, const __uint128_t *bu, const uint64_t *da, const uint64_t *db, const __uint128_t *aby,
+                             uint64_t constant, int len) {
+    if (num >= buffer_sz)
+      batch_check(1);
+
+    if (party == ALICE) {
+      uint64_t mzero = 0;
+      uint64_t M1, M2; 
+      for (int i = 0; i < len; ++i) {
+        M1 = add_mod(da[i], LOW64(au[i])), M2 = add_mod(db[i], LOW64(bu[i]));
+        M1 = mult_mod(M1,M2);
+        mzero = add_mod(mzero,M1);
+        mzero = add_mod(mzero,aby[i]);
+      }
+      buffer[num] = mzero;
+    } else {
+      uint64_t kzero = 0;
+      uint64_t K1, K2;
+      uint64_t tmp;
+      for (int i = 0; i < len; ++i) {
+        K1 = add_mod(da[i], au[i]), K2 = add_mod(db[i], bu[i]);
+        K1 = mult_mod(K1, K2);
+        K2 = mult_mod(da[i], db[i]);
+        K2 = mult_mod(K2, delta);
+        kzero = add_mod(kzero, K1);
+        kzero = add_mod(kzero, K2);
+        kzero = add_mod(kzero, aby[i]);
+      }
+      tmp = mult_mod(constant, delta);
+      kzero = add_mod(kzero, tmp);
+      buffer[num] = kzero;
+    }
+
+    num++;
+
+   
   }
 };
 template <typename IO> FpPolyProof<IO> *FpPolyProof<IO>::fppolyproof = nullptr;

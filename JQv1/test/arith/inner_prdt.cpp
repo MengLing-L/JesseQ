@@ -17,7 +17,11 @@ void test_inner_product(BoolIO<NetIO> *ios[threads], int party) {
 
   setup_zk_arith<BoolIO<NetIO>>(ios, threads, party);
 
-  IntFp *x = new IntFp[2 * sz];
+  IntFp *wit = new IntFp[2 * sz];
+  __uint128_t *x = new __uint128_t[2 * sz];
+  uint64_t *d = new uint64_t[2 * sz];
+  __uint128_t *ab = new __uint128_t[sz];
+  __uint128_t *ab_y = new __uint128_t[sz];
 
   if (party == ALICE) {
     uint64_t sum = 0, tmp;
@@ -35,12 +39,37 @@ void test_inner_product(BoolIO<NetIO> *ios[threads], int party) {
     ios[0]->recv_data(&constant, sizeof(uint64_t));
   }
 
-  for (int i = 0; i < 2 * sz; ++i)
-    x[i] = IntFp(witness[i], ALICE);
+  for (int i = 0; i < 2 * sz; ++i) {
+    wit[i] = IntFp(witness[i], ALICE, 1);
+    x[i] = wit[i].get_u();
+    d[i] = wit[i].get_d();
+  }
+  
+  if (party == ALICE) {
+    for (int i = 0; i < sz; ++i) {
+      // c[i] = IntFp().get_u();
+      ab[i] = auth_compute_mul(x[i],x[sz + i]);
+      ab[i] = PR - LOW64(ab[i]);
+      // ab[i] = add_mod(ab[i], LOW64(c[i]));
+      ab_y[i] = mult_mod(LOW64(x[i]), LOW64(x[sz + i]));
+      ab_y[i] = PR - LOW64(ab_y[i]);
+      ab_y[i] = add_mod(ab[i], LOW64(ab_y[i]));
+    }
+  } else {
+    for (int i = 0; i < sz; ++i) {
+      // c[i] = IntFp().get_u();
+      ab[i] = auth_compute_mul(x[i],x[sz + i]);
+      ab[i] = PR - ab[i];
+      ab_y[i] = mult_mod(x[i], x[sz + i]);
+      ab_y[i] = PR - ab_y[i];
+      ab_y[i] = add_mod(ab[i], ab_y[i]);
+    }
+  }
+
 
   auto start = clock_start();
   for (int j = 0; j < repeat; ++j) {
-    fp_zkp_inner_prdt<BoolIO<NetIO>>(x, x + sz, constant, sz);
+    fp_zkp_inner_prdt<BoolIO<NetIO>>(x, x + sz, d, d + sz, ab_y, constant, sz);
   }
 
   finalize_zk_arith<BoolIO<NetIO>>();
@@ -72,8 +101,8 @@ int main(int argc, char **argv) {
               << std::endl;
     return -1;
   } else if (argc < 5) {
-    repeat = 100;
-    sz = 10;
+    repeat = 10000;
+    sz = 100000;
   } else {
     repeat = atoi(argv[3]);
     sz = atoi(argv[4]);

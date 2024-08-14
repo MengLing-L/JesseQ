@@ -74,10 +74,10 @@ public:
   }
 
   uint64_t auth_compute_mul_send_with_setup(__uint128_t &Ma, __uint128_t &Mb, __uint128_t &Mc,
-                                               uint64_t Mabc, uint64_t wa, uint64_t wb, __uint128_t &MaMb_My, uint64_t *d) {
+                                               uint64_t Mabc, uint64_t wa, uint64_t wb, __uint128_t &MaMb_My) {
     uint64_t wc = mult_mod(wa,wb);
     uint64_t sa = PR - wa, sb = PR - wb, sc = PR - wc;
-    // uint64_t *d = new uint64_t[3];
+    uint64_t *d = new uint64_t[3];
     d[0] = add_mod(HIGH64(Ma), sa);
     d[1] = add_mod(HIGH64(Mb), sb);
     d[2] = add_mod(HIGH64(Mc), sc);
@@ -86,7 +86,7 @@ public:
     M1 = mult_mod(M1,M2);
     M1 = add_mod(M1,MaMb_My);
 
-    // io->send_data(d, 3 * sizeof(uint64_t));
+    io->send_data(d, 3 * sizeof(uint64_t));
     Ma = (__uint128_t)makeBlock(wa, LOW64(Ma));
     Mb = (__uint128_t)makeBlock(wb, LOW64(Mb));
     Mc = (__uint128_t)makeBlock(wc, LOW64(Mc));
@@ -94,9 +94,9 @@ public:
     return M1;
   }
 
-  uint64_t auth_compute_mul_recv_with_setup(__uint128_t &Ka, __uint128_t &Kb, __uint128_t &Kc, __uint128_t Kab,__uint128_t &KaKb_Ky, uint64_t *d) {
-    // uint64_t *d = new uint64_t[3];
-    // io->recv_data(d, 3 * sizeof(uint64_t));
+  uint64_t auth_compute_mul_recv_with_setup(__uint128_t &Ka, __uint128_t &Kb, __uint128_t &Kc, __uint128_t Kab,__uint128_t &KaKb_Ky) {
+    uint64_t *d = new uint64_t[3];
+    io->recv_data(d, 3 * sizeof(uint64_t));
 
     d[2] = mult_mod(d[2], delta);
     Kc = add_mod(Kc, d[2]);
@@ -131,6 +131,16 @@ public:
     return (__uint128_t)makeBlock(w, LOW64(mac));
   }
 
+  __uint128_t authenticated_val_input(uint64_t w, uint64_t &d) {
+    __uint128_t mac;
+    vole->extend(&mac, 1);
+
+    d = PR - w;
+    d = add_mod(HIGH64(mac), d);
+    io->send_data(&d, sizeof(uint64_t));
+    return mac;
+  }
+
   void authenticated_val_input(__uint128_t *label, const uint64_t *w, int len) {
     uint64_t *lam = new uint64_t[len];
     vole->extend(label, len);
@@ -154,6 +164,14 @@ public:
     lam = mult_mod(lam, delta);
     key = add_mod(key, lam);
 
+    return key;
+  }
+
+  __uint128_t authenticated_val_input(uint64_t &d, int flag) {
+    __uint128_t key;
+    vole->extend(&key, 1);
+
+    io->recv_data(&d, sizeof(uint64_t));
     return key;
   }
 

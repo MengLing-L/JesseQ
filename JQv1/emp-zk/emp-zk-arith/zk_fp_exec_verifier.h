@@ -28,6 +28,10 @@ public:
     label = this->ostriple->authenticated_val_input();
   }
 
+  void feed(__uint128_t &label, const uint64_t &val, uint64_t &d) {
+    label = this->ostriple->authenticated_val_input(d, 1);
+  }
+
   void feed(__uint128_t *label, const uint64_t *val, int len) {
     this->ostriple->authenticated_val_input(label, len);
   }
@@ -65,6 +69,14 @@ public:
     uint64_t key = mult_mod(delta, a);
     key = PR - key;
     return add_mod(key, (uint64_t)this->pub_mac);
+  }
+
+  void random_val_input(__uint128_t &label) {
+    label = ostriple->random_val_input();
+  }
+
+  __uint128_t auth_compute_mul(__uint128_t &a, __uint128_t &b) {
+    return ostriple->auth_compute_mul_recv(a, b);
   }
 };
 #endif

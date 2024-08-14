@@ -11,8 +11,11 @@
 class IntFp {
 public:
   __uint128_t value;
+  uint64_t d;
 
-  IntFp() {}
+  IntFp() {
+    ZKFpExec::zk_exec->random_val_input(value);
+  }
 
   IntFp(IntFp *obj) { this->value = obj->value; }
 
@@ -22,6 +25,18 @@ public:
     } else {
       ZKFpExec::zk_exec->feed(value, input);
     }
+  }
+
+  IntFp(uint64_t input, int party = PUBLIC, int flag=1) {
+      ZKFpExec::zk_exec->feed(value, input, d);
+  }
+
+  __uint128_t get_u(){
+    return this->value;
+  }
+
+  uint64_t get_d(){
+    return this->d;
   }
 
   uint64_t reveal() {
@@ -64,6 +79,14 @@ public:
   }
 };
 
+// static inline __uint128_t random_val_input() {
+//   return ZKFpExec::zk_exec->random_val_input();
+// }
+
+static inline __uint128_t auth_compute_mul(__uint128_t &a, __uint128_t &b){
+  return ZKFpExec::zk_exec->auth_compute_mul(a, b);
+}
+
 static inline void batch_feed(IntFp *obj, uint64_t *value, int len) {
   ZKFpExec::zk_exec->feed((__uint128_t *)obj, value, len);
 }
@@ -92,5 +115,10 @@ template <typename IO>
 inline void fp_zkp_inner_prdt(IntFp *x, IntFp *y, uint64_t constant, int len) {
   FpPolyProof<IO>::fppolyproof->zkp_inner_prdt((__uint128_t *)x,
                                                (__uint128_t *)y, constant, len);
+}
+
+template <typename IO>
+inline void fp_zkp_inner_prdt(__uint128_t *au, __uint128_t *bu, uint64_t *da, uint64_t *db, __uint128_t *mamb_my, uint64_t constant, int len) {
+  FpPolyProof<IO>::fppolyproof->zkp_inner_prdt(au, bu, da, db, mamb_my, constant, len);
 }
 #endif
