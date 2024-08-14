@@ -192,7 +192,7 @@ public:
   /*
    * authenticated bits for computing AND gates
    */
-  __uint128_t auth_compute_mul_send(__uint128_t Ma, __uint128_t Mb) {
+  __uint128_t auth_compute_mul_send(const __uint128_t Ma,const __uint128_t Mb) {
     __uint128_t mac;
     if (check_cnt == CHECK_SZ) {
       andgate_correctness_check_manage();
@@ -214,7 +214,7 @@ public:
     return mac;
   }
 
-  __uint128_t auth_compute_mul_recv(__uint128_t Ka, __uint128_t Kb) {
+  __uint128_t auth_compute_mul_recv(const __uint128_t Ka,const __uint128_t Kb) {
     __uint128_t key;
     if (check_cnt == CHECK_SZ) {
       andgate_correctness_check_manage();
