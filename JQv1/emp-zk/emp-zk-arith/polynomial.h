@@ -190,25 +190,25 @@ public:
       }
       buffer[num] = mzero;
     } else {
-      uint64_t kzero = 0;
+      uint64_t kzero = 0, dadb = 0;
       uint64_t K1, K2;
       uint64_t tmp;
       for (int i = 0; i < len; ++i) {
         K1 = add_mod(da[i], au[i]), K2 = add_mod(db[i], bu[i]);
         K1 = mult_mod(K1, K2);
         K2 = mult_mod(da[i], db[i]);
-        K2 = mult_mod(K2, delta);
+        dadb = add_mod(dadb, K2);
         kzero = add_mod(kzero, K1);
-        kzero = add_mod(kzero, K2);
+        // kzero = add_mod(kzero, K2);
         kzero = add_mod(kzero, aby[i]);
       }
-      tmp = mult_mod(constant, delta);
+      tmp = add_mod(dadb, constant);
+      tmp = mult_mod(tmp, delta);
       kzero = add_mod(kzero, tmp);
       buffer[num] = kzero;
     }
 
     num++;
-
    
   }
 };

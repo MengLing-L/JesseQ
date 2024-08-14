@@ -39,11 +39,16 @@ void test_inner_product(BoolIO<NetIO> *ios[threads], int party) {
     ios[0]->recv_data(&constant, sizeof(uint64_t));
   }
 
+  auto start = clock_start();
   for (int i = 0; i < 2 * sz; ++i) {
     wit[i] = IntFp(witness[i], ALICE, 1);
     x[i] = wit[i].get_u();
     d[i] = wit[i].get_d();
   }
+  double tt_0 = time_from(start);
+
+  cout << "commit witness of degree-2 polynomial of length " << sz << endl;
+  cout << "time use: " << tt_0 / 1000 << " ms" << endl;
   
   if (party == ALICE) {
     for (int i = 0; i < sz; ++i) {
@@ -67,17 +72,17 @@ void test_inner_product(BoolIO<NetIO> *ios[threads], int party) {
   }
 
 
-  auto start = clock_start();
+  start = clock_start();
   for (int j = 0; j < repeat; ++j) {
     fp_zkp_inner_prdt<BoolIO<NetIO>>(x, x + sz, d, d + sz, ab_y, constant, sz);
   }
 
   finalize_zk_arith<BoolIO<NetIO>>();
 
-  double tt = time_from(start);
+  double tt_1 = time_from(start);
   cout << "prove " << repeat << " degree-2 polynomial of length " << sz << endl;
-  cout << "time use: " << tt / 1000 << " ms" << endl;
-  cout << "average time use: " << tt / 1000 / repeat << " ms" << endl;
+  cout << "time use: " << tt_1 / 1000  << " ms" << endl;
+  cout << "average time use: " << tt_1 / 1000 / repeat  << " ms" << endl;
 
   delete[] witness;
   delete[] x;
