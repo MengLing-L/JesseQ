@@ -17,10 +17,8 @@ int port, party;
 const int threads = 1;
 
 void test_circuit_zk(NetIO *ios[threads + 1], int party, int matrix_sz) {
-  std::cout << "setup: ";
   long long test_n = matrix_sz * matrix_sz;
 
-  std::cout << "setup: ";
   FpOSTriple<NetIO> ostriple(party, threads, ios);
   // cout << party << "\tconstructor\t" << time_from(t1) << " us" << endl;
 
@@ -62,12 +60,6 @@ void test_circuit_zk(NetIO *ios[threads + 1], int party, int matrix_sz) {
       for (int k = 0; k < matrix_sz; ++k) {
         mat_ab[z] = ostriple.random_val_input();
         if (party == ALICE) {
-          // ab[z] = ostriple.auth_compute_mul_send(mat_a[i * matrix_sz + j], mat_b[j * matrix_sz + k]);
-          // ab[z] = PR - LOW64(ab[z]);
-          // ab[z] = add_mod(ab[z], LOW64(mat_ab[z]));
-          // ab_y[z] = mult_mod(LOW64(mat_a[i * matrix_sz + j]), LOW64(mat_b[j * matrix_sz + k]));
-          // ab_y[z] = PR - LOW64(ab_y[z]);
-          // ab_y[z] = add_mod(ab[z], LOW64(ab_y[z]));
           ab[z] = ostriple.auth_compute_mul_send(mat_a[i * matrix_sz + j], mat_b[j * matrix_sz + k]);
           ab[z] = PR - LOW64(ab[z]);
           ab[z] = add_mod(ab[z], LOW64(mat_ab[z]));
@@ -75,11 +67,6 @@ void test_circuit_zk(NetIO *ios[threads + 1], int party, int matrix_sz) {
           ab_y[z] = PR - LOW64(ab_y[z]);
           ab_y[z] = add_mod(ab[z], LOW64(ab_y[z]));
         } else {
-          // ab[z] = ostriple.auth_compute_mul_recv(mat_a[i * matrix_sz + j],mat_b[j * matrix_sz + k]);
-          // ab[z] = PR - ab[z];
-          // ab_y[z] = mult_mod(mat_a[i * matrix_sz + j],mat_b[j * matrix_sz + k]);
-          // ab_y[z] = PR - ab_y[z];
-          // ab_y[z] = add_mod(ab[z], ab_y[z]);
           ab[z] = ostriple.auth_compute_mul_recv(mat_a[i * matrix_sz + j], mat_b[j * matrix_sz + k]);
           ab[z] = PR - ab[z];
           ab_y[z] = mult_mod(mat_a[i * matrix_sz + j], mat_b[j * matrix_sz + k]);
@@ -87,12 +74,9 @@ void test_circuit_zk(NetIO *ios[threads + 1], int party, int matrix_sz) {
           ab_y[z] = add_mod(ab[z], ab_y[z]);
         }
         z++;
-    // IntFp tmp = mat_a[i * matrix_sz + j] * mat_b[j * matrix_sz + k];
-    // mat_c[i * matrix_sz + k] = mat_c[i * matrix_sz + k] + tmp;
       }
     }
   }
-  // ostriple.andgate_correctness_check_manage();
   std::cout << "Time for setup: " << time_from(start)<<" us" << std::endl;
 
   start = clock_start();
@@ -102,13 +86,8 @@ void test_circuit_zk(NetIO *ios[threads + 1], int party, int matrix_sz) {
       for (int k = 0; k < matrix_sz; ++k) {
         if (party == ALICE) {
           hash_input[z] = ostriple.auth_compute_mul_send_with_setup(mat_a[i * matrix_sz + j], mat_b[j * matrix_sz + k], mat_ab[z], mat_ab[z], ar[i * matrix_sz + j], br[j * matrix_sz + k], ab_y[z]);
-          std::cout<<"z="<<z << " "<<hash_input[z]<<"\n";
-
-          // hash_input[z] = ostriple.auth_compute_mul_send_with_setup(mat_a[i * matrix_sz + j], mat_b[j * matrix_sz + k], mat_ab[z], mat_ab[z], ar[i * matrix_sz + j], br[j * matrix_sz + k], ab_y[z]);
         } else {
-          // hash_input[z] = ostriple.auth_compute_mul_recv_with_setup(mat_a[i * matrix_sz + j], mat_b[j * matrix_sz + k], mat_ab[z], mat_ab[z], ab_y[z]);
           hash_input[z] = ostriple.auth_compute_mul_recv_with_setup(mat_a[i * matrix_sz + j], mat_b[j * matrix_sz + k], mat_ab[z], mat_ab[z], ab_y[z]);
-          std::cout<<"z="<< z << " "<<hash_input[z]<<"\n";
         }
         z++;
       }
@@ -116,11 +95,9 @@ void test_circuit_zk(NetIO *ios[threads + 1], int party, int matrix_sz) {
   }
   if (party == ALICE) {
     block hash_output = Hash::hash_for_block(hash_input, test_n * matrix_sz * 8);
-    std::cout<<hash_output<<"\n";
     ios[0]->send_data(&hash_output, sizeof(block));
   } else {
     block hash_output = Hash::hash_for_block(hash_input, test_n * matrix_sz * 8), output_recv;
-    std::cout<<hash_output<<"\n";
     ios[0]->recv_data(&output_recv, sizeof(block));
     if (HIGH64(hash_output) == HIGH64(output_recv) && LOW64(hash_output) == LOW64(output_recv))
       std::cout<<"JQv1 matrix success!\n";
@@ -140,18 +117,7 @@ void test_circuit_zk(NetIO *ios[threads + 1], int party, int matrix_sz) {
   delete[] mat_b;
   delete[] mat_c;
 
-// for (size_t i = 0; i < matrix_sz; ++i) {
-//     for (size_t j = 0; j < matrix_sz; ++j) {
-//         delete[] ab[i][j]; // delete innermost dimension
-//         delete[] ab_y[i][j]; // delete innermost dimension
-//         delete[] hash_input[i][j]; // delete innermost dimension
-//         delete[] mat_ab[i][j];
-//     }
-//     delete[] ab[i]; // delete middle dimension
-//     delete[] ab_y[i]; // delete middle dimension
-//     delete[] hash_input[i]; // delete middle dimension
-//     delete[] mat_ab[i];
-// }
+
 delete[] ab; // delete outermost dimension
 delete[] ab_y; // delete outermost dimension
 delete[] hash_input; // delete outermost dimension
@@ -199,7 +165,6 @@ int main(int argc, char **argv) {
     num = atoi(argv[3]);
   }
 
-   std::cout << "test"<< std::endl;
   test_circuit_zk(ios, party, num);
 
   for (int i = 0; i < threads; ++i) {

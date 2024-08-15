@@ -73,7 +73,7 @@ public:
     return val;
   }
 
-  uint64_t auth_compute_mul_send_with_setup(__uint128_t &Ma, __uint128_t &Mb, __uint128_t &Mc,
+  uint64_t auth_compute_mul_send_with_setup(const __uint128_t Ma,const __uint128_t Mb, __uint128_t &Mc,
                                                uint64_t Mabc, uint64_t wa, uint64_t wb, __uint128_t &MaMb_My) {
     uint64_t wc = mult_mod(wa,wb);
     uint64_t sa = PR - wa, sb = PR - wb, sc = PR - wc;
@@ -87,14 +87,13 @@ public:
     M1 = add_mod(M1,MaMb_My);
 
     io->send_data(d, 3 * sizeof(uint64_t));
-    Ma = (__uint128_t)makeBlock(wa, LOW64(Ma));
-    Mb = (__uint128_t)makeBlock(wb, LOW64(Mb));
-    Mc = (__uint128_t)makeBlock(wc, LOW64(Mc));
-
+    // Ma = (__uint128_t)makeBlock(wa, LOW64(Ma));
+    // Mb = (__uint128_t)makeBlock(wb, LOW64(Mb));
+    // Mc = (__uint128_t)makeBlock(wc, LOW64(Mc));
     return M1;
   }
 
-  uint64_t auth_compute_mul_recv_with_setup(__uint128_t &Ka, __uint128_t &Kb, __uint128_t &Kc, __uint128_t Kab,__uint128_t &KaKb_Ky) {
+  uint64_t auth_compute_mul_recv_with_setup(const __uint128_t Ka,const __uint128_t Kb, __uint128_t &Kc, __uint128_t Kab,__uint128_t &KaKb_Ky) {
     uint64_t *d = new uint64_t[3];
     io->recv_data(d, 3 * sizeof(uint64_t));
 
@@ -111,8 +110,8 @@ public:
 
     d[0] = mult_mod(d[0], delta);
     d[1] = mult_mod(d[1], delta);
-    Ka = add_mod(Ka, d[0]);
-    Kb = add_mod(Kb, d[1]);
+    // Ka = add_mod(Ka, d[0]);
+    // Kb = add_mod(Kb, d[1]);
 
     return K1;
   }
