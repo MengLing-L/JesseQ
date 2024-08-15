@@ -87,6 +87,32 @@ public:
     io->send_data(d, 2 * sizeof(uint64_t));
   }
 
+  void auth_scal_send_with_setup(const __uint128_t M, const uint64_t A, uint64_t w) {
+    uint64_t s = PR - w;
+    uint64_t d;
+    d = add_mod(HIGH64(M), s);
+    d = mult_mod(d, A);
+
+    io->send_data(&d, sizeof(uint64_t));
+  }
+
+  void auth_add_send_with_setup(const __uint128_t M, uint64_t w) {
+    uint64_t s = PR - w;
+    uint64_t d = 0;
+    d = add_mod(HIGH64(M), s);
+    // d = PR - d;
+
+    io->send_data(&d, sizeof(uint64_t));
+  }
+
+  void auth_scal_recv_with_setup(__uint128_t &H1) {
+    uint64_t d;
+    io->recv_data(&d, sizeof(uint64_t));
+    uint64_t K1;
+    K1 = mult_mod(d, delta);
+    H1 = add_mod(K1, H1);
+  }
+
   void auth_compute_mul_recv_with_setup(const __uint128_t Ka,const __uint128_t Kb, __uint128_t &H1) {
     uint64_t *d = new uint64_t[2];
     io->recv_data(d, 2 * sizeof(uint64_t));

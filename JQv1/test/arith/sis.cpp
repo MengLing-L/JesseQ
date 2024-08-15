@@ -16,9 +16,11 @@ using namespace std;
 int port, party;
 const int threads = 1;
 
-void test_sis_proof(BoolIO<NetIO> *ios[threads + 1], int party, int n, int m) {
+void test_sis_proof(NetIO *ios[threads + 1], int party, int n, int m) {
 
   srand(time(NULL));
+
+  FpOSTriple<NetIO> ostriple(party, threads, ios);
 
   int mat_size = n * m;
   uint64_t *A, *s, *t;
@@ -29,59 +31,138 @@ void test_sis_proof(BoolIO<NetIO> *ios[threads + 1], int party, int n, int m) {
     A[i] = mod(rand());
   for (int i = 0; i < m; ++i)
     s[i] = rand() % 2;
+    // s[i] = mod(rand());
   for (int i = 0; i < (m + n); ++i) {
     t[i] = (uint64_t)0;
   }
   for (int i = 0; i < n; ++i) {
     for (int j = 0; j < m; ++j) {
       t[i] = add_mod(t[i], A[i * m + j] * s[j]);
+      // t[i] = add_mod(t[i], s[j]);
     }
   }
 
   int repeat = 485;
-  auto start = clock_start();
-  setup_zk_arith<BoolIO<NetIO>>(ios, threads, party);
 
   // allocation
-  IntFp *vec_s = new IntFp[m];
-  IntFp *vec_t = new IntFp[n + m];
-  IntFp *vec_r = new IntFp[m];
-  uint64_t minusone = PR - 1;
+  __uint128_t *vec_s = new __uint128_t[m];
+  // __uint128_t *vec_t = new __uint128_t[n + m];
+  __uint128_t *vec_t = new __uint128_t[n + m];
+  __uint128_t *vec_r = new __uint128_t[m];
   int tt = 0;
 
-  for (int round = 0; round < repeat; round++) {
+  // for (int round = 0; round < repeat; round++) {
     // init
-    for (int i = 0; i < m; ++i)
-      vec_s[i] = IntFp(s[i], ALICE);
-    for (int i = 0; i < (n + m); ++i)
-      vec_t[i] = IntFp((uint64_t)0, PUBLIC);
+  for (int i = 0; i < m; ++i)
+    vec_s[i] = ostriple.random_val_input();
+
+  for (int i = 0; i < n + m; ++i) {
+    if (party == ALICE) {
+      vec_t[i] = ostriple.authenticated_val_input(0);
+    } else {
+      vec_t[i] = ostriple.authenticated_val_input();
+    }
+  }
+  // r[i] = s[i]^2
+  for (int i = 0; i < m; ++i) {
+    __uint128_t ab, tmp;
+    if (party == ALICE) {
+      tmp = ostriple.auth_compute_mul_send(vec_s[i], vec_s[i]);
+      tmp = PR - LOW64(tmp);
+      ab = mult_mod(LOW64(vec_s[i]), LOW64(vec_s[i]));
+      ab = PR - LOW64(ab);
+      vec_r[i] = add_mod(LOW64(tmp), LOW64(ab));
+    } else {
+      tmp = ostriple.auth_compute_mul_recv(vec_s[i], vec_s[i]);
+      tmp = PR - tmp;
+      ab = mult_mod(vec_s[i], vec_s[i]);
+      ab = PR - ab;
+      vec_r[i] = add_mod(tmp, ab);
+    }
+  }
+
+  // y[i] = sum{A[j][i]*s[i]}
+  for (int i = 0; i < n; ++i) {
+    for (int j = 0; j < m; ++j) {
+      __uint128_t tmp;
+      if (party == ALICE) {
+        tmp = mult_mod(LOW64(vec_s[j]), A[i * m + j]);
+        vec_t[i] = add_mod(LOW64(vec_t[i]), tmp);
+      } else {
+        tmp = mult_mod(vec_s[j], A[i * m + j]);
+        vec_t[i] = add_mod(vec_t[i], tmp);
+      }
+    }
+  }
+
+  // y[i+n] = r[i] - s[i]
+  for (int i = 0; i < m; ++i) {
+    __uint128_t tmp;
+    if (party == ALICE) {
+      // tmp = PR - LOW64(vec_s[i]);
+      vec_t[i + n] = add_mod(LOW64(vec_r[i]), LOW64(vec_s[i]));
+    } else {
+      // tmp = PR - vec_s[i];
+      vec_t[i + n] = add_mod(vec_r[i], vec_s[i]);
+    }
+  }
+  //   tt += 1;
+  // }
+  auto start = clock_start();
+
+  // for (int round = 0; round < repeat; round++) {
 
     // r[i] = s[i]^2
-    for (int i = 0; i < m; ++i)
-      vec_r[i] = vec_s[i] * vec_s[i];
+    for (int i = 0; i < m; ++i) {
+      if (party == ALICE) {
+        ostriple.auth_compute_mul_send_with_setup(vec_s[i], vec_s[i], s[i], s[i], vec_t[i + n]);
+      } else {
+        ostriple.auth_compute_mul_recv_with_setup(vec_s[i], vec_s[i], vec_t[i + n]);
+      }
+    }
 
     // y[i] = sum{A[j][i]*s[i]}
     for (int i = 0; i < n; ++i) {
       for (int j = 0; j < m; ++j) {
-        IntFp tmp = vec_s[j] * A[i * m + j];
-        vec_t[i] = vec_t[i] + tmp;
+        if (party == ALICE) {
+          ostriple.auth_scal_send_with_setup(vec_s[j], A[i * m + j], s[j]);
+        } else {
+          ostriple.auth_scal_recv_with_setup(vec_t[i]);
+        }
       }
     }
 
     // y[i+n] = r[i] - s[i]
     for (int i = 0; i < m; ++i) {
-      vec_s[i] = vec_s[i] * minusone;
-      vec_t[i + n] = vec_r[i] + vec_s[i];
+      __uint128_t tmp;
+      if (party == ALICE) {
+        ostriple.auth_add_send_with_setup(vec_s[i], s[i]);
+      } else {
+        ostriple.auth_scal_recv_with_setup(vec_t[i + n]);
+      }
     }
-    tt += 1;
+  //   tt += 1;
+  // }
+  if (party == ALICE) {
+    block hash_output = Hash::hash_for_block(vec_t, (n+m) * 16);
+    ios[0]->send_data(&hash_output, sizeof(block));
+  } else {
+    for (int i = 0; i < (n+m); ++i) {
+      // cout << LOW64(vec_t[i]) <<"\n";
+      uint64_t constant = 0;
+      constant = t[i];
+      ostriple.auth_constant(constant, vec_t[i]);
+    }
+    block hash_output = Hash::hash_for_block(vec_t,  (n+m) * 16), output_recv;
+    ios[0]->recv_data(&output_recv, sizeof(block));
+    if (HIGH64(hash_output) == HIGH64(output_recv) && LOW64(hash_output) == LOW64(output_recv))
+      std::cout<<"JQv1 success!\n";
+    else std::cout<<"JQv1 fail!\n";
   }
 
-  bool ret = batch_reveal_check(vec_t, t, n + m);
-  finalize_zk_arith<BoolIO<NetIO>>();
   auto timeuse = time_from(start);
-  cout << n << "\t" << m << "\t" << timeuse / tt << " us\t" << party << " "
-       << ret << endl;
-  std::cout << std::endl;
+  cout << n << "\t" << m << "\t" << timeuse  << " us\t" << party << " "
+       << endl;
 
   delete[] A;
   delete[] s;
@@ -111,11 +192,9 @@ void test_sis_proof(BoolIO<NetIO> *ios[threads + 1], int party, int n, int m) {
 
 int main(int argc, char **argv) {
   parse_party_and_port(argv, &party, &port);
-  BoolIO<NetIO> *ios[threads + 1];
-  for (int i = 0; i < threads + 1; ++i)
-    ios[i] = new BoolIO<NetIO>(
-        new NetIO(party == ALICE ? nullptr : "127.0.0.1", port + i),
-        party == ALICE);
+  NetIO *ios[threads];
+  for (int i = 0; i < threads; ++i)
+    ios[i] = new NetIO(party == ALICE ? nullptr : "127.0.0.1", port + i);
 
   std::cout << std::endl
             << "------------ circuit zero-knowledge proof test ------------"
@@ -123,12 +202,12 @@ int main(int argc, char **argv) {
             << std::endl;
   ;
 
-  test_sis_proof(ios, party, 8, 16);
-  //	test_sis_proof(ios, party, 1024, 4096);
+  // test_sis_proof(ios, party, 2, 2);
+  	test_sis_proof(ios, party, 1024, 4096);
   //	test_sis_proof(ios, party, 256, 256*61);
 
-  for (int i = 0; i < threads + 1; ++i) {
-    delete ios[i]->io;
+  for (int i = 0; i < threads; ++i) {
+    // delete ios[i]->io;
     delete ios[i];
   }
   return 0;

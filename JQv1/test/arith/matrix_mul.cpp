@@ -58,8 +58,7 @@ void test_circuit_zk(NetIO *ios[threads + 1], int party, int matrix_sz) {
   for (int i = 0; i < matrix_sz; ++i) {
     for (int j = 0; j < matrix_sz; ++j) {
       for (int k = 0; k < matrix_sz; ++k) {
-        __uint128_t ab;
-        __uint128_t tmp;
+        __uint128_t ab, tmp;
         if (party == ALICE) {
           tmp = ostriple.auth_compute_mul_send(mat_a[i * matrix_sz + j], mat_b[j * matrix_sz + k]);
           tmp = PR - LOW64(tmp);
