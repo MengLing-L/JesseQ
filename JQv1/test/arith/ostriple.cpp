@@ -118,6 +118,7 @@ void test_compute_and_gate_check_JQv1(NetIO *ios[threads + 1], int party) {
       ab_y[i] = add_mod(ab[i], LOW64(ab_y[i]));
     }
     os.andgate_correctness_check_manage();
+    os.check_cnt = 0;
     std::cout << "sender time for setup: " << time_from(t2)<<" us" << std::endl;
 
     auto start = clock_start();
@@ -157,6 +158,7 @@ void test_compute_and_gate_check_JQv1(NetIO *ios[threads + 1], int party) {
       ab_y[i] = add_mod(ab[i], ab_y[i]);
     }
     os.andgate_correctness_check_manage();
+    os.check_cnt = 0;
     std::cout << "recver time for setup: " << time_from(t2)<<" us" << std::endl;
 
     auto start = clock_start();

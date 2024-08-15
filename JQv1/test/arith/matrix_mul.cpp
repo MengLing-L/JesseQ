@@ -20,7 +20,6 @@ void test_circuit_zk(NetIO *ios[threads + 1], int party, int matrix_sz) {
   long long test_n = matrix_sz * matrix_sz;
 
   FpOSTriple<NetIO> ostriple(party, threads, ios);
-  // cout << party << "\tconstructor\t" << time_from(t1) << " us" << endl;
 
   uint64_t *ar, *br, *cr;
   ar = new uint64_t[test_n];
@@ -40,73 +39,77 @@ void test_circuit_zk(NetIO *ios[threads + 1], int party, int matrix_sz) {
     }
   }
 
-  auto start = clock_start();
-
   __uint128_t *mat_a = new __uint128_t[test_n];
   __uint128_t *mat_b = new __uint128_t[test_n];
-  __uint128_t *mat_c = new __uint128_t[test_n];
-  __uint128_t *mat_ab = new __uint128_t[test_n * matrix_sz];
-  __uint128_t *ab = new __uint128_t[test_n * matrix_sz];
-  __uint128_t *ab_y = new __uint128_t[test_n * matrix_sz];
-  uint64_t *hash_input = new uint64_t[test_n * matrix_sz];
+  __uint128_t *mat_ab = new __uint128_t[test_n];
+  // IntFp *mat_c = new IntFp[test_n];
 
   for (int i = 0; i < test_n; ++i) {
     mat_a[i] = ostriple.random_val_input();
     mat_b[i] = ostriple.random_val_input();
-  }
-  int z = 0;
-   for (int i = 0; i < matrix_sz; ++i) {
-    for (int j = 0; j < matrix_sz; ++j) {
-      for (int k = 0; k < matrix_sz; ++k) {
-        mat_ab[z] = ostriple.random_val_input();
-        if (party == ALICE) {
-          ab[z] = ostriple.auth_compute_mul_send(mat_a[i * matrix_sz + j], mat_b[j * matrix_sz + k]);
-          ab[z] = PR - LOW64(ab[z]);
-          ab[z] = add_mod(ab[z], LOW64(mat_ab[z]));
-          ab_y[z] = mult_mod(LOW64(mat_a[i * matrix_sz + j]), LOW64(mat_b[j * matrix_sz + k]));
-          ab_y[z] = PR - LOW64(ab_y[z]);
-          ab_y[z] = add_mod(ab[z], LOW64(ab_y[z]));
-        } else {
-          ab[z] = ostriple.auth_compute_mul_recv(mat_a[i * matrix_sz + j], mat_b[j * matrix_sz + k]);
-          ab[z] = PR - ab[z];
-          ab_y[z] = mult_mod(mat_a[i * matrix_sz + j], mat_b[j * matrix_sz + k]);
-          ab_y[z] = PR - ab_y[z];
-          ab_y[z] = add_mod(ab[z], ab_y[z]);
-        }
-        z++;
-      }
+    // mat_c[i] = IntFp();
+    if (party == ALICE) {
+      mat_ab[i] = ostriple.authenticated_val_input(0);
+    } else {
+      mat_ab[i] = ostriple.authenticated_val_input();
     }
   }
-  std::cout << "Time for setup: " << time_from(start)<<" us" << std::endl;
 
-  start = clock_start();
-  z = 0;
   for (int i = 0; i < matrix_sz; ++i) {
     for (int j = 0; j < matrix_sz; ++j) {
       for (int k = 0; k < matrix_sz; ++k) {
+        __uint128_t ab;
+        __uint128_t tmp;
         if (party == ALICE) {
-          hash_input[z] = ostriple.auth_compute_mul_send_with_setup(mat_a[i * matrix_sz + j], mat_b[j * matrix_sz + k], mat_ab[z], mat_ab[z], ar[i * matrix_sz + j], br[j * matrix_sz + k], ab_y[z]);
+          tmp = ostriple.auth_compute_mul_send(mat_a[i * matrix_sz + j], mat_b[j * matrix_sz + k]);
+          tmp = PR - LOW64(tmp);
+          ab = mult_mod(LOW64(mat_a[i * matrix_sz + j]), LOW64(mat_b[j * matrix_sz + k]));
+          ab = PR - LOW64(ab);
+          mat_ab[i * matrix_sz + k] = add_mod(LOW64(mat_ab[i * matrix_sz + k]), LOW64(tmp));
+          mat_ab[i * matrix_sz + k] = add_mod(LOW64(mat_ab[i * matrix_sz + k]), LOW64(ab));
         } else {
-          hash_input[z] = ostriple.auth_compute_mul_recv_with_setup(mat_a[i * matrix_sz + j], mat_b[j * matrix_sz + k], mat_ab[z], mat_ab[z], ab_y[z]);
+          tmp = ostriple.auth_compute_mul_recv(mat_a[i * matrix_sz + j], mat_b[j * matrix_sz + k]);
+          tmp = PR - tmp;
+          ab = mult_mod(mat_a[i * matrix_sz + j], mat_b[j * matrix_sz + k]);
+          ab = PR - ab;
+          mat_ab[i * matrix_sz + k] = add_mod(mat_ab[i * matrix_sz + k], tmp);
+          mat_ab[i * matrix_sz + k] = add_mod(mat_ab[i * matrix_sz + k], ab);
         }
-        z++;
       }
     }
   }
-  if (party == ALICE) {
-    block hash_output = Hash::hash_for_block(hash_input, test_n * matrix_sz * 8);
-    ios[0]->send_data(&hash_output, sizeof(block));
-  } else {
-    block hash_output = Hash::hash_for_block(hash_input, test_n * matrix_sz * 8), output_recv;
-    ios[0]->recv_data(&output_recv, sizeof(block));
-    if (HIGH64(hash_output) == HIGH64(output_recv) && LOW64(hash_output) == LOW64(output_recv))
-      std::cout<<"JQv1 matrix success!\n";
-    else std::cout<<"JQv1 matrix fail!\n";
+
+  auto start = clock_start();
+
+  for (int i = 0; i < matrix_sz; ++i) {
+    for (int j = 0; j < matrix_sz; ++j) {
+      for (int k = 0; k < matrix_sz; ++k) {
+         if (party == ALICE) {
+          ostriple.auth_compute_mul_send_with_setup(mat_a[i * matrix_sz + j], mat_b[j * matrix_sz + k], ar[i * matrix_sz + j], br[j * matrix_sz + k], mat_ab[i * matrix_sz + k]);
+         } else {
+          ostriple.auth_compute_mul_recv_with_setup(mat_a[i * matrix_sz + j], mat_b[j * matrix_sz + k], mat_ab[i * matrix_sz + k]);
+         }
+      }
+    }
   }
 
-  // batch_reveal_check(mat_c, cr, test_n);
+  if (party == ALICE) {
+    block hash_output = Hash::hash_for_block(mat_ab, test_n * 8);
+    ios[0]->send_data(&hash_output, sizeof(block));
+  } else {
+    for (int i = 0; i < test_n; ++i) {
+      uint64_t constant = 0;
+      constant = PR - cr[i];
+      ostriple.auth_constant(constant, mat_ab[i]);
+    }
+    block hash_output = Hash::hash_for_block(mat_ab, test_n * 8), output_recv;
+    ios[0]->recv_data(&output_recv, sizeof(block));
+    if (HIGH64(hash_output) == HIGH64(output_recv) && LOW64(hash_output) == LOW64(output_recv))
+      std::cout<<"JQv1 success!\n";
+    else std::cout<<"JQv1 fail!\n";
+  }
+
   auto timeuse = time_from(start);
-  // finalize_zk_arith<BoolIO<NetIO>>();
   cout << matrix_sz << "\t" << timeuse << " us\t" << party << " " << endl;
   std::cout << std::endl;
 
@@ -115,13 +118,7 @@ void test_circuit_zk(NetIO *ios[threads + 1], int party, int matrix_sz) {
   delete[] cr;
   delete[] mat_a;
   delete[] mat_b;
-  delete[] mat_c;
-
-
-delete[] ab; // delete outermost dimension
-delete[] ab_y; // delete outermost dimension
-delete[] hash_input; // delete outermost dimension
-delete[] mat_ab;
+  delete[] mat_ab;
 
 #if defined(__linux__)
   struct rusage rusage;
@@ -160,7 +157,7 @@ int main(int argc, char **argv) {
               << std::endl;
     return -1;
   } else if (argc == 3) {
-    num = 2;
+    num = 1024;
   } else {
     num = atoi(argv[3]);
   }
