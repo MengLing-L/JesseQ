@@ -17,14 +17,14 @@ endmacro()
 
 # Test cases
 # add_test_case_with_run(bool example)
-add_test_case_with_run(bool ostriple)
+# add_test_case_with_run(bool ostriple)
 # add_test_case_with_run(bool bool_io)
 # add_test_case_with_run(bool memory_scalability)
 # add_test_case_with_run(bool input_scalability)
 # add_test_case_with_run(bool circuit_scalability)
 # add_test_case_with_run(bool sha256)
 # add_test_case_with_run(bool polynomial)
-# add_test_case_with_run(bool inner_prdt)
+add_test_case_with_run(bool inner_prdt)
 # add_test_case_with_run(bool lowmc)
 
 # add_test_case_with_run(arith abconversion)
