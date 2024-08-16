@@ -29,7 +29,7 @@ void test_auth_bit_input(OSTriple<BoolIO<NetIO>> *os, BoolIO<NetIO> *io) {
 void test_compute_and_gate_check(OSTriple<BoolIO<NetIO>> *os,
                                  BoolIO<NetIO> *io) {
   PRG prg;
-  int len = 1024;
+  int len = 10000000;
   block *a = new block[3 * len];
   bool *ain = new bool[3 * len];
   if (party == ALICE) {
@@ -52,6 +52,51 @@ void test_compute_and_gate_check(OSTriple<BoolIO<NetIO>> *os,
   delete[] ain;
   io->flush();
 }
+
+void test_compute_and_gate_check_JQv1(OSTriple<BoolIO<NetIO>> *os,
+                                 BoolIO<NetIO> *io) {
+  PRG prg;
+  int len = 30000000;
+  block *a = new block[2 * len];
+  block *ab = new block[len];
+  block *c = new block[len];
+  bool *ain = new bool[3 * len];
+  os->random_bits_input(a, 2 * len);
+  os->random_bits_input(c, len);
+  if (party == ALICE) {
+    prg.random_bool(ain, 2 * len);
+  }
+
+  for (int i = 0; i < len; ++i) {
+    ab[i] = os->auth_compute_and(a[i], a[len + i]);
+    ain[2 * len + i] = ain[i] & ain[len + i]; 
+  }
+
+  auto start = clock_start();
+
+  for (int i = 0; i < len; ++i) {
+    if (party == ALICE) {
+      os->auth_compute_and_send_with_setup(a[i], a[len + i], c[i], ain[i], ain[len + i], ain[2 * len + i], ab[i]);
+    } else {
+      os->auth_compute_and_recv_with_setup(a[i], a[len + i], c[i], ab[i]);
+    }
+  }
+
+  if (party == ALICE) {
+    block hash_output = Hash::hash_for_block(ab, len * 16);
+    io[0].send_data(&hash_output, sizeof(block));
+  } else {
+    block hash_output = Hash::hash_for_block(ab, len * 16), output_recv;
+    io[0].recv_data(&output_recv, sizeof(block));
+    if (HIGH64(hash_output) == HIGH64(output_recv) && LOW64(hash_output) == LOW64(output_recv))
+      std::cout<<"JQv1 success!\n";
+    else std::cout<<"JQv1 fail!\n";
+  }
+  auto timeuse = time_from(start);
+  cout << len << "\t" << timeuse << " us\t" << party << " " << endl;
+  std::cout << std::endl;
+}
+
 void test_ostriple(BoolIO<NetIO> *ios[threads + 1], int party) {
   auto t1 = clock_start();
   OSTriple<BoolIO<NetIO>> os(party, threads, ios);
@@ -60,7 +105,7 @@ void test_ostriple(BoolIO<NetIO> *ios[threads + 1], int party) {
   test_auth_bit_input(&os, ios[0]);
   std::cout << "check for authenticated bit input\n";
 
-  test_compute_and_gate_check(&os, ios[0]);
+  test_compute_and_gate_check_JQv1(&os, ios[0]);
 }
 
 int main(int argc, char **argv) {

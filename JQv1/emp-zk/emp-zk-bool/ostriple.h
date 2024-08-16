@@ -88,6 +88,61 @@ public:
     return res;
   }
 
+  void random_bits_input(block *auth, int len) {
+    ferret->rcot(auth, len);
+  }
+
+  void auth_compute_and_send_with_setup(const block Ma,const block Mb, const block Mc, bool wa, bool wb, bool wc, block &H1) {
+    block Ma_ = Ma,  Mb_ = Mb, Mc_ = Mc;
+    bool *d = new bool[3];
+    d[0] = getLSB(Ma_) ^ wa;
+    io->send_bit(d[0]);
+    set_value_in_block(Ma_, wa);
+    d[1] = getLSB(Mb_) ^ wb;
+    io->send_bit(d[1]);
+    set_value_in_block(Mb_, wb);
+    d[2] = getLSB(Mc_) ^ wc;
+    io->send_bit(d[2]);
+    set_value_in_block(Mc_, wc);
+  
+    block ch_tmp[2];
+    ch_tmp[0] = zero_block;
+    ch_tmp[1] = Ma_;
+    H1 = H1 ^ ch_tmp[d[1]];
+    ch_tmp[1] = Mb_;
+    H1 = H1 ^ ch_tmp[d[0]];
+    H1 = H1 ^ Mc_;
+
+    // io->send_data(d, 3 * sizeof(bool));
+  }
+
+  void auth_compute_and_recv_with_setup(const block Ka,const block Kb,const block Kc, block &H1) {
+    block Ka_ = Ka,  Kb_ = Kb, Kc_ = Kc;
+    bool *d = new bool[3];
+    // io->recv_data(d, 3 * sizeof(bool));
+
+    d[0] = io->recv_bit();
+    Ka_ = Ka_ ^ choice[d[0]];
+    set_zero_bit(Ka_);
+
+    d[1] = io->recv_bit();
+    Kb_ = Kb_ ^ choice[d[1]];
+    set_zero_bit(Kb_);
+
+    d[2] = io->recv_bit();
+    Kc_ = Kc_ ^ choice[d[2]];
+    set_zero_bit(Kc_);
+
+    block ch_tmp[2];
+    ch_tmp[0] = zero_block;
+    ch_tmp[1] = Ka_;
+    H1 = H1 ^ ch_tmp[d[1]];
+    ch_tmp[1] = Kb_;
+    H1 = H1 ^ ch_tmp[d[0]];
+    H1 = H1 ^ Kc_;
+    H1 = H1 ^ choice[(d[0] & d[1])];
+  }
+
   /* ---------------------inputs----------------------*/
   /*
    * authenticated bits for inputs of the prover
