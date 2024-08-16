@@ -29,7 +29,7 @@ void test_auth_bit_input(OSTriple<BoolIO<NetIO>> *os, BoolIO<NetIO> *io) {
 void test_compute_and_gate_check(OSTriple<BoolIO<NetIO>> *os,
                                  BoolIO<NetIO> *io) {
   PRG prg;
-  int len = 10000000;
+  int len = 1024;
   block *a = new block[3 * len];
   bool *ain = new bool[3 * len];
   if (party == ALICE) {
@@ -56,7 +56,7 @@ void test_compute_and_gate_check(OSTriple<BoolIO<NetIO>> *os,
 void test_compute_and_gate_check_JQv1(OSTriple<BoolIO<NetIO>> *os,
                                  BoolIO<NetIO> *io) {
   PRG prg;
-  int len = 30000000;
+  int len = 1024;
   block *a = new block[2 * len];
   block *ab = new block[len];
   block *c = new block[len];

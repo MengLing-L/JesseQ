@@ -97,10 +97,8 @@ public:
     bool *d = new bool[3];
     d[0] = getLSB(Ma_) ^ wa;
     io->send_bit(d[0]);
-    set_value_in_block(Ma_, wa);
     d[1] = getLSB(Mb_) ^ wb;
     io->send_bit(d[1]);
-    set_value_in_block(Mb_, wb);
     d[2] = getLSB(Mc_) ^ wc;
     io->send_bit(d[2]);
     set_value_in_block(Mc_, wc);
@@ -122,12 +120,8 @@ public:
     // io->recv_data(d, 3 * sizeof(bool));
 
     d[0] = io->recv_bit();
-    Ka_ = Ka_ ^ choice[d[0]];
-    set_zero_bit(Ka_);
 
     d[1] = io->recv_bit();
-    Kb_ = Kb_ ^ choice[d[1]];
-    set_zero_bit(Kb_);
 
     d[2] = io->recv_bit();
     Kc_ = Kc_ ^ choice[d[2]];
