@@ -80,13 +80,30 @@ void test_circuit_zk(NetIO *ios[threads + 1], int party, int matrix_sz) {
 
   auto start = clock_start();
 
+  for (int i = 0; i < test_n; ++i) {
+    if (party == ALICE) {
+      uint64_t sa = PR - ar[i];
+      ar[i] = add_mod(HIGH64(mat_a[i]), sa);
+      uint64_t sb = PR - br[i];
+      br[i] = add_mod(HIGH64(mat_b[i]), sb);
+    }
+  }
+
+  if (party == ALICE) { 
+    ios[0]->send_data(ar, sizeof(uint64_t) * test_n);
+    ios[0]->send_data(br, sizeof(uint64_t) * test_n);
+  } else {
+    ios[0]->recv_data(ar, sizeof(uint64_t) * test_n);
+    ios[0]->recv_data(br, sizeof(uint64_t) * test_n);
+  }
+
   for (int i = 0; i < matrix_sz; ++i) {
     for (int j = 0; j < matrix_sz; ++j) {
       for (int k = 0; k < matrix_sz; ++k) {
          if (party == ALICE) {
           ostriple.auth_compute_mul_send_with_setup(mat_a[i * matrix_sz + j], mat_b[j * matrix_sz + k], ar[i * matrix_sz + j], br[j * matrix_sz + k], mat_ab[i * matrix_sz + k]);
          } else {
-          ostriple.auth_compute_mul_recv_with_setup(mat_a[i * matrix_sz + j], mat_b[j * matrix_sz + k], mat_ab[i * matrix_sz + k]);
+          ostriple.auth_compute_mul_recv_with_setup(mat_a[i * matrix_sz + j], mat_b[j * matrix_sz + k], ar[i * matrix_sz + j], br[j * matrix_sz + k], mat_ab[i * matrix_sz + k]);
          }
       }
     }
