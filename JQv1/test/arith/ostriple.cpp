@@ -39,7 +39,9 @@ void test_compute_and_gate_check_JQv1(NetIO *ios[threads + 1], int party) {
       ab[i] = os.authenticated_val_input();
     }
   }
-
+  __uint128_t *ain = new __uint128_t[len];
+  __uint128_t *bin = new __uint128_t[len];
+  __uint128_t *cin = new __uint128_t[len];
   if (party == ALICE) {
     for (int i = 0; i < len; i++) {
       __uint128_t ab_, tmp;
@@ -55,19 +57,27 @@ void test_compute_and_gate_check_JQv1(NetIO *ios[threads + 1], int party) {
     std::cout << "sender time for setup: " << time_from(t2)<<" us" << std::endl;
 
     auto start = clock_start();
-    __uint128_t *ain = new __uint128_t[len];
-    __uint128_t *bin = new __uint128_t[len];
+    
     prg.random_block((block *)ain, len);
     prg.random_block((block *)bin, len);
-
     for (int i = 0; i < len; ++i) {
       ain[i] = ain[i] & (__uint128_t)0xFFFFFFFFFFFFFFFFLL;
       ain[i] = mod(ain[i], pr);
       bin[i] = bin[i] & (__uint128_t)0xFFFFFFFFFFFFFFFFLL;
       bin[i] = mod(bin[i], pr);
-      os.auth_compute_mul_send_with_setup(a[i], b[i], c[i], ain[i], bin[i], ab[i]);
+      uint64_t sa = PR - ain[i], sb = PR - bin[i], sc = PR - mult_mod(ain[i],bin[i]);
+      ain[i] = add_mod(HIGH64(a[i]), sa);
+      bin[i] = add_mod(HIGH64(b[i]), sb);
+      cin[i] = add_mod(HIGH64(c[i]), sc);
     }
 
+    ios[0]->send_data(ain, sizeof(__uint128_t) * len);
+    ios[0]->send_data(bin, sizeof(__uint128_t) * len);
+    ios[0]->send_data(cin, sizeof(__uint128_t) * len);
+
+    for (int i = 0; i < len; ++i) {
+      os.auth_compute_mul_send_with_setup(a[i], b[i], c[i], ain[i], bin[i], ab[i]);
+    }
 
     block hash_output = Hash::hash_for_block(ab, len * 16);
     ios[0]->send_data(&hash_output, sizeof(block));
@@ -91,8 +101,17 @@ void test_compute_and_gate_check_JQv1(NetIO *ios[threads + 1], int party) {
     std::cout << "recver time for setup: " << time_from(t2)<<" us" << std::endl;
 
     auto start = clock_start();
+
+    ios[0]->recv_data(ain, sizeof(__uint128_t) * len);
+    ios[0]->recv_data(bin, sizeof(__uint128_t) * len);
+    ios[0]->recv_data(cin, sizeof(__uint128_t) * len);
+
+    for (int i = 0; i < len; ++i) {
+      os.auth_constant(cin[i], c[i]);
+    }
+
     for (int i = 0; i < len; ++i) 
-      os.auth_compute_mul_recv_with_setup(a[i], b[i], c[i], ab[i]);
+      os.auth_compute_mul_recv_with_setup(a[i], b[i], c[i], ain[i], bin[i], ab[i]);
     
     block hash_output = Hash::hash_for_block(ab, len * 16), output_recv;
     ios[0]->recv_data(&output_recv, sizeof(block));

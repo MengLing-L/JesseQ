@@ -43,9 +43,34 @@ void test_compute_and_gate_check_JQv1(OSTriple<BoolIO<NetIO>> *os,
 
   for (int i = 0; i < len; ++i) {
     if (party == ALICE) {
+      bool tmp;
+      ain[i] =  getLSB(a[i]) ^ ain[i];
+      ain[len + i] =  getLSB(a[len + i]) ^  ain[len + i];
+      tmp = getLSB(c[i]) ^  ain[2 * len + i];
+      io[0].send_bit(ain[i]);
+      io[0].send_bit(ain[len + i]);
+      io[0].send_bit(tmp);
+    } else {
+      ain[i] = io[0].recv_bit();
+      ain[len + i] = io[0].recv_bit();
+      ain[2 * len + i] = io[0].recv_bit();
+      os->adjust_kc(c[i], ain[2 * len + i]);
+    }
+  }
+
+  // if (party == ALICE) { 
+  //   io[0].send_data_internal(ain, len);
+  //   io[0].send_data_internal(ain + len, len);
+  // } else {
+  //   io[0].recv_data_internal(ain, len);
+  //   io[0].recv_data_internal(ain + len, len);
+  // }
+
+  for (int i = 0; i < len; ++i) {
+    if (party == ALICE) {
       os->auth_compute_and_send_with_setup(a[i], a[len + i], c[i], ain[i], ain[len + i], ain[2 * len + i], ab[i]);
     } else {
-      os->auth_compute_and_recv_with_setup(a[i], a[len + i], c[i], ab[i]);
+      os->auth_compute_and_recv_with_setup(a[i], a[len + i], c[i], ain[i], ain[len + i], ab[i]);
     }
   }
 
