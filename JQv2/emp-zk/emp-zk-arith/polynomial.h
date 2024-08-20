@@ -91,8 +91,8 @@ public:
       block hash_output = Hash::hash_for_block(buffer, num * 8), output_recv;
       io->recv_data(&output_recv, sizeof(block));
       if (HIGH64(hash_output) == HIGH64(output_recv) && LOW64(hash_output) == LOW64(output_recv))
-        std::cout<<"JQv1 success!\n";
-      else std::cout<<"JQv1 fail!\n";
+        std::cout<<"JQv2 success!\n";
+      else std::cout<<"JQv2 fail!\n";
     }
     num = 0;
   }
