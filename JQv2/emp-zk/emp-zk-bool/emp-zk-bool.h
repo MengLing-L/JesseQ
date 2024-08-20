@@ -30,6 +30,20 @@ template <typename IO> inline block get_bool_delta(int party) {
     return zero_block;
 }
 
+template <typename IO> inline void random_bits_input(int party, block *auth, int len) {
+  if (party == ALICE)
+    ((ZKProver<IO> *)(ProtocolExecution::prot_exec))->ostriple->random_bits_input(auth, len);
+  else 
+    ((ZKVerifier<IO> *)(ProtocolExecution::prot_exec))->ostriple->random_bits_input(auth, len);
+}
+
+template <typename IO> inline block auth_compute_and(int party, block a, block b) {
+  if (party == ALICE)
+    return ((ZKProver<IO> *)(ProtocolExecution::prot_exec))->ostriple->auth_compute_and(a, b);
+  else
+    return ((ZKVerifier<IO> *)(ProtocolExecution::prot_exec))->ostriple->auth_compute_and(a, b);
+}
+
 template <typename IO> inline void sync_zk_bool() {
   ((ZKBoolCircExec<IO> *)CircuitExecution::circ_exec)->sync();
 }
@@ -50,6 +64,12 @@ template <typename IO>
 inline void zkp_inner_prdt(Bit *x, Bit *y, bool constant, int len) {
   ((ZKBoolCircExec<IO> *)(CircuitExecution::circ_exec))
       ->polyproof->zkp_inner_prdt((block *)x, (block *)y, constant, len);
+}
+
+template <typename IO>
+inline void zkp_inner_prdt(block *polyx, block *polyy, bool *x, bool *y, block *ab, bool constant, int len) {
+  ((ZKBoolCircExec<IO> *)(CircuitExecution::circ_exec))
+      ->polyproof->zkp_inner_prdt(polyx, polyy, x, y, ab, constant, len);
 }
 
 template <typename IO>

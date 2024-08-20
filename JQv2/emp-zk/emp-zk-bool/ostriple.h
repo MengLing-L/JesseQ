@@ -98,6 +98,10 @@ public:
     return res;
   }
 
+  void random_bits_input(block *auth, int len) {
+    ferret->rcot(auth, len);
+  }
+
   void original_setup(int len) {
     vole_val = new block[len];
     ferret->rcot(vole_val, len);
@@ -310,16 +314,15 @@ public:
    * authenticated bits for computing AND gates
    */
   block auth_compute_and(block a, block b) {
-    //block auth;
+    block auth;
     if (check_cnt == CHECK_SZ) {
       andgate_correctness_check_manage();
       check_cnt = 0;
     }
 
-    //ferret->rcot(&auth, 1);
+    ferret->rcot(&auth, 1);
     andgate_left_buffer[check_cnt] = a;
     andgate_right_buffer[check_cnt] = b;
-    block auth = *(vole_tmp++);
 
     if (party == ALICE) {
       bool s = getLSB(a) and getLSB(b);

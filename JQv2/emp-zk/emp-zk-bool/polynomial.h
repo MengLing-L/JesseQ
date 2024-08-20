@@ -42,7 +42,7 @@ public:
   void batch_check() {
     if (num == 0)
       return;
-
+    CheatRecord::put("zk polynomial batch check");
     block seed;
     block *chi = new block[num > 4 ? num : 4];
     block ope_data[128];
@@ -91,9 +91,28 @@ public:
       check_sum[1] = B ^ tmp;
       if (cmpBlock(check_sum, check_sum + 1, 1) != 1)
         CheatRecord::put("zk polynomial: boolean polynomial zkp fails");
+      else 
+        CheatRecord::put("zk polynomial: boolean polynomial zkp success!");
     }
     num = 0;
     delete[] chi;
+  }
+
+  void batch_check(int flag) {
+    if (num == 0)
+      return;
+    io->flush();
+    if (party == ALICE) {
+      block hash_output = Hash::hash_for_block(buffer, num * 16);
+      io->send_data(&hash_output, sizeof(block));
+    } else {
+      block hash_output = Hash::hash_for_block(buffer, num * 16), output_recv;
+      io->recv_data(&output_recv, sizeof(block));
+      if (HIGH64(hash_output) == HIGH64(output_recv) && LOW64(hash_output) == LOW64(output_recv))
+        std::cout<<"JQv1 success!\n";
+      else std::cout<<"JQv1 fail!\n";
+    }
+    num = 0;
   }
 
   inline void zkp_poly_deg2(block *polyx, block *polyy, bool *coeff, int len) {
@@ -150,7 +169,6 @@ public:
                              int len) {
     if (num >= buffer_sz)
       batch_check();
-
     block choice[2];
     choice[0] = zero_block;
     if (party == ALICE) {
@@ -187,6 +205,55 @@ public:
       tmp = choice[constant];
       B = B ^ tmp;
       buffer[num] = B;
+    }
+    num++;
+  }
+
+  inline void zkp_inner_prdt(block *polyx, block *polyy, bool *x, bool *y, block *ab, bool constant,
+                             int len) {
+    if (num >= buffer_sz)
+      batch_check(1);
+
+    block choice[2];
+    choice[0] = zero_block;
+    choice[1] = delta;
+    if (party == ALICE) {
+      block mzero = zero_block;
+      for (int i = 0; i < len; ++i) {
+        block Ma_ = polyx[i],  Mb_ = polyy[i];
+        bool *d = new bool[2];
+        d[0] = x[i];
+        // io->send_bit(d[0]);
+        d[1] = y[i];
+        // io->send_bit(d[1]);
+        block ch_tmp[2];
+        ch_tmp[0] = zero_block;
+        ch_tmp[1] = Ma_;
+        mzero = mzero ^ ch_tmp[d[1]];
+        ch_tmp[1] = Mb_;
+        mzero = mzero ^ ch_tmp[d[0]];
+        mzero = mzero ^ ab[i];
+      }
+      // cout << party<< "mzero ";
+      buffer[num] = mzero;
+    } else {
+      block kzero = zero_block;
+      for (int i = 0; i < len; ++i) {
+        block Ka_ = polyx[i],  Kb_ = polyy[i];
+        bool *d = new bool[2];
+        d[0] = x[i];
+        d[1] = y[i];
+        block ch_tmp[2];
+        ch_tmp[0] = zero_block;
+        ch_tmp[1] = Ka_;
+        kzero = kzero ^ ch_tmp[d[1]];
+        ch_tmp[1] = Kb_;
+        kzero = kzero ^ ch_tmp[d[0]];
+        kzero = kzero ^ choice[(d[0] & d[1])];
+        kzero = kzero ^ ab[i];
+      }
+      kzero = kzero ^ choice[constant];
+      buffer[num] = kzero;
     }
     num++;
   }
