@@ -198,14 +198,12 @@ public:
         std::cout<<party<<"->"<<A0_buffer[i]<<" "<<A1_buffer[i]<<"\n";
       }
     } else {
-      std::cout<<"shit: "<<(uint64_t)delta<<"\n";
       //uint64_t a0, a1;
       for (int i = 0; i < buffer_cnt; i++) {
         //io->recv_data(&a0, sizeof(uint64_t));
         //io->recv_data(&a1, sizeof(uint64_t));
         std::cout<<party<<"->"<<A0_buffer[i]<<"\n";
         //if (add_mod(A0_buffer[i], mult_mod(a1, delta)) != a0) {
-        //  std::cout<<"fuck "<<i<<"\n";
         //}
       }
     }
@@ -221,6 +219,24 @@ public:
   void authenticated_val_input_with_setup(__uint128_t &key, uint64_t &lam) {
     io->recv_data(&lam, sizeof(uint64_t));
     key = add_mod(key, mult_mod(lam, delta));
+  }
+
+  void authenticated_val_input_with_setup(__uint128_t *mac, uint64_t *w, uint64_t *lam, int len) {
+    for (int i = 0; i < len; i++) {
+      lam[i] = PR - w[i];
+      lam[i] = add_mod(HIGH64(mac[i]), lam[i]);
+      mac[i] = (__uint128_t)makeBlock(w[i], LOW64(mac[i]));
+    }
+
+    io->send_data(lam, len * sizeof(uint64_t));
+  }
+
+  void authenticated_val_input_with_setup(__uint128_t *key, uint64_t *lam, int len) {
+    io->recv_data(lam, len * sizeof(uint64_t));
+    
+    for (int i = 0; i < len; i++) {
+      key[i] = add_mod(key[i], mult_mod(lam[i], delta));
+    }
   }
 
   void setup_pre_processing(__uint128_t *val1,int *left, int *right, bool *clr, uint64_t *val_pre_pro, int len) {
