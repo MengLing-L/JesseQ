@@ -2,6 +2,14 @@
 #include <emp-zk/emp-zk.h>
 #include <iostream>
 #include <cstdlib>
+#if defined(__linux__)
+#include <sys/time.h>
+#include <sys/resource.h>
+#elif defined(__APPLE__)
+#include <unistd.h>
+#include <sys/resource.h>
+#include <mach/mach.h>
+#endif
 using namespace emp;
 using namespace std;
 
@@ -33,7 +41,6 @@ void random_circuit(bool*& in, int*& left, int*& right, int len, int len_in) {
     left[i] = rep[rand()%len_in];
     right[i] = rep[rand()%len_in];
     rep[rand()%len_in] = i;
-    //cout<<party<<" Gate: "<<left[i]<<"<-- "<<i<<" -->"<<right[i]<<"\n";
   }
   delete[] rep;
 }
@@ -161,15 +168,10 @@ void test_compute_and_gate_check_layer_JQv2(OSTriple<BoolIO<NetIO>> *os, BoolIO<
     start = clock_start();
     int  *p_left = left + len_in, *p_right = right + len_in;
     block *p_apre = a_pre + len_in;
-    //int p_rep, p_left, p_right;
-    //block p_apre;
+
     os->authenticated_bits_input_with_setup(a, ain, d, len_in);
-    //for (int i = len_in; i < len + len_in; ++i) {
+
     for (int i = len_in; i < len + len_in; ++i, ++p_left, ++p_right, ++p_apre) {
-      //p_rep = rep[i];
-      //p_left = left[i];
-      //p_right = right[i];
-      //p_apre = a_pre[i];
       if (!clr[i]) {
         a[i] = os->auth_compute_and_with_setup(a[*p_left], a[*p_right], *p_apre, d[i]);
       } else {
@@ -201,6 +203,24 @@ void test_compute_and_gate_check_layer_JQv2(OSTriple<BoolIO<NetIO>> *os, BoolIO<
     delete[] d;
   }
   io->flush();
+
+#if defined(__linux__)
+struct rusage rusage;
+if (!getrusage(RUSAGE_SELF, &rusage))
+  std::cout << "[Linux]Peak resident set size: " << (size_t)rusage.ru_maxrss
+            << std::endl;
+else
+  std::cout << "[Linux]Query RSS failed" << std::endl;
+#elif defined(__APPLE__)
+struct mach_task_basic_info info;
+mach_msg_type_number_t count = MACH_TASK_BASIC_INFO_COUNT;
+if (task_info(mach_task_self(), MACH_TASK_BASIC_INFO, (task_info_t)&info,
+              &count) == KERN_SUCCESS)
+  std::cout << "[Mac]Peak resident set size: "
+            << (size_t)info.resident_size_max << std::endl;
+else
+  std::cout << "[Mac]Query RSS failed" << std::endl;
+#endif
 }
 
 
@@ -210,7 +230,6 @@ void test_ostriple(BoolIO<NetIO> *ios[threads + 1], int party) {
   OSTriple<BoolIO<NetIO>> os(party, threads, ios);
   cout << party << "\tconstructor\t" << time_from(t1) << " us" << endl;
 
-  //test_compute_and_gate_check_layer(&os, ios[0], flag);
   test_compute_and_gate_check_layer_JQv2(&os, ios[0], flag);
 }
 
