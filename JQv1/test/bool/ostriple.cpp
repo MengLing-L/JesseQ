@@ -1,62 +1,24 @@
 #include "emp-tool/emp-tool.h"
 #include <emp-zk/emp-zk.h>
 #include <iostream>
+#if defined(__linux__)
+#include <sys/time.h>
+#include <sys/resource.h>
+#elif defined(__APPLE__)
+#include <unistd.h>
+#include <sys/resource.h>
+#include <mach/mach.h>
+#endif
 using namespace emp;
 using namespace std;
 
 int port, party;
 const int threads = 1;
 
-void test_auth_bit_input(OSTriple<BoolIO<NetIO>> *os, BoolIO<NetIO> *io) {
-  PRG prg;
-  int len = 1024;
-  block *auth = new block[len];
-  bool *in = new bool[len];
-  if (party == ALICE) {
-    PRG prg;
-    prg.random_bool(in, len);
-    os->authenticated_bits_input(auth, in, len);
-    os->check_auth_mac(auth, in, len, io);
-  } else {
-    os->authenticated_bits_input(auth, in, len);
-    os->check_auth_mac(auth, in, len, io);
-  }
-  delete[] auth;
-  delete[] in;
-  io->flush();
-}
-
-void test_compute_and_gate_check(OSTriple<BoolIO<NetIO>> *os,
-                                 BoolIO<NetIO> *io) {
-  PRG prg;
-  int len = 1024;
-  block *a = new block[3 * len];
-  bool *ain = new bool[3 * len];
-  if (party == ALICE) {
-    prg.random_bool(ain, 2 * len);
-  }
-  os->authenticated_bits_input(a, ain, 2 * len);
-  os->check_auth_mac(a, ain, 2 * len, io);
-  std::cout << "generate triple inputs" << std::endl;
-  for (int i = 0; i < len; ++i) {
-    a[2 * len + i] = os->auth_compute_and(a[i], a[len + i]);
-    ain[2 * len + i] = getLSB(a[2 * len + i]);
-  }
-  std::cout << "compute AND" << std::endl;
-  os->check_auth_mac(a + 2 * len, ain + 2 * len, len, io);
-
-  os->check_compute_and(a, a + len, a + 2 * len, len, io);
-  std::cout << "check for computing AND gate\n";
-
-  delete[] a;
-  delete[] ain;
-  io->flush();
-}
-
 void test_compute_and_gate_check_JQv1(OSTriple<BoolIO<NetIO>> *os,
                                  BoolIO<NetIO> *io) {
   PRG prg;
-  int len = 1024;
+  int len = 30000000;
   block *a = new block[2 * len];
   block *ab = new block[len];
   block *c = new block[len];
@@ -67,10 +29,15 @@ void test_compute_and_gate_check_JQv1(OSTriple<BoolIO<NetIO>> *os,
     prg.random_bool(ain, 2 * len);
   }
 
+  auto tt = clock_start();
   for (int i = 0; i < len; ++i) {
     ab[i] = os->auth_compute_and(a[i], a[len + i]);
-    ain[2 * len + i] = ain[i] & ain[len + i]; 
+    if (party == ALICE) {
+      ain[2 * len + i] = ain[i] & ain[len + i]; 
+    }
   }
+
+  std::cout << "setu up time of party " << party << ": " << time_from(tt) << " us" << std::endl;
 
   auto start = clock_start();
 
@@ -95,6 +62,24 @@ void test_compute_and_gate_check_JQv1(OSTriple<BoolIO<NetIO>> *os,
   auto timeuse = time_from(start);
   cout << len << "\t" << timeuse << " us\t" << party << " " << endl;
   std::cout << std::endl;
+  
+#if defined(__linux__)
+struct rusage rusage;
+if (!getrusage(RUSAGE_SELF, &rusage))
+  std::cout << "[Linux]Peak resident set size: " << (size_t)rusage.ru_maxrss
+            << std::endl;
+else
+  std::cout << "[Linux]Query RSS failed" << std::endl;
+#elif defined(__APPLE__)
+struct mach_task_basic_info info;
+mach_msg_type_number_t count = MACH_TASK_BASIC_INFO_COUNT;
+if (task_info(mach_task_self(), MACH_TASK_BASIC_INFO, (task_info_t)&info,
+              &count) == KERN_SUCCESS)
+  std::cout << "[Mac]Peak resident set size: "
+            << (size_t)info.resident_size_max << std::endl;
+else
+  std::cout << "[Mac]Query RSS failed" << std::endl;
+#endif
 }
 
 void test_ostriple(BoolIO<NetIO> *ios[threads + 1], int party) {
@@ -102,8 +87,6 @@ void test_ostriple(BoolIO<NetIO> *ios[threads + 1], int party) {
   OSTriple<BoolIO<NetIO>> os(party, threads, ios);
   cout << party << "\tconstructor\t" << time_from(t1) << " us" << endl;
 
-  test_auth_bit_input(&os, ios[0]);
-  std::cout << "check for authenticated bit input\n";
 
   test_compute_and_gate_check_JQv1(&os, ios[0]);
 }
