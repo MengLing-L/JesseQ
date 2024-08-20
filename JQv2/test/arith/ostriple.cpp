@@ -101,7 +101,6 @@ void test_compute_and_gate_check_JQv2_layer(FpOSTriple<NetIO> *os) {
     ain = mod(ain, pr);
     uint64_t d_1, d_2;
     os->authenticated_val_input_with_setup(a[0], ain, d_1);
-    //os->authenticated_val_input_with_setup(a[0], ain, d_2);
     d_2 = d_1;
     for (int i = 1; i <= len; ++i) {
       if (i&1)
@@ -138,7 +137,6 @@ void test_compute_and_gate_check_JQv2_layer(FpOSTriple<NetIO> *os) {
     uint64_t d_1, d_2;
     __uint128_t key1 = a[0], key2 = a[0];
     os->authenticated_val_input_with_setup(a[0], d_1);
-    //os->authenticated_val_input_with_setup(a[0],  d_2);
     d_2 = d_1;
 
     for (int i = 1; i <= len; ++i) {
@@ -169,11 +167,6 @@ void test_ostriple(NetIO *ios[threads + 1], int party) {
   FpOSTriple<NetIO> os(party, threads, ios);
   cout << party << "\tconstructor\t" << time_from(t1) << " us" << endl;
 
-  //test_auth_bit_input(&os);
-  //std::cout << "check for authenticated bit input\n";
-
-  //test_compute_and_gate_check(&os);
-  //test_compute_and_gate_check_layer(&os);
   test_compute_and_gate_check_JQv2_layer(&os);
   std::cout << "check for multiplication\n";
 

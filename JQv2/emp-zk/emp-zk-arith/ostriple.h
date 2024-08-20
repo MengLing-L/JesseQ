@@ -82,6 +82,24 @@ public:
     return val;
   }
 
+  __uint128_t authenticated_val_input(uint64_t w, uint64_t &d) {
+    __uint128_t mac;
+    vole->extend(&mac, 1);
+
+    d = PR - w;
+    d = add_mod(HIGH64(mac), d);
+    io->send_data(&d, sizeof(uint64_t));
+    return mac;
+  }
+
+  __uint128_t authenticated_val_input(uint64_t &d, int flag) {
+    __uint128_t key;
+    vole->extend(&key, 1);
+
+    io->recv_data(&d, sizeof(uint64_t));
+    return key;
+  }
+
   uint64_t auth_compute_mul_send_with_setup(__uint128_t &Ma, __uint128_t &Mb, __uint128_t &Mc,
                                                uint64_t Mabc, uint64_t wa, uint64_t wb) {
     uint64_t wc = mult_mod(wa,wb);

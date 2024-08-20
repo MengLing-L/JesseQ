@@ -17,7 +17,7 @@ endmacro()
 
 # Test cases
 #add_test_case_with_run(bool example)
-add_test_case_with_run(bool ostriple)
+# add_test_case_with_run(bool ostriple)
 #add_test_case_with_run(bool bool_io)
 #add_test_case_with_run(bool memory_scalability)
 #add_test_case_with_run(bool input_scalability)
@@ -29,11 +29,11 @@ add_test_case_with_run(bool ostriple)
 
 #add_test_case_with_run(arith abconversion)
 #add_test_case_with_run(arith zk_proof)
-#add_test_case_with_run(arith ostriple)
+add_test_case_with_run(arith ostriple)
 #add_test_case_with_run(arith input_scalability)
 #add_test_case_with_run(arith circuit_scalability)
 #add_test_case_with_run(arith polynomial)
-#add_test_case_with_run(arith inner_prdt)
+add_test_case_with_run(arith inner_prdt)
 #add_test_case_with_run(arith matrix_mul)
 #add_test_case_with_run(arith sis)
 

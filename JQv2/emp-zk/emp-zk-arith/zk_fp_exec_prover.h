@@ -23,6 +23,10 @@ public:
    * authenticated message, last bit as the value
    * embeded in label
    */
+  void feed(__uint128_t &label, const uint64_t &val,  uint64_t &d) {
+    label = this->ostriple->authenticated_val_input(val, d);
+  }
+
   void feed(__uint128_t &label, const uint64_t &val) {
     label = this->ostriple->authenticated_val_input(val);
   }
@@ -65,6 +69,14 @@ public:
 
   __uint128_t pub_label(const uint64_t &a) {
     return (__uint128_t)makeBlock(a, (uint64_t)this->pub_mac);
+  }
+
+  void random_val_input(__uint128_t &label) {
+    label = ostriple->random_val_input();
+  }
+
+  __uint128_t auth_compute_mul(__uint128_t &a, __uint128_t &b) {
+    return ostriple->auth_compute_mul_send(a, b);
   }
 };
 #endif
