@@ -33,7 +33,7 @@ void test_compute_and_gate_check_JQv1(NetIO *ios[threads + 1], int party) {
     a[i] = os.random_val_input();
     b[i] = os.random_val_input();
     c[i] = os.random_val_input();
-      if (party == ALICE) {
+    if (party == ALICE) {
       ab[i] = os.authenticated_val_input(0);
     } else {
       ab[i] = os.authenticated_val_input();
