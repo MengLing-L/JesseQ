@@ -12,15 +12,18 @@ public:
   block delta;
 
   // managing buffers storing COTs
-  int check_cnt = 0;
+  int check_cnt = 0, buffer_cnt = 0;
   block *andgate_out_buffer = nullptr;
   block *andgate_left_buffer = nullptr;
   block *andgate_right_buffer = nullptr;
+  block *A0_buffer = nullptr;
+  block *A1_buffer = nullptr;
+  block *vole_val = nullptr, *vole_tmp = nullptr;
 
   GaloisFieldPacking pack;
   int64_t CHECK_SZ = 1024 * 1024;
 
-  block choice[2], choice2[2];
+  block choice[2], choice2[2], choice_t1[2], choice_t2[2];
   block minusone, one;
   IO *io;
   IO **ios;
@@ -50,11 +53,15 @@ public:
     andgate_out_buffer = new block[CHECK_SZ];
     andgate_left_buffer = new block[CHECK_SZ];
     andgate_right_buffer = new block[CHECK_SZ];
+    A0_buffer = new block[CHECK_SZ];
+    if (party == ALICE) {
+      A1_buffer = new block[CHECK_SZ];
+    }
 
     block tmp;
     ferret->rcot(&tmp, 1);
 
-    choice[0] = choice2[0] = zero_block;
+    choice_t1[0] = choice_t2[0] = choice[0] = choice2[0] = zero_block;
     choice[1] = this->delta;
     minusone = makeBlock(0xFFFFFFFFFFFFFFFFLL, 0xFFFFFFFFFFFFFFFELL);
     one = makeBlock(0x0L, 0x1L);
@@ -69,6 +76,7 @@ public:
     if (check_cnt != 0) {
       andgate_correctness_check_manage();
     }
+    if (vole_val != nullptr) delete[] vole_val;
     if (!auth_helper->finalize())
       CheatRecord::put("emp-zk-bool finalize");
     if (ferret_state != nullptr)
@@ -77,6 +85,8 @@ public:
     delete[] andgate_out_buffer;
     delete[] andgate_left_buffer;
     delete[] andgate_right_buffer;
+    delete[] A0_buffer;
+    if (party == ALICE) delete[] A1_buffer;
     delete auth_helper;
     delete pool;
   }
@@ -88,21 +98,207 @@ public:
     return res;
   }
 
+  void original_setup(int len) {
+    vole_val = new block[len];
+    ferret->rcot(vole_val, len);
+    vole_tmp = vole_val;
+  }
+
   /* ---------------------inputs----------------------*/
+
+  /*
+   * random bits for inputs and authentications for JQv1
+   */
+
+  void debug_time() {
+    block A, B, C;
+    PRG prg;
+    prg.random_block(&A, 1);
+    prg.random_block(&B, 1);
+    prg.random_block(&C, 1);
+    std::cout<<"C before is: "<<C<<"\n";
+    for(int i=0;i<200000000;i++) {
+      prg.random_block(&A, 1);
+      prg.random_block(&B, 1);
+      gfmul(A,B,&C);
+      //std::cout<<i<<" C after is: "<<C<<"\n";
+    }
+    std::cout<<"C after is: "<<C<<"\n";
+  }
+
+  block random_val_input() {
+    return *(vole_tmp++);
+  }
+
+  void authenticated_bits_input_with_setup(block *auth, const bool *in, bool *buff, int len) {
+    if (party == ALICE) {
+      for (int i = 0; i < len; ++i) {
+        buff[i] = getLSB(auth[i]) ^ in[i];
+        set_value_in_block(auth[i], in[i]);
+        io->send_bit(buff[i]);
+      }
+    } else {
+      for (int i = 0; i < len; ++i) {
+        buff[i] = io->recv_bit();
+        auth[i] = auth[i] ^ choice[buff[i]];
+        set_zero_bit(auth[i]);
+      }
+    }
+  }
+
+  block evaluate_MAC(block val1, block val2, const bool d1, const bool d2, block val) {
+    choice_t1[1] = val1;
+    choice_t2[1] = val2;
+    val = val ^ choice2[d1 & d2];
+    val = val ^ choice_t1[d2];
+    val = val ^ choice_t2[d1];
+
+    //!!! val1 and val2 is generated in the preprocessing phase
+    if (party == ALICE) {
+      bool w = ((getLSB(val1) ^ d1) && (getLSB(val2) ^ d2));
+      set_value_in_block(val, w);
+    } else {
+      val = val ^ choice[d1 & d2];
+      set_zero_bit(val);
+    }
+    return val;
+  }
+
+  block auth_compute_and_with_setup(block val1, block val2, block val3, bool &buff) {
+    if (buffer_cnt == CHECK_SZ) {
+      andgate_correctness_check_manage_JQv2();
+      buffer_cnt = 0;
+    }
+
+    if (party == ALICE) {
+      bool w1 = getLSB(val1), w2 = getLSB(val2);
+      bool w3 = (w1 & w2);
+      buff = getLSB(val3) ^ w3;
+      set_value_in_block(val3, w3);
+      io->send_bit(buff);
+
+      gfmul(val1, val2, &A0_buffer[buffer_cnt]);
+      choice_t1[1] = val1;
+      choice_t2[1] = val2;
+      A1_buffer[buffer_cnt] = (val3 ^ choice_t1[w2] ^ choice_t2[w1]);
+    } else {
+      buff = io->recv_bit();
+      val3 = val3 ^ choice[buff];
+      set_zero_bit(val3);
+
+      block val3_delta;
+      gfmul(val3, delta, &val3_delta);
+      gfmul(val1, val2, &A0_buffer[buffer_cnt]);
+      A0_buffer[buffer_cnt] = A0_buffer[buffer_cnt] ^ val3_delta;
+    }
+
+    buffer_cnt++;
+    return val3;
+  }
+
+  void andgate_correctness_check_manage_JQv2() {
+    io->flush();
+    block seed = io->get_hash_block();
+    vector<future<void>> fut;
+
+    int share_seed_n = threads;
+    block *share_seed = new block[share_seed_n];
+    PRG(&seed).random_block(share_seed, share_seed_n);
+
+    uint32_t task_base = buffer_cnt / threads;
+    uint32_t leftover = task_base + (buffer_cnt % task_base);
+    uint32_t start = 0;
+    block *sum = new block[2 * threads];
+    for (int i = 0; i < threads - 1; ++i) {
+      fut.push_back(
+          pool->enqueue([this, sum, i, start, task_base, share_seed]() {
+            andgate_correctness_check_JQv2(sum, i, start, task_base, share_seed[i]);
+          }));
+      start += task_base;
+    }
+    andgate_correctness_check_JQv2(sum, threads - 1, start, leftover,
+                              share_seed[threads - 1]);
+
+    for (auto &f : fut)
+      f.get();
+
+    if (party == ALICE) {
+      block ope_data[128];
+      ferret->rcot(ope_data, 128);
+      uint64_t ch_bits[2];
+      for (int i = 0; i < 2; ++i) {
+        if (getLSB(ope_data[64 * i + 63]))
+          ch_bits[i] = 1;
+        else
+          ch_bits[i] = 0;
+        for (int j = 62; j >= 0; --j) {
+          ch_bits[i] <<= 1;
+          if (getLSB(ope_data[64 * i + j]))
+            ch_bits[i]++;
+        }
+      }
+      block A_star[2];
+      A_star[1] = makeBlock(ch_bits[1], ch_bits[0]);
+      pack.packing(A_star, ope_data);
+      for (int i = 0; i < threads; ++i) {
+        A_star[0] = A_star[0] ^ sum[2 * i];
+        A_star[1] = A_star[1] ^ sum[2 * i + 1];
+      }
+      io->send_data(A_star, 2 * sizeof(block));
+    } else {
+      block ope_data[128];
+      ferret->rcot(ope_data, 128);
+      block B_star;
+      pack.packing(&B_star, ope_data);
+      for (int i = 0; i < threads; ++i)
+        B_star = B_star ^ sum[i];
+      block A_star[2];
+      io->recv_data(A_star, 2 * sizeof(block));
+      block W;
+      gfmul(A_star[1], this->delta, &W);
+      W = W ^ A_star[0];
+      if (cmpBlock(&W, &B_star, 1) != 1){
+        CheatRecord::put("emp_zk_bool AND batch check");std::cout<<"fuck\n\n";}
+    }
+    io->flush();
+    delete[] share_seed;
+    delete[] sum;
+  }
+
+  void andgate_correctness_check_JQv2(block *ret, int thr_i, uint32_t start,
+                                 uint32_t task_n, block chi_seed) {
+    if (task_n == 0)
+      return;
+
+
+    block *chi = new block[task_n];
+    uni_hash_coeff_gen(chi, chi_seed, task_n);
+    if (party == ALICE) {
+      vector_inn_prdt_sum_red(ret + 2 * thr_i, chi, A0_buffer + start, task_n);
+      vector_inn_prdt_sum_red(ret + 2 * thr_i + 1, chi, A1_buffer + start, task_n);
+    } else
+      vector_inn_prdt_sum_red(ret + thr_i, chi, A0_buffer + start, task_n);
+
+    delete[] chi;
+  }
+
   /*
    * authenticated bits for inputs of the prover
    */
+
   void authenticated_bits_input(block *auth, const bool *in, int len) {
-    ferret->rcot(auth, len);
+    //ferret->rcot(auth, len);
 
     if (party == ALICE) {
       for (int i = 0; i < len; ++i) {
+        auth[i] = *(vole_tmp++);
         bool buff = getLSB(auth[i]) ^ in[i];
         set_value_in_block(auth[i], in[i]);
         io->send_bit(buff);
       }
     } else {
       for (int i = 0; i < len; ++i) {
+        auth[i] = *(vole_tmp++);
         bool buff = io->recv_bit();
         auth[i] = auth[i] ^ choice[buff];
         set_zero_bit(auth[i]);
@@ -114,15 +310,16 @@ public:
    * authenticated bits for computing AND gates
    */
   block auth_compute_and(block a, block b) {
-    block auth;
+    //block auth;
     if (check_cnt == CHECK_SZ) {
       andgate_correctness_check_manage();
       check_cnt = 0;
     }
 
-    ferret->rcot(&auth, 1);
+    //ferret->rcot(&auth, 1);
     andgate_left_buffer[check_cnt] = a;
     andgate_right_buffer[check_cnt] = b;
+    block auth = *(vole_tmp++);
 
     if (party == ALICE) {
       bool s = getLSB(a) and getLSB(b);
@@ -228,7 +425,7 @@ public:
         A1 = ch_tmp[getLSB(left[i])];
         ch_tmp[1] = left[i];
         A1 = A1 ^ ch_tmp[getLSB(right[i])];
-        A1 = A1 ^ gateout[i];
+        A1 = A1 ^ gateout[i]^one;
         left[i] = A0;
         right[i] = A1;
       }

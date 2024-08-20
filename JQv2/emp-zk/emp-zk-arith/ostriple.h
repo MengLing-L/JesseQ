@@ -14,10 +14,12 @@ public:
   int triple_n;
   __uint128_t delta;
 
-  int check_cnt = 0;
+  int check_cnt = 0, buffer_cnt = 0;
   __uint128_t *andgate_out_buffer = nullptr;
   __uint128_t *andgate_left_buffer = nullptr;
   __uint128_t *andgate_right_buffer = nullptr;
+  uint64_t *A0_buffer = nullptr;
+  uint64_t *A1_buffer = nullptr;
 
   IO *io;
   IO **ios;
@@ -27,6 +29,7 @@ public:
   ThreadPool *pool = nullptr;
 
   uint64_t CHECK_SZ = 1024 * 1024;
+
 
   FpOSTriple(int party, int threads, IO **ios) {
     this->party = party;
@@ -39,7 +42,9 @@ public:
     andgate_out_buffer = new __uint128_t[CHECK_SZ];
     andgate_left_buffer = new __uint128_t[CHECK_SZ];
     andgate_right_buffer = new __uint128_t[CHECK_SZ];
+    A0_buffer = new uint64_t[CHECK_SZ];
     if (party == ALICE) {
+      A1_buffer = new uint64_t[CHECK_SZ];
       vole->setup();
     } else {
       delta_gen();
@@ -54,17 +59,21 @@ public:
   ~FpOSTriple() {
     if (check_cnt != 0)
       andgate_correctness_check_manage();
+    if (buffer_cnt !=0)
+      andgate_correctness_check_manage_JQv2();
     auth_helper->flush();
     delete auth_helper;
     delete vole;
     delete[] andgate_out_buffer;
     delete[] andgate_left_buffer;
     delete[] andgate_right_buffer;
+    delete[] A0_buffer;
+    if (party == ALICE) delete[] A1_buffer;
   }
   /* ---------------------inputs----------------------*/
 
   /*
-   * random bits for inputs and authentications
+   * random bits for inputs and authentications for JQv1
    */
 
   __uint128_t random_val_input() {
@@ -118,6 +127,214 @@ public:
     Kb = add_mod(Kb, db);
 
     return K1;
+  }
+
+  /*
+   * random bits for inputs and authentications for JQv2
+   */
+
+  void debug_A0_A1() {
+    if (party == ALICE) {
+      for (int i = 0; i < buffer_cnt; i++) {
+        //io->send_data(&A0_buffer[i], sizeof(uint64_t));
+        //io->send_data(&A1_buffer[i], sizeof(uint64_t));
+        //io->flush();
+        std::cout<<party<<"->"<<A0_buffer[i]<<" "<<A1_buffer[i]<<"\n";
+      }
+    } else {
+      std::cout<<"shit: "<<(uint64_t)delta<<"\n";
+      //uint64_t a0, a1;
+      for (int i = 0; i < buffer_cnt; i++) {
+        //io->recv_data(&a0, sizeof(uint64_t));
+        //io->recv_data(&a1, sizeof(uint64_t));
+        std::cout<<party<<"->"<<A0_buffer[i]<<"\n";
+        //if (add_mod(A0_buffer[i], mult_mod(a1, delta)) != a0) {
+        //  std::cout<<"fuck "<<i<<"\n";
+        //}
+      }
+    }
+  }
+
+  void authenticated_val_input_with_setup(__uint128_t &mac, uint64_t w, uint64_t &lam) {
+    lam = PR - w;
+    lam = add_mod(HIGH64(mac), lam);
+    io->send_data(&lam, sizeof(uint64_t));
+    mac = (__uint128_t)makeBlock(w, LOW64(mac));
+  }
+
+  void authenticated_val_input_with_setup(__uint128_t &key, uint64_t &lam) {
+    io->recv_data(&lam, sizeof(uint64_t));
+    key = add_mod(key, mult_mod(lam, delta));
+  }
+
+  void setup_pre_processing(__uint128_t *val1,int *left, int *right, bool *clr, uint64_t *val_pre_pro, int len) {
+    for (int i = 0; i < len; i++) 
+    if (clr[i]) {
+      val_pre_pro[i] = mult_mod(LOW64(val1[left[i]]), LOW64(val1[right[i]]));
+      val_pre_pro[i] = add_mod(val_pre_pro[i], LOW64(val1[i]));
+    }
+  }
+
+  void evaluate_MAC(__uint128_t val1, __uint128_t val2, uint64_t d1, uint64_t d2, uint64_t val_pre_pro, __uint128_t &val) {
+    if (party == ALICE) {
+      uint64_t w = mult_mod(HIGH64(val1), HIGH64(val2));
+      uint64_t mac1 = add_mod(LOW64(val1), d1), mac2 = add_mod(LOW64(val2), d2);
+      mac1 = mult_mod(mac1, mac2);
+      mac1 = pr - mac1;
+      mac1 = add_mod(mac1, val_pre_pro);
+      val = (__uint128_t)makeBlock(w, mac1);
+    } else {
+      //!!! val1 and val2 is generated in the preprocessing phase instead of the function auth_compute_mul_with_setup()
+      uint64_t key1 = add_mod(val1, d1), key2 = add_mod(val2, d2);
+      key1 = mult_mod(key1, key2);
+      key2 = mult_mod(d1,d2);
+      key2 = mult_mod(key2, delta);
+      key1 = add_mod(key1, key2);
+      key1 = pr - key1;
+      val = add_mod(key1, val_pre_pro);
+    }
+  }
+
+  void auth_compute_mul_with_setup(__uint128_t Vala, __uint128_t Valb, __uint128_t &Valc, uint64_t &d) {
+    if (buffer_cnt == CHECK_SZ) {
+      andgate_correctness_check_manage_JQv2();
+      buffer_cnt = 0;
+    }
+
+    if (party == ALICE) {
+      uint64_t m_wa = pr - HIGH64(Vala), m_wb = pr - HIGH64(Valb);
+      uint64_t wc = mult_mod(m_wa, m_wb);
+      d = PR - wc;
+      d = add_mod(HIGH64(Valc), d);
+      io->send_data(&d, sizeof(uint64_t));
+      Valc = (__uint128_t)makeBlock(wc, LOW64(Valc));
+
+      A0_buffer[buffer_cnt] = mult_mod(LOW64(Vala), LOW64(Valb));
+      m_wa = add_mod(m_wa, LOW64(Vala)); m_wb = add_mod(m_wb, LOW64(Valb));
+      m_wa = mult_mod(m_wa, m_wb);
+      m_wa = add_mod(m_wa, LOW64(Valc));
+      m_wa = pr - m_wa;
+      m_wa = add_mod(m_wa, wc);
+      A1_buffer[buffer_cnt] = add_mod(m_wa, A0_buffer[buffer_cnt]);
+    } else {
+      io->recv_data(&d, sizeof(uint64_t));
+      uint64_t dc = mult_mod(d, delta);
+      Valc = add_mod(Valc, dc);
+
+      dc = mult_mod(LOW64(Vala), LOW64(Valb));
+      A0_buffer[buffer_cnt] = mult_mod(Valc, delta);
+      A0_buffer[buffer_cnt] = add_mod(A0_buffer[buffer_cnt], dc);
+    }
+
+    buffer_cnt++;
+  }
+
+  /*
+   * JQv2 check
+   */
+
+  void andgate_correctness_check_manage_JQv2() {
+    io->flush();
+
+    vector<future<void>> fut;
+
+    uint64_t U = 0, V = 0, W = 0;
+    if (buffer_cnt < 32) {
+      block share_seed;
+      share_seed_gen(&share_seed, 1);
+      io->flush();
+
+      uint64_t sum[2];
+      andgate_correctness_check_JQv2(sum, 0, 0, buffer_cnt, &share_seed);
+      if (party == ALICE) {
+        U = sum[0];
+        V = sum[1];
+      } else
+        W = sum[0];
+    } else {
+      block *share_seed = new block[threads];
+      share_seed_gen(share_seed, threads);
+      io->flush();
+
+      uint32_t task_base = buffer_cnt / threads;
+      uint32_t leftover = task_base + (buffer_cnt % task_base);
+      uint32_t start = 0;
+
+      uint64_t *sum = new uint64_t[2 * threads];
+
+      for (int i = 0; i < threads - 1; ++i) {
+        fut.push_back(
+            pool->enqueue([this, sum, i, start, task_base, share_seed]() {
+              andgate_correctness_check_JQv2(sum, i, start, task_base, share_seed);
+            }));
+        start += task_base;
+      }
+      andgate_correctness_check_JQv2(sum, threads - 1, start, leftover, share_seed);
+
+      for (auto &f : fut)
+        f.get();
+
+      delete[] share_seed;
+      if (party == ALICE) {
+        for (int i = 0; i < threads; ++i) {
+          U = add_mod(U, sum[2 * i]);
+          V = add_mod(V, sum[2 * i + 1]);
+        }
+      } else {
+        for (int i = 0; i < threads; ++i)
+          W = add_mod(W, sum[i]);
+      }
+    }
+
+    if (party == ALICE) {
+      __uint128_t ope_data;
+      vole->extend(&ope_data, 1);
+      uint64_t A0_star = LOW64(ope_data);
+      uint64_t A1_star = HIGH64(ope_data);
+      uint64_t check_sum[2];
+      check_sum[0] = add_mod(U, A0_star);
+      check_sum[1] = add_mod(V, A1_star);
+      io->send_data(check_sum, 2 * sizeof(uint64_t));
+    } else {
+      __uint128_t ope_data;
+      vole->extend(&ope_data, 1);
+      uint64_t B_star = LOW64(ope_data);
+      W = add_mod(W, B_star);
+      uint64_t check_sum[2];
+      io->recv_data(check_sum, 2 * sizeof(uint64_t));
+      check_sum[1] = mult_mod(check_sum[1], delta);
+      check_sum[1] = add_mod(check_sum[1], W);
+      if (check_sum[0] != check_sum[1])
+        error("JQv2 check fails");
+    }
+    io->flush();
+  }
+
+  void andgate_correctness_check_JQv2(uint64_t *ret, int thr_idx, uint32_t start,
+                                 uint32_t task_n, block *chi_seed) {
+    if (task_n == 0)
+      return;
+
+    uint64_t *chi = new uint64_t[task_n];
+    uint64_t seed = mod(LOW64(chi_seed[thr_idx]));
+    uni_hash_coeff_gen(chi, seed, task_n);
+    if (party == ALICE) {
+      uint64_t U = 0, V = 0;
+      for (uint32_t i = start, k = 0; i < start + task_n; ++i, ++k) {
+        U = add_mod(U, mult_mod(A0_buffer[i], chi[k]));
+        V = add_mod(V, mult_mod(A1_buffer[i], chi[k]));
+      }
+      ret[2 * thr_idx] = U;
+      ret[2 * thr_idx + 1] = V;
+    } else {
+      uint64_t W = 0;
+      for (uint32_t i = start, k = 0; i < start + task_n; ++i, ++k) {
+        W = add_mod(W, mult_mod(A0_buffer[i], chi[k]));
+      }
+      ret[thr_idx] = W;
+    }
+
+    delete[] chi;
   }
 
   /*

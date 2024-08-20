@@ -30,51 +30,139 @@ void test_auth_bit_input(FpOSTriple<NetIO> *os) {
   delete[] auth;
 }
 
-void test_compute_and_gate_check(FpOSTriple<NetIO> *os) {
+void test_compute_and_gate_check_layer(FpOSTriple<NetIO> *os) {
   PRG prg;
   int len = 30000000;
-  __uint128_t *a = new __uint128_t[len];
-  __uint128_t *b = new __uint128_t[len];
-  __uint128_t *c = new __uint128_t[len];
+  __uint128_t *a = new __uint128_t[len+1];
   auto start = clock_start();
   if (party == ALICE) {
-    __uint128_t *ain = new __uint128_t[len];
-    __uint128_t *bin = new __uint128_t[len];
+    block a_block;
     PRG prg;
-    prg.random_block((block *)ain, len);
-    prg.random_block((block *)bin, len);
-    for (int i = 0; i < len; ++i) {
-      ain[i] = ain[i] & (__uint128_t)0xFFFFFFFFFFFFFFFFLL;
-      ain[i] = mod(ain[i], pr);
-      a[i] = os->authenticated_val_input(ain[i]);
-      bin[i] = bin[i] & (__uint128_t)0xFFFFFFFFFFFFFFFFLL;
-      bin[i] = mod(bin[i], pr);
-      b[i] = os->authenticated_val_input(bin[i]);
-      c[i] = os->auth_compute_mul_send(a[i], b[i]);
+    prg.random_block(&a_block, 1);
+    __uint128_t ain = (__uint128_t)a_block;
+    ain = ain & (__uint128_t)0xFFFFFFFFFFFFFFFFLL;
+    ain = mod(ain, pr);
+    a[0] = os->authenticated_val_input(ain);
+    for (int i = 1; i <= len; ++i) {
+      a[i] = os->auth_compute_mul_send(a[i-1], a[i-1]);
     }
     os->andgate_correctness_check_manage();
-    delete[] ain;
-    delete[] bin;
+    os->check_cnt = 0;
     std::cout << "sender time: " << time_from(start) << std::endl;
     std::cout << "proof of sender for 1s: " << double(len)/time_from(start)*1000000 << std::endl;
-    os->check_compute_mul(a, b, c, len);
+    //os->check_compute_mul(a, b, c, len);
   } else {
-    for (int i = 0; i < len; ++i) {
-      a[i] = os->authenticated_val_input();
-      b[i] = os->authenticated_val_input();
-      c[i] = os->auth_compute_mul_recv(a[i], b[i]);
+    a[0] = os->authenticated_val_input();
+    for (int i = 1; i <= len; ++i) {
+      a[i] = os->auth_compute_mul_recv(a[i-1], a[i-1]);
     }
     os->andgate_correctness_check_manage();
+    os->check_cnt = 0;
     std::cout << "recver time: " << time_from(start) << std::endl;
     std::cout << "proof of recver for 1s: " << double(len)/time_from(start)*1000000 << std::endl;
-    os->check_compute_mul(a, b, c, len);
+    //os->check_compute_mul(a, b, c, len);
   }
 
   delete[] a;
-  delete[] b;
-  delete[] c;
 }
 
+void test_compute_and_gate_check_JQv2_layer(FpOSTriple<NetIO> *os) {
+  int len = 30000000;
+
+  auto t2 = clock_start();
+  __uint128_t *a = new __uint128_t[len+1];
+  uint64_t *val_pre_pro = new uint64_t[len+1];
+  int *left = new int[len+1];
+  int *right = new int[len+1];
+  bool *clr = new bool[len+1];
+  if (party == ALICE) {
+    for (int i = 0; i <= len; i++) {
+      if (i&1) {
+        a[i] = os->auth_compute_mul_send(a[i-1], a[i-1]);
+        clr[i] = true;
+        left[i] = right[i] = i-1;
+      }
+      else {
+        a[i] = os->random_val_input();
+        clr[i] = false;
+      }
+    }
+    os->setup_pre_processing(a, left, right, clr, val_pre_pro, len + 1);
+    os->andgate_correctness_check_manage();
+    os->check_cnt = 0;
+    std::cout << "sender time for setup: " << time_from(t2)<<" us" << std::endl;
+
+    auto start = clock_start();
+    block a_block;
+    PRG prg;
+    prg.random_block(&a_block, 1);
+    __uint128_t ain = (__uint128_t)a_block;
+    ain = ain & (__uint128_t)0xFFFFFFFFFFFFFFFFLL;
+    ain = mod(ain, pr);
+    uint64_t d_1, d_2;
+    os->authenticated_val_input_with_setup(a[0], ain, d_1);
+    //os->authenticated_val_input_with_setup(a[0], ain, d_2);
+    d_2 = d_1;
+    for (int i = 1; i <= len; ++i) {
+      if (i&1)
+        os->evaluate_MAC(a[i-1], a[i-1], d_1, d_2, val_pre_pro[i], a[i]);
+      else{
+        os->auth_compute_mul_with_setup(a[i-1], a[i-1], a[i], d_1);
+        d_2 = d_1;
+      }
+    }
+    os->andgate_correctness_check_manage_JQv2();
+    os->buffer_cnt = 0;
+
+    std::cout << "sender time: " << time_from(start) <<" us" << std::endl;
+    std::cout << "proof of sender for 1s: " << double(len)/time_from(start)*1000000 << std::endl;
+  } else {
+    for (int i = 0; i <= len; i++) {
+      if (i&1) {
+        a[i] = os->auth_compute_mul_recv(a[i-1], a[i-1]);
+        clr[i] = 1;
+        left[i] = right[i] = i-1;
+      }
+      else {
+        a[i] = os->random_val_input();
+        clr[i] = 0;
+      }
+    }
+    os->setup_pre_processing(a, left, right, clr, val_pre_pro, len + 1);
+    os->andgate_correctness_check_manage();
+    os->check_cnt = 0;
+    std::cout << "recver time for setup: " << time_from(t2)<<" us" << std::endl;
+
+    auto start = clock_start();
+
+    uint64_t d_1, d_2;
+    __uint128_t key1 = a[0], key2 = a[0];
+    os->authenticated_val_input_with_setup(a[0], d_1);
+    //os->authenticated_val_input_with_setup(a[0],  d_2);
+    d_2 = d_1;
+
+    for (int i = 1; i <= len; ++i) {
+      if (i&1) 
+        os->evaluate_MAC(key1, key2, d_1, d_2, val_pre_pro[i], a[i]);
+      else {
+        key1 = key2 = a[i];
+        os->auth_compute_mul_with_setup(a[i-1], a[i-1], a[i], d_1);
+        d_2 = d_1;
+      }
+    }
+    os->andgate_correctness_check_manage_JQv2();
+    os->buffer_cnt = 0;
+
+    std::cout << "recver time: " << time_from(start)<<" us" << std::endl;
+    std::cout << "proof of recver for 1s: " << double(len)/time_from(start)*1000000 << std::endl;
+  }
+
+  delete[] a;
+  delete[] val_pre_pro;
+  delete[] left;
+  delete[] right;
+  delete[] clr;
+}
 
 void test_ostriple(NetIO *ios[threads + 1], int party) {
   auto t1 = clock_start();
@@ -84,96 +172,14 @@ void test_ostriple(NetIO *ios[threads + 1], int party) {
   //test_auth_bit_input(&os);
   //std::cout << "check for authenticated bit input\n";
 
-  test_compute_and_gate_check(&os);
+  //test_compute_and_gate_check(&os);
+  //test_compute_and_gate_check_layer(&os);
+  test_compute_and_gate_check_JQv2_layer(&os);
   std::cout << "check for multiplication\n";
 
   std::cout << std::endl;
 }
 
-void test_compute_and_gate_check_JQv1(NetIO *ios[threads + 1], int party) {
-  auto t1 = clock_start();
-  int len = 30000000;
-  PRG prg;
-  FpOSTriple<NetIO> os(party, threads, ios);
-  cout << party << "\tconstructor\t" << time_from(t1) << " us" << endl;
-
-  auto t2 = clock_start();
-  __uint128_t *a = new __uint128_t[len];
-  __uint128_t *b = new __uint128_t[len];
-  __uint128_t *c = new __uint128_t[len];
-  __uint128_t *ab = new __uint128_t[len];
-  uint64_t *hash_input = new uint64_t[len];
-  if (party == ALICE) {
-    for (int i = 0; i < len; i++) {
-      a[i] = os.random_val_input();
-      b[i] = os.random_val_input();
-      c[i] = os.random_val_input();
-      ab[i] = os.auth_compute_mul_send(a[i],b[i]);
-      ab[i] = PR - LOW64(ab[i]);
-      ab[i] = add_mod(ab[i], LOW64(c[i]));
-    }
-    os.andgate_correctness_check_manage();
-    std::cout << "sender time for setup: " << time_from(t2)<<" us" << std::endl;
-
-    auto start = clock_start();
-    __uint128_t *ain = new __uint128_t[len];
-    __uint128_t *bin = new __uint128_t[len];
-    prg.random_block((block *)ain, len);
-    prg.random_block((block *)bin, len);
-
-    for (int i = 0; i < len; ++i) {
-      ain[i] = ain[i] & (__uint128_t)0xFFFFFFFFFFFFFFFFLL;
-      ain[i] = mod(ain[i], pr);
-      bin[i] = bin[i] & (__uint128_t)0xFFFFFFFFFFFFFFFFLL;
-      bin[i] = mod(bin[i], pr);
-
-      hash_input[i] = os.auth_compute_mul_send_with_setup(a[i], b[i], c[i], ab[i], ain[i], bin[i]);
-    }
-
-    block hash_output = Hash::hash_for_block(hash_input, len * 8);
-    ios[0]->send_data(&hash_output, sizeof(block));
-
-    delete[] ain;
-    delete[] bin;
-
-    std::cout << "sender time: " << time_from(start) <<" us" << std::endl;
-    std::cout << "proof of sender for 1s: " << double(len)/time_from(start)*1000000 << std::endl;
-    os.check_compute_mul(a, b, c, len);
-  } else {
-    for (int i = 0; i < len; i++) {
-      a[i] = os.random_val_input();
-      b[i] = os.random_val_input();
-      c[i] = os.random_val_input();
-      ab[i] = os.auth_compute_mul_recv(a[i],b[i]);
-      ab[i] = PR - ab[i];
-    }
-    os.andgate_correctness_check_manage();
-    std::cout << "recver time for setup: " << time_from(t2)<<" us" << std::endl;
-
-    auto start = clock_start();
-    for (int i = 0; i < len; ++i) 
-      hash_input[i] = os.auth_compute_mul_recv_with_setup(a[i], b[i], c[i], ab[i]);
-    
-    block hash_output = Hash::hash_for_block(hash_input, len * 8), output_recv;
-    ios[0]->recv_data(&output_recv, sizeof(block));
-    if (HIGH64(hash_output) == HIGH64(output_recv) && LOW64(hash_output) == LOW64(output_recv))
-      std::cout<<"JQv1 success!\n";
-    else std::cout<<"JQv1 fail!\n";
-
-    std::cout << "recver time: " << time_from(start)<<" us" << std::endl;
-    std::cout << "proof of recver for 1s: " << double(len)/time_from(start)*1000000 << std::endl;
-    os.check_compute_mul(a, b, c, len);
-  }
-
-  //for (int i=0; i<7; i++)
-  //    std::cout<<party<<": "<<i<<" -> "<<hash_input[i]<<"\n";
-
-  delete[] a;
-  delete[] b;
-  delete[] c;
-  delete[] ab;
-  delete[] hash_input;
-}
 
 int main(int argc, char **argv) {
   parse_party_and_port(argv, &party, &port);
@@ -188,7 +194,6 @@ int main(int argc, char **argv) {
 
 
   test_ostriple(ios, party);
-  //test_compute_and_gate_check_JQv1(ios, party);
 
   for (int i = 0; i < threads; ++i) {
     delete ios[i];
