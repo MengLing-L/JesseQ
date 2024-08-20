@@ -52,10 +52,8 @@ void test_inner_product(BoolIO<NetIO> *ios[threads], int party) {
   
   if (party == ALICE) {
     for (int i = 0; i < sz; ++i) {
-      // c[i] = IntFp().get_u();
       ab[i] = auth_compute_mul(x[i],x[sz + i]);
       ab[i] = PR - LOW64(ab[i]);
-      // ab[i] = add_mod(ab[i], LOW64(c[i]));
       ab_y[i] = mult_mod(LOW64(x[i]), LOW64(x[sz + i]));
       ab_y[i] = PR - LOW64(ab_y[i]);
       ab_y[i] = add_mod(ab[i], LOW64(ab_y[i]));
