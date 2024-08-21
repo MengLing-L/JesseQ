@@ -27,7 +27,7 @@ public:
     }
   }
 
-  IntFp(uint64_t input, int party = PUBLIC, int flag=1) {
+  IntFp(uint64_t input, bool flag=1) {
       ZKFpExec::zk_exec->feed(value, input, d);
   }
 

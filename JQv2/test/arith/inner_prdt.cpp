@@ -48,7 +48,7 @@ void test_inner_product(BoolIO<NetIO> *ios[threads], int party) {
   
   IntFp wit;
   for (int i = 0; i < 2 * sz; ++i) {
-    wit = IntFp(witness[i], ALICE, 1);
+    wit = IntFp(witness[i], true);
     x[i] = wit.get_u();
     d[i] = wit.get_d();
   }
