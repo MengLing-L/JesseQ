@@ -18,7 +18,7 @@ void test_circuit_zk(NetIO *ios[threads + 1], int party,
   __uint128_t *ao = new __uint128_t[test_n + 1];
   __uint128_t *ab = new __uint128_t[test_n];
   __uint128_t b_u, b_u_0;
-    uint64_t db;
+  uint64_t db;
   ao[0] = ostriple.random_val_input();
   b_u = ostriple.random_val_input();
   b_u_0 = b_u;
@@ -51,24 +51,6 @@ void test_circuit_zk(NetIO *ios[threads + 1], int party,
   ostriple.check_cnt = 0;
   cout << "Setup time: " << time_from(start) / 1000 << "ms " << party
        << " " << endl;
-  // __uint128_t ab, tmp;
-  // if (party == ALICE) {
-  //   ab = mult_mod(LOW64(ao[test_n - 1]), LOW64(b_u));
-  //   ab = PR - LOW64(ab);
-  //   tmp = ostriple.auth_compute_mul_send(ao[test_n - 1], b_u);
-  //   tmp = PR - LOW64(tmp);
-  //   ab_o = add_mod(LOW64(tmp), LOW64(ab));
-  //   c_u = ostriple.random_val_input();
-  //   c_u = mult_mod(LOW64(c_u), LOW64(ao[test_n - 1]));
-  // } else {
-  //   ab = mult_mod(ao[test_n - 1], b_u);
-  //   ab = PR - ab;
-  //   tmp = ostriple.auth_compute_mul_recv(ao[test_n - 1], b_u);
-  //   tmp = PR - LOW64(tmp);
-  //   ab_o = add_mod(tmp, ab);
-  //   c_u = ostriple.random_val_input();
-  //   c_u = mult_mod(c_u, ao[test_n - 1]);
-  // }
 
   start = clock_start();
   uint64_t ar = 2, br = 3;
@@ -154,9 +136,7 @@ int main(int argc, char **argv) {
 
   std::cout << std::endl
             << "------------ circuit zero-knowledge proof test ------------"
-            << std::endl
             << std::endl;
-  ;
 
   int num = 0;
   if (argc < 3) {
