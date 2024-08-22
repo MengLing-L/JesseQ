@@ -29,11 +29,7 @@ void test_circuit_zk(NetIO *ios[threads + 1], int party,
   auto start= clock_start();
   auto setup= 0;
   auto prove= 0;
-  FILE* fp = fopen("precomputed.bin", "wb+"); 
-  if (!fp) {
-      perror("fopen");
-      return;
-  }
+
   uint64_t ar = 2, br = 3;
   for (int j = 0; j < num_of_chunk; ++j) {
     start = clock_start();
@@ -66,11 +62,7 @@ void test_circuit_zk(NetIO *ios[threads + 1], int party,
     a_u = ao[chunk];
     ostriple.andgate_correctness_check_manage();
     ostriple.check_cnt = 0;
-    fwrite(ao, sizeof(__uint128_t), chunk + 1, fp);
-    fwrite(ab, sizeof(__uint128_t), chunk, fp);
-    fflush(fp);
     setup += time_from(start);
-  // }
 
     start = clock_start();
     if (party == ALICE) {
