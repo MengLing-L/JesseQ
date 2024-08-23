@@ -56,7 +56,6 @@ void test_compute_and_gate_check_layer(OSTriple<BoolIO<NetIO>> *os,
     //extreme_layered_circuit
     len_in = 1;
     extreme_layered_circuit(ain, len);
-    os->original_setup(len + len_in);
     a = new block[len + len_in];
     start = clock_start();
     os->authenticated_bits_input(a, ain, len_in);
@@ -67,7 +66,6 @@ void test_compute_and_gate_check_layer(OSTriple<BoolIO<NetIO>> *os,
     //random_circuit
     len_in = 1024;
     random_circuit(ain, left, right, len, len_in);
-    os->original_setup(len + len_in);
     a = new block[len_in + len];
     start = clock_start();
     os->authenticated_bits_input(a, ain, len_in);
@@ -109,7 +107,6 @@ void test_compute_and_gate_check_layer_JQv2(OSTriple<BoolIO<NetIO>> *os, BoolIO<
     //extreme_layered_circuit
     len_in = 1;
     extreme_layered_circuit(ain, len);
-    os->original_setup(len + len_in);
     t1 = clock_start();
     a = new block[len + len_in];
     for (int i = 0; i < len + len_in; i++) {
@@ -142,7 +139,6 @@ void test_compute_and_gate_check_layer_JQv2(OSTriple<BoolIO<NetIO>> *os, BoolIO<
     //random_circuit
     len_in = 1024;
     random_circuit(ain, left, right, len, len_in);
-    os->original_setup(len + len_in);
     t1 = clock_start();
     a = new block[len_in + len];
     d = new bool[len_in + len];
@@ -225,12 +221,13 @@ else
 
 
 void test_ostriple(BoolIO<NetIO> *ios[threads + 1], int party) {
-  bool flag = true;
+  bool flag = false;
   auto t1 = clock_start();
   OSTriple<BoolIO<NetIO>> os(party, threads, ios);
   cout << party << "\tconstructor\t" << time_from(t1) << " us" << endl;
 
   test_compute_and_gate_check_layer_JQv2(&os, ios[0], flag);
+  //test_compute_and_gate_check_layer(&os, ios[0], flag);
 }
 
 int main(int argc, char **argv) {

@@ -18,7 +18,6 @@ public:
   block *andgate_right_buffer = nullptr;
   block *A0_buffer = nullptr;
   block *A1_buffer = nullptr;
-  block *vole_val = nullptr, *vole_tmp = nullptr;
 
   GaloisFieldPacking pack;
   int64_t CHECK_SZ = 1024 * 1024;
@@ -76,7 +75,6 @@ public:
     if (check_cnt != 0) {
       andgate_correctness_check_manage();
     }
-    if (vole_val != nullptr) delete[] vole_val;
     if (!auth_helper->finalize())
       CheatRecord::put("emp-zk-bool finalize");
     if (ferret_state != nullptr)
@@ -102,12 +100,6 @@ public:
     ferret->rcot(auth, len);
   }
 
-  void original_setup(int len) {
-    vole_val = new block[len];
-    ferret->rcot(vole_val, len);
-    vole_tmp = vole_val;
-  }
-
   /* ---------------------inputs----------------------*/
 
   /*
@@ -131,7 +123,9 @@ public:
   }
 
   block random_val_input() {
-    return *(vole_tmp++);
+    block auth;
+    ferret->rcot(&auth, 1);
+    return auth;
   }
 
   void authenticated_bits_input_with_setup(block *auth, const bool *in, bool *buff, int len) {
@@ -291,18 +285,16 @@ public:
    */
 
   void authenticated_bits_input(block *auth, const bool *in, int len) {
-    //ferret->rcot(auth, len);
+    ferret->rcot(auth, len);
 
     if (party == ALICE) {
       for (int i = 0; i < len; ++i) {
-        auth[i] = *(vole_tmp++);
         bool buff = getLSB(auth[i]) ^ in[i];
         set_value_in_block(auth[i], in[i]);
         io->send_bit(buff);
       }
     } else {
       for (int i = 0; i < len; ++i) {
-        auth[i] = *(vole_tmp++);
         bool buff = io->recv_bit();
         auth[i] = auth[i] ^ choice[buff];
         set_zero_bit(auth[i]);
