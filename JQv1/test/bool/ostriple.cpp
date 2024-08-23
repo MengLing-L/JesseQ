@@ -86,6 +86,7 @@ void test_compute_and_gate_check_JQv1(OSTriple<BoolIO<NetIO>> *os,
   }
   auto timeuse = time_from(start);
   cout << len << "\t" << timeuse << " us\t" << party << " " << endl;
+  cout << len << "\t" << double(len)/(timeuse)*1000000 << "\t" << party << " " << endl;
   std::cout << std::endl;
   
 #if defined(__linux__)

@@ -17,5 +17,7 @@ endmacro()
 
 # Test cases
 add_test_case_with_run(bool ostriple)
+add_test_case_with_run(bool circuit_scalability)
 add_test_case_with_run(arith ostriple)
 add_test_case_with_run(arith circuit_scalability)
+add_test_case_with_run(arith test_file)
