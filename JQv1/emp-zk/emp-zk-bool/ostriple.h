@@ -20,7 +20,7 @@ public:
   GaloisFieldPacking pack;
   int64_t CHECK_SZ = 1024 * 1024;
 
-  block choice[2], choice2[2];
+  block choice[2], choice2[2], ch_tmp[2];
   block minusone, one;
   IO *io;
   IO **ios;
@@ -54,7 +54,7 @@ public:
     block tmp;
     ferret->rcot(&tmp, 1);
 
-    choice[0] = choice2[0] = zero_block;
+    choice[0] = choice2[0] = ch_tmp[0] = zero_block;
     choice[1] = this->delta;
     minusone = makeBlock(0xFFFFFFFFFFFFFFFFLL, 0xFFFFFFFFFFFFFFFELL);
     one = makeBlock(0x0L, 0x1L);
@@ -98,29 +98,23 @@ public:
   }
 
   void auth_compute_and_send_with_setup(const block Ma,const block Mb, const block Mc, bool da, bool db, bool wc, block &H1) {
-    block Ma_ = Ma,  Mb_ = Mb, Mc_ = Mc;
+    block Mc_ = Mc;
 
     set_value_in_block(Mc_, wc);
   
-    block ch_tmp[2];
-    ch_tmp[0] = zero_block;
-    ch_tmp[1] = Ma_;
+    ch_tmp[1] = Ma;
     H1 = H1 ^ ch_tmp[db];
-    ch_tmp[1] = Mb_;
+    ch_tmp[1] = Mb;
     H1 = H1 ^ ch_tmp[da];
     H1 = H1 ^ Mc_;
   }
 
   void auth_compute_and_recv_with_setup(const block Ka,const block Kb,const block Kc, bool da, bool db, block &H1) {
-    block Ka_ = Ka,  Kb_ = Kb, Kc_ = Kc;
-
-    block ch_tmp[2];
-    ch_tmp[0] = zero_block;
-    ch_tmp[1] = Ka_;
+    ch_tmp[1] = Ka;
     H1 = H1 ^ ch_tmp[db];
-    ch_tmp[1] = Kb_;
+    ch_tmp[1] = Kb;
     H1 = H1 ^ ch_tmp[da];
-    H1 = H1 ^ Kc_;
+    H1 = H1 ^ Kc;
     H1 = H1 ^ choice[(da & db)];
   }
 
