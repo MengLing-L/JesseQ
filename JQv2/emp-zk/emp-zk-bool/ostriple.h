@@ -256,7 +256,7 @@ public:
       gfmul(A_star[1], this->delta, &W);
       W = W ^ A_star[0];
       if (cmpBlock(&W, &B_star, 1) != 1){
-        CheatRecord::put("emp_zk_bool AND batch check");std::cout<<"fuck\n\n";}
+        CheatRecord::put("emp_zk_bool AND batch check");std::cout<<"Wrong\n\n";}
     }
     io->flush();
     delete[] share_seed;
