@@ -221,7 +221,7 @@ else
 
 
 void test_ostriple(BoolIO<NetIO> *ios[threads + 1], int party) {
-  bool flag = false;
+  bool flag = true;
   auto t1 = clock_start();
   OSTriple<BoolIO<NetIO>> os(party, threads, ios);
   cout << party << "\tconstructor\t" << time_from(t1) << " us" << endl;

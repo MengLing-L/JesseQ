@@ -19,7 +19,7 @@ void test_compute_and_gate_check_JQv1(OSTriple<BoolIO<NetIO>> *os,
                                  BoolIO<NetIO> *io) {
   PRG prg;
   // long long len = 300000000;
-  // int chunk = 3000000;
+  // int chunk = 30000000;
   long long len = 1024 * 1024 * 10 * 10 * 3;
   int chunk = 1024 * 1024;
   int num_of_chunk = len / chunk;
@@ -32,6 +32,7 @@ void test_compute_and_gate_check_JQv1(OSTriple<BoolIO<NetIO>> *os,
   os->random_bits_input(&b_u, 1);
   a_u = a[0];
   b_u_0 = b_u;
+  
   // if (party == ALICE) {
   //   prg.random_bool(ain, 2 * chunk);
   // }
@@ -67,6 +68,7 @@ void test_compute_and_gate_check_JQv1(OSTriple<BoolIO<NetIO>> *os,
     if (party == ALICE) {
         for (int i = 0; i < chunk; ++i) {
           d[i] = getLSB(a[i]) ^ ar;
+          // io[0].send_bit(d[i]);
           br = ar ^ br;
           ar = ar & br;
         }
@@ -94,16 +96,31 @@ void test_compute_and_gate_check_JQv1(OSTriple<BoolIO<NetIO>> *os,
       }
     }
 
+    // if (party == ALICE) {
+    //   block hash_output = Hash::hash_for_block(ab, sizeof(block) * (chunk));
+    //   io[0].send_data(&hash_output, sizeof(block));
+    // } else {
+    //   block hash_output = Hash::hash_for_block(ab, sizeof(block) * (chunk)), output_recv;
+    //   io[0].recv_data(&output_recv, sizeof(block));
+    //   if (HIGH64(hash_output) != HIGH64(output_recv) || LOW64(hash_output) != LOW64(output_recv))
+    //     std::cout<<"JQv1 fail!\n";
+    // }
+    io[0].flush();
+    block seed = io[0].get_hash_block();
+    block share_seed;
+    PRG(&seed).random_block(&share_seed, 1);
+    block *chi = new block[chunk];
+    uni_hash_coeff_gen(chi, share_seed, chunk);
+    block sum;
     if (party == ALICE) {
-      block hash_output = Hash::hash_for_block(ab, sizeof(block) * (chunk));
-      io[0].send_data(&hash_output, sizeof(block));
+      vector_inn_prdt_sum_red(&sum, chi, ab, chunk);
+      io[0].send_data(&sum, sizeof(block));
     } else {
-      block hash_output = Hash::hash_for_block(ab, sizeof(block) * (chunk)), output_recv;
+      block output_recv;
+      vector_inn_prdt_sum_red(&sum, chi, ab, chunk);
       io[0].recv_data(&output_recv, sizeof(block));
-      if (HIGH64(hash_output) != HIGH64(output_recv) || LOW64(hash_output) != LOW64(output_recv))
+      if (HIGH64(sum) != HIGH64(output_recv) || LOW64(sum) != LOW64(output_recv))
         std::cout<<"JQv1 fail!\n";
-      // else
-      //   std::cout<<"JQv1 success!\n";
     }
     prove += time_from(start);
   }
