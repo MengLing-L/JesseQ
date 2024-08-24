@@ -21,7 +21,7 @@ void test_compute_and_gate_check_JQv1(OSTriple<BoolIO<NetIO>> *os,
   // long long len = 300000000;
   // int chunk = 30000000;
   long long len = 1024 * 1024 * 10 * 10 * 3;
-  int chunk = 1024 * 1024;
+  int chunk = 1024 ;
   int num_of_chunk = len / chunk;
   bool *d = new bool[chunk + 1];
   block *a = new block[chunk + 1];
@@ -112,10 +112,16 @@ void test_compute_and_gate_check_JQv1(OSTriple<BoolIO<NetIO>> *os,
     // block *chi = new block[chunk];
     // uni_hash_coeff_gen(chi, share_seed, chunk);
     // block sum;
+    // gfmul(ab[0], ab[1], &sum);
     // if (party == ALICE) {
     //   vector_inn_prdt_sum_red(&sum, chi, ab, chunk);
     //   io[0].send_data(&sum, sizeof(block));
     // } else {
+    //   for(int i = 0; i < chunk; i++) {
+    //     block tmp;
+    //     gfmul(chi[i], ab[i], &tmp);
+    //     sum = tmp;
+    //   }
     //   block output_recv;
     //   vector_inn_prdt_sum_red(&sum, chi, ab, chunk);
     //   io[0].recv_data(&output_recv, sizeof(block));
