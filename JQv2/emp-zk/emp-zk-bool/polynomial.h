@@ -13,6 +13,7 @@ public:
   // int buffer_sz = 4096;
   block *buffer = nullptr;
   block *buffer1 = nullptr;
+  block ch_tmp[2];
   int num;
   GaloisFieldPacking pack;
   FerretCOT<IO> *ferret = nullptr;
@@ -22,6 +23,7 @@ public:
     this->io = io;
     this->ferret = ferret;
     this->delta = ferret->Delta;
+    ch_tmp[0] = zero_block;
     if (party == ALICE) {
       buffer = new block[buffer_sz];
       buffer1 = new block[buffer_sz];
@@ -220,18 +222,12 @@ public:
     if (party == ALICE) {
       block mzero = zero_block;
       for (int i = 0; i < len; ++i) {
-        block Ma_ = polyx[i],  Mb_ = polyy[i];
-        bool *d = new bool[2];
-        d[0] = x[i];
-        // io->send_bit(d[0]);
-        d[1] = y[i];
+        // block Ma_ = polyx[i],  Mb_ = polyy[i];
         // io->send_bit(d[1]);
-        block ch_tmp[2];
-        ch_tmp[0] = zero_block;
-        ch_tmp[1] = Ma_;
-        mzero = mzero ^ ch_tmp[d[1]];
-        ch_tmp[1] = Mb_;
-        mzero = mzero ^ ch_tmp[d[0]];
+        ch_tmp[1] = polyx[i];
+        mzero = mzero ^ ch_tmp[y[i]];
+        ch_tmp[1] = polyy[i];
+        mzero = mzero ^ ch_tmp[x[i]];
         mzero = mzero ^ ab[i];
       }
       // cout << party<< "mzero ";
@@ -239,17 +235,12 @@ public:
     } else {
       block kzero = zero_block;
       for (int i = 0; i < len; ++i) {
-        block Ka_ = polyx[i],  Kb_ = polyy[i];
-        bool *d = new bool[2];
-        d[0] = x[i];
-        d[1] = y[i];
-        block ch_tmp[2];
-        ch_tmp[0] = zero_block;
-        ch_tmp[1] = Ka_;
-        kzero = kzero ^ ch_tmp[d[1]];
-        ch_tmp[1] = Kb_;
-        kzero = kzero ^ ch_tmp[d[0]];
-        kzero = kzero ^ choice[(d[0] & d[1])];
+        // block Ka_ = polyx[i],  Kb_ = polyy[i];
+        ch_tmp[1] = polyx[i];
+        kzero = kzero ^ ch_tmp[y[i]];
+        ch_tmp[1] = polyy[i];
+        kzero = kzero ^ ch_tmp[x[i]];
+        kzero = kzero ^ choice[(x[i] & y[i])];
         kzero = kzero ^ ab[i];
       }
       kzero = kzero ^ choice[constant];
