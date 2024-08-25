@@ -175,8 +175,8 @@ int main(int argc, char **argv) {
   for (int i = 0; i < threads; ++i)
     ios[i] = new BoolIO<NetIO>(
         // new NetIO(party == ALICE ? nullptr : "127.0.0.1", port + i),
-        // new NetIO(party == ALICE ? nullptr : "172.31.57.232", port + i),
-        new NetIO(party == ALICE ? "172.31.39.103" : "172.31.39.103", port + i),
+        new NetIO(party == ALICE ? nullptr : "172.31.38.235", port + i),
+        // new NetIO(party == ALICE ? "172.31.39.103" : "172.31.39.103", port + i),
         party == ALICE);
 
   std::cout << std::endl
