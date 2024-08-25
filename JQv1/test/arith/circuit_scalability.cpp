@@ -149,7 +149,7 @@ int main(int argc, char **argv) {
   for (int i = 0; i < threads; ++i)
     // ios[i] = new NetIO(party == ALICE ? nullptr : "127.0.0.1", port + i);
     // ios[i] = new NetIO(party == ALICE ? nullptr : "172.31.57.232", port + i);
-    ios[i] = new NetIO(party == ALICE ? "172.31.49.169" : "172.31.49.169", port + i);
+    ios[i] = new NetIO(party == ALICE ? "172.31.39.103" : "172.31.39.103", port + i);
 
   std::cout << std::endl
             << "------------ circuit zero-knowledge proof test ------------"
