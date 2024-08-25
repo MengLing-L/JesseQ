@@ -264,7 +264,7 @@ void random_circuit_cutted(block*& a, block*& a_pre, int*& left, int*& right, bo
 
 
 void test_compute_and_gate_check_huge_random_circuit_JQv2(OSTriple<BoolIO<NetIO>> *os, BoolIO<NetIO> *io) {
-  int len = (int)3e7, len_in = 1024, repeat = 10;
+  int len = (int)1.5e6, len_in = 1024, repeat = 200;
   bool *ain = nullptr, *clr = nullptr, *d = nullptr;
   int *left = nullptr, *right = nullptr;
   block* a = nullptr, *a_pre = nullptr;
@@ -348,8 +348,8 @@ int main(int argc, char **argv) {
   BoolIO<NetIO> *ios[threads];
   for (int i = 0; i < threads; ++i)
     ios[i] = new BoolIO<NetIO>(
-        // new NetIO(party == ALICE ? nullptr : "127.0.0.1", port + i),
-        new NetIO(party == ALICE ? nullptr : "172.31.2.203", port + i),
+        new NetIO(party == ALICE ? nullptr : "127.0.0.1", port + i),
+        // new NetIO(party == ALICE ? nullptr : "172.31.2.203", port + i),
         // new NetIO(party == ALICE ? "172.31.5.65" : "172.31.5.65", port + i),
         // new NetIO(party == ALICE ? nullptr : "127.0.0.1", port + i),
         party == ALICE);
