@@ -271,19 +271,22 @@ void test_compute_and_gate_check_huge_random_circuit_JQv2(OSTriple<BoolIO<NetIO>
   int *left = nullptr, *right = nullptr;
   block* a = nullptr, *a_pre = nullptr;
 
-  int timeuse = 0;
+  int timeuse = 0, timesetup = 0;
 
   for (int tm = 0; tm < repeat; tm++) {
     if (!tm) {
       random_input_set(ain, len_in);
       random_circuit_cutted(a, a_pre, left, right, clr, d, len, len_in, 0);
+      auto start = clock_start();
       for (int i = 0; i < len_in; i++) {
         clr[i] = false;
         a[i] = a_pre[i] = os->random_val_input();
       }
+      timesetup += time_from(start);
     }
     else random_circuit_cutted(a, a_pre, left, right, clr, d, len, len_in, 1 + bool(tm == repeat - 1));
     
+    auto start = clock_start();
     for (int i = len_in; i < len + len_in; i++) {
       if (clr[left[i]] || clr[right[i]]) {
         clr[i] = false;
@@ -293,11 +296,12 @@ void test_compute_and_gate_check_huge_random_circuit_JQv2(OSTriple<BoolIO<NetIO>
         a_pre[i] = os->auth_compute_and(a_pre[left[i]], a_pre[right[i]]);
       }
     }
+    timesetup += time_from(start);
 
-    auto start = clock_start();
+    start = clock_start();
     if (!tm) os->authenticated_bits_input_with_setup(a, ain, d, len_in);
 
-    int *p_left = left + len_in, *p_right = right + len_in;
+    /*int *p_left = left + len_in, *p_right = right + len_in;
     block *p_apre = a_pre + len_in;
     for (int i = len_in; i < len + len_in; ++i, ++p_left, ++p_right, ++p_apre) {
       if (!clr[i]) {
@@ -305,12 +309,26 @@ void test_compute_and_gate_check_huge_random_circuit_JQv2(OSTriple<BoolIO<NetIO>
       } else {
         a[i] = os->evaluate_MAC(a_pre[*p_left], a_pre[*p_right], d[*p_left], d[*p_right], *p_apre);
       }
+    }*/
+    for (int i = len_in; i < len + len_in; ++i) {
+      if (!clr[i]) {
+        a[i] = os->auth_compute_and_with_setup(a[left[i]], a[right[i]], a_pre[i], d[i]);
+      } else {
+        a[i] = os->evaluate_MAC(a_pre[left[i]], a_pre[right[i]], d[left[i]], d[right[i]], a_pre[i]);
+      }
     }
 
     timeuse += time_from(start);
   }
 
   auto start = clock_start();
+  if (os->check_cnt) {
+    os->andgate_correctness_check_manage();
+    os->check_cnt = 0;
+  }
+  timesetup += time_from(start);
+
+  start = clock_start();
   if (os->buffer_cnt) {
     os->andgate_correctness_check_manage_JQv2();
     os->buffer_cnt = 0;
@@ -318,10 +336,12 @@ void test_compute_and_gate_check_huge_random_circuit_JQv2(OSTriple<BoolIO<NetIO>
   timeuse += time_from(start);
 
   if (party == ALICE) {
-    std::cout << "sender time: " << timeuse <<" us" << std::endl;
+    std::cout << "prover setup time: " << timesetup <<" us" << std::endl;
+    std::cout << "Prove time: " << timeuse <<" us" << std::endl;
     std::cout << "proof of sender for 1s: " << double(len * repeat) / timeuse * 1000000 << std::endl;
   } else {
-    std::cout << "recver time: " << timeuse<<" us" << std::endl;
+    std::cout << "recver setup time: " << timesetup <<" us" << std::endl;
+    std::cout << "Verify time: " << timeuse<<" us" << std::endl;
     std::cout << "proof of recver for 1s: " << double(len * repeat) / timeuse * 1000000 << std::endl;
   }
 
