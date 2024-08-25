@@ -44,7 +44,7 @@ void test_inner_product(BoolIO<NetIO> *ios[threads], int party) {
     ab[i] = auth_compute_and<BoolIO<NetIO>>(party, x[i], x[sz + i]);
   }
 
-  auto start = clock_start();
+  
   for (int i = 0; i < sz; ++i) {
     if (party == ALICE) {
       witness[i] =  getLSB(x[i]) ^ witness[i];
@@ -57,6 +57,7 @@ void test_inner_product(BoolIO<NetIO> *ios[threads], int party) {
     }
   }
   
+  auto start = clock_start();
   for (int j = 0; j < repeat; ++j) {
     zkp_inner_prdt<BoolIO<NetIO>>(x, x + sz, witness, witness + sz, ab, constant, sz);
   }
@@ -81,8 +82,8 @@ int main(int argc, char **argv) {
   BoolIO<NetIO> *ios[threads];
   for (int i = 0; i < threads; ++i)
     ios[i] = new BoolIO<NetIO>(
-        // new NetIO(party == ALICE ? nullptr : "127.0.0.1", port + i),
-        new NetIO(party == ALICE ? nullptr : "172.31.2.203", port + i),
+        new NetIO(party == ALICE ? nullptr : "127.0.0.1", port + i),
+        // new NetIO(party == ALICE ? nullptr : "172.31.2.203", port + i),
         // new NetIO(party == ALICE ? "172.31.5.65" : "172.31.5.65", port + i),
         // new NetIO(party == ALICE ? nullptr : "127.0.0.1", port + i),
         party == ALICE);
@@ -97,7 +98,7 @@ int main(int argc, char **argv) {
               << std::endl;
     return -1;
   } else if (argc < 5) {
-    repeat = 10240;
+    repeat = 1;
     sz = 10000000;
   } else {
     repeat = atoi(argv[3]);

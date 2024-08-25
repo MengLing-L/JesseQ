@@ -45,14 +45,13 @@ void test_inner_product(BoolIO<NetIO> *ios[threads], int party) {
     ios[0]->recv_data(&constant, sizeof(uint64_t));
   }
 
-  
+  auto start = clock_start();
   IntFp wit;
   for (int i = 0; i < 2 * sz; ++i) {
     wit = IntFp(witness[i], true);
     x[i] = wit.get_u();
     d[i] = wit.get_d();
   }
-  auto start = clock_start();
   __uint128_t ab_, tmp;
   if (party == ALICE) {
     for (int i = 0; i < sz; ++i) {

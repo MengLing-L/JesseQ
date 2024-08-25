@@ -125,6 +125,8 @@ void test_circuit_zk(NetIO *ios[threads + 1], int party, int matrix_sz) {
     else std::cout<<"JQv2 fail!\n";
   }
 
+  std::cout<< "communication" << test_n * 2 *  sizeof(uint64_t) + sizeof(block) << " bytes." << endl;
+
   auto timeuse = time_from(start);
   cout << matrix_sz << "\t" << timeuse << " us\t" << party << " " << endl;
   std::cout << std::endl;
