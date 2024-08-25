@@ -370,9 +370,9 @@ int main(int argc, char **argv) {
   BoolIO<NetIO> *ios[threads];
   for (int i = 0; i < threads; ++i)
     ios[i] = new BoolIO<NetIO>(
-        new NetIO(party == ALICE ? nullptr : "127.0.0.1", port + i),
-        // new NetIO(party == ALICE ? nullptr : "172.31.37.146", port + i),
-        // new NetIO(party == ALICE ? "172.31.43.140" : "172.31.43.140", port + i),
+        // new NetIO(party == ALICE ? nullptr : "127.0.0.1", port + i),
+        new NetIO(party == ALICE ? nullptr : "172.31.17.177", port + i),
+        // new NetIO(party == ALICE ? "172.31.16.78" : "172.31.16.78", port + i),
         party == ALICE);
 
   std::cout << std::endl
