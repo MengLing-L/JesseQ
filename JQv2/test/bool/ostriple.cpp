@@ -263,8 +263,10 @@ void random_circuit_cutted(block*& a, block*& a_pre, int*& left, int*& right, bo
 }
 
 
+
+
 void test_compute_and_gate_check_huge_random_circuit_JQv2(OSTriple<BoolIO<NetIO>> *os, BoolIO<NetIO> *io) {
-  int len = (int)1.5e6, len_in = 1024, repeat = 200;
+  int len = (int)1e6, len_in = 1024, repeat = 300;
   bool *ain = nullptr, *clr = nullptr, *d = nullptr;
   int *left = nullptr, *right = nullptr;
   block* a = nullptr, *a_pre = nullptr;
@@ -324,7 +326,7 @@ void test_compute_and_gate_check_huge_random_circuit_JQv2(OSTriple<BoolIO<NetIO>
   }
 
   delete[] a;
-  delete[] ain;
+  if (party == ALICE) delete[] ain;
   delete[] clr;
   delete[] left;
   delete[] right;

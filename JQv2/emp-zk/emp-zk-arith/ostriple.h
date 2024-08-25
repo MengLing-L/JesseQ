@@ -247,6 +247,14 @@ public:
     }
   }
 
+  void setup_pre_processing(__uint128_t *val1,int *left, int *right, bool *clr, uint64_t *val_pre_pro, int len, int len_in) {
+    for (int i = len_in; i < len + len_in; i++) 
+    if (clr[i]) {
+      val_pre_pro[i] = mult_mod(LOW64(val1[left[i]]), LOW64(val1[right[i]]));
+      val_pre_pro[i] = add_mod(val_pre_pro[i], LOW64(val1[i]));
+    }
+  }
+
   void evaluate_MAC(__uint128_t val1, __uint128_t val2, uint64_t d1, uint64_t d2, uint64_t val_pre_pro, __uint128_t &val) {
     if (party == ALICE) {
       uint64_t w = mult_mod(HIGH64(val1), HIGH64(val2));
