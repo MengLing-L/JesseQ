@@ -356,20 +356,23 @@ void test_compute_and_gate_check_huge_random_circuit_JQv2(FpOSTriple<NetIO> *os)
   __uint128_t* a = nullptr, *a_pre = nullptr;
   uint64_t *val_pre_pro = new uint64_t[len + len_in];
 
-  int timeuse = 0;
+  int timeuse = 0, timesetup = 0;
 
   for (int tm = 0; tm < repeat; tm++) {
     if (!tm) {
       random_input_set(ain, len_in);
       random_circuit_cutted(a, a_pre, left, right, clr, d, len, len_in, 0);
+      auto start = clock_start();
       for (int i = 0; i < len_in; i++) {
         clr[i] = false;
         a_pre[i] = a[i] = os->random_val_input();
       }
+      timesetup += time_from(start);
     }
     else random_circuit_cutted(a, a_pre, left, right, clr, d, len, len_in, 1 + bool(tm == repeat - 1));
     
     if (party == ALICE) {
+      auto start = clock_start();
       for (int i = len_in; i < len + len_in; i++) {
         if (clr[left[i]] || clr[right[i]]) {
           clr[i] = false;
@@ -381,8 +384,9 @@ void test_compute_and_gate_check_huge_random_circuit_JQv2(FpOSTriple<NetIO> *os)
         a_pre[i] = a[i];
       }
       os->setup_pre_processing(a_pre, left, right, clr, val_pre_pro, len, len_in);
+      timesetup += time_from(start);
 
-      auto start = clock_start();
+      start = clock_start();
       if (!tm) os->authenticated_val_input_with_setup(a, ain, d, len_in);
 
       int *p_left = left + len_in, *p_right = right + len_in;
@@ -396,6 +400,7 @@ void test_compute_and_gate_check_huge_random_circuit_JQv2(FpOSTriple<NetIO> *os)
 
       timeuse += time_from(start);
     } else {
+      auto start = clock_start();
       for (int i = len_in; i < len + len_in; i++) {
         if (clr[left[i]] || clr[right[i]]) {
           clr[i] = false;
@@ -407,8 +412,9 @@ void test_compute_and_gate_check_huge_random_circuit_JQv2(FpOSTriple<NetIO> *os)
         a_pre[i] = a[i];
       }
       os->setup_pre_processing(a_pre, left, right, clr, val_pre_pro, len, len_in);
+      timesetup += time_from(start);
 
-      auto start = clock_start();
+      start = clock_start();
       if (!tm) os->authenticated_val_input_with_setup(a, d, len_in);
 
       int  *p_left = left + len_in, *p_right = right + len_in;
@@ -425,6 +431,13 @@ void test_compute_and_gate_check_huge_random_circuit_JQv2(FpOSTriple<NetIO> *os)
   }
 
   auto start = clock_start();
+  if (os->check_cnt) {
+    os->andgate_correctness_check_manage();
+    os->check_cnt = 0;
+  }
+  timesetup += time_from(start);
+
+  start = clock_start();
   if (os->buffer_cnt) {
     os->andgate_correctness_check_manage_JQv2();
     os->buffer_cnt = 0;
@@ -432,10 +445,12 @@ void test_compute_and_gate_check_huge_random_circuit_JQv2(FpOSTriple<NetIO> *os)
   timeuse += time_from(start);
 
   if (party == ALICE) {
-    std::cout << "sender time: " << timeuse <<" us" << std::endl;
+    std::cout << "prover setup time: " << timesetup <<" us" << std::endl;
+    std::cout << "Prove time: " << timeuse <<" us" << std::endl;
     std::cout << "proof of sender for 1s: " << double(len * repeat) / timeuse * 1000000 << std::endl;
   } else {
-    std::cout << "recver time: " << timeuse<<" us" << std::endl;
+    std::cout << "recver setup time: " << timesetup <<" us" << std::endl;
+    std::cout << "Verify time: " << timeuse<<" us" << std::endl;
     std::cout << "proof of recver for 1s: " << double(len * repeat) / timeuse * 1000000 << std::endl;
   }
 
