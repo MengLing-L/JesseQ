@@ -80,10 +80,10 @@ void test_inner_product(BoolIO<NetIO> *ios[threads], int party) {
   for (int j = 0; j < repeat; ++j) {
     fp_zkp_inner_prdt<BoolIO<NetIO>>(x, x + sz, d, d + sz, ab, constant, sz);
   }
+  double tt_1 = time_from(start);
 
   finalize_zk_arith<BoolIO<NetIO>>();
-
-  double tt_1 = time_from(start);
+  
   cout << "prove " << repeat << " degree-2 polynomial of length " << sz << endl;
   cout << "time use: " << tt_1 / 1000  << " ms" << endl;
   cout << "average time use: " << tt_1 / 1000 / repeat  << " ms" << endl;
