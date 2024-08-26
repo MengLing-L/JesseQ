@@ -14,7 +14,7 @@ void test_circuit_zk(NetIO *ios[threads + 1], int party,
   // long long test_n = 300000000;
   // int chunk = 30000000;
   long long test_n = 1024 * 1024 * 10 * 10 * 3;
-  int chunk = 1024 * 100;
+  int chunk = 1024 *100;
   int num_of_chunk = test_n / chunk;
   FpOSTriple<NetIO> ostriple(party, threads, ios);
   
@@ -66,16 +66,13 @@ void test_circuit_zk(NetIO *ios[threads + 1], int party,
     ostriple.check_cnt = 0;
     setup += time_from(start);
 
-    start = clock_start();
+    
+
     if (party == ALICE) {
+      start = clock_start();
       db = PR - br;
       db = add_mod(HIGH64(b_u_0), db);
       ios[0]->send_data(&db, sizeof(uint64_t));
-    } else {
-      ios[0]->recv_data(&db, sizeof(uint64_t));
-    }
-
-    if (party == ALICE) {
       for (int i = 0; i < chunk; ++i) {
         d[i] = PR - ar;
         d[i] = add_mod(HIGH64(ao[i]), d[i]);
@@ -84,12 +81,12 @@ void test_circuit_zk(NetIO *ios[threads + 1], int party,
       }
       d[chunk] = PR - ar;
       d[chunk] = add_mod(HIGH64(ao[chunk]), d[chunk]);
-
       ios[0]->send_data(d, sizeof(uint64_t) * (chunk+1));
-      ios[0]->send_data(&ar, sizeof(uint64_t));
+      
     } else {
+      ios[0]->recv_data(&db, sizeof(uint64_t));
+      start = clock_start();
       ios[0]->recv_data(d, sizeof(uint64_t) * (chunk+1));
-      ios[0]->recv_data(&ar, sizeof(uint64_t));
     }
 
     for (int i = 0; i < chunk; ++i) {
@@ -122,10 +119,12 @@ void test_circuit_zk(NetIO *ios[threads + 1], int party,
   }
 
   if (party == ALICE) { 
+    ios[0]->send_data(&ar, sizeof(uint64_t));
     __uint128_t val = ar;
     ao[chunk] = (val << 64) ^ LOW64(ao[chunk]);
     ostriple.reveal_check_send(&(ao[chunk]), &ar, 1);
   } else { 
+    ios[0]->recv_data(&ar, sizeof(uint64_t));
     ostriple.auth_constant(d[chunk], ao[chunk]);
     ostriple.reveal_check_recv(&(ao[chunk]), &ar, 1);
   }
@@ -147,8 +146,8 @@ int main(int argc, char **argv) {
   parse_party_and_port(argv, &party, &port);
   NetIO *ios[threads];
   for (int i = 0; i < threads; ++i)
-    // ios[i] = new NetIO(party == ALICE ? nullptr : "127.0.0.1", port + i);
-    ios[i] = new NetIO(party == ALICE ? nullptr : "172.31.38.235", port + i);
+    ios[i] = new NetIO(party == ALICE ? nullptr : "127.0.0.1", port + i);
+    // ios[i] = new NetIO(party == ALICE ? nullptr : "172.31.38.235", port + i);
     // ios[i] = new NetIO(party == ALICE ? "172.31.39.103" : "172.31.39.103", port + i);
 
   std::cout << std::endl
