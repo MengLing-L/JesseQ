@@ -2,7 +2,6 @@
 import subprocess
 
 ban = '''
-sudo tc qdisc del dev ens5 root
 sudo tc qdisc add dev ens5 root tbf rate 500Mbit latency 15ms burst 937.5k
 '''
 print(ban)
