@@ -14,6 +14,7 @@ using namespace emp;
 using namespace std;
 
 int port, party;
+char *ip;
 const int threads = 1;
 
 void test_circuit_zk(NetIO *ios[threads + 1], int party, int matrix_sz) {
@@ -128,7 +129,7 @@ void test_circuit_zk(NetIO *ios[threads + 1], int party, int matrix_sz) {
   std::cout<< "communication" << test_n * 2 *  sizeof(uint64_t) + sizeof(block) << " bytes." << endl;
 
   auto timeuse = time_from(start);
-  cout << matrix_sz << "\t" << timeuse << " us\t" << party << " " << endl;
+  cout << matrix_sz << "\t" << timeuse / 1000000 << " s\t" << party << " " << endl;
   std::cout << std::endl;
 
   delete[] ar;
@@ -158,12 +159,12 @@ void test_circuit_zk(NetIO *ios[threads + 1], int party, int matrix_sz) {
 }
 
 int main(int argc, char **argv) {
-  parse_party_and_port(argv, &party, &port);
+  party = atoi (argv[1]);
+	port = atoi (argv[2]);
+  ip = argv[3];
   NetIO *ios[threads];
   for (int i = 0; i < threads; ++i)
-    // ios[i] = new NetIO(party == ALICE ? nullptr : "127.0.0.1", port + i);
-    ios[i] = new NetIO(party == ALICE ? nullptr : "172.31.2.203", port + i);
-  // ios[i] = new NetIO(party == ALICE ? "172.31.5.65" : "172.31.5.65", port + i),
+    ios[i] = new NetIO(party == ALICE ? nullptr : ip, port + i);
 
   std::cout << std::endl
             << "------------ circuit zero-knowledge proof test ------------"
@@ -173,14 +174,12 @@ int main(int argc, char **argv) {
 
   int num = 0;
   if (argc < 3) {
-    std::cout << "usage: bin/arith/matrix_mul_arith PARTY PORT DIMENSION"
+    std::cout << "usage: bin/arith/matrix_mul_arith PARTY PORT IP"
               << std::endl;
     return -1;
-  } else if (argc == 3) {
-    num = 1024;
-  } else {
-    num = atoi(argv[3]);
-  }
+  } 
+
+  num = 1024;
 
   test_circuit_zk(ios, party, num);
 

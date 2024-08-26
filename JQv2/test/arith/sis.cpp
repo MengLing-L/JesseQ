@@ -14,6 +14,7 @@ using namespace emp;
 using namespace std;
 
 int port, party;
+char *ip;
 const int threads = 1;
 
 void test_sis_proof(NetIO *ios[threads + 1], int party, int n, int m) {
@@ -185,12 +186,12 @@ void test_sis_proof(NetIO *ios[threads + 1], int party, int n, int m) {
 }
 
 int main(int argc, char **argv) {
-  parse_party_and_port(argv, &party, &port);
+  party = atoi (argv[1]);
+	port = atoi (argv[2]);
+  ip = argv[3];
   NetIO *ios[threads];
   for (int i = 0; i < threads; ++i)
-    // ios[i] = new NetIO(party == ALICE ? nullptr : "127.0.0.1", port + i);
-    ios[i] = new NetIO(party == ALICE ? nullptr : "172.31.2.203", port + i);
-  // ios[i] = new NetIO(party == ALICE ? "172.31.5.65" : "172.31.5.65", port + i),
+    ios[i] = new NetIO(party == ALICE ? nullptr : ip, port + i);
 
   std::cout << std::endl
             << "------------ circuit zero-knowledge proof test ------------"
@@ -199,7 +200,7 @@ int main(int argc, char **argv) {
   ;
 
   // test_sis_proof(ios, party, 2, 2);
-  test_sis_proof(ios, party, 1024, 1024);
+  test_sis_proof(ios, party, 2048, 1024);
 
   for (int i = 0; i < threads; ++i) {
     delete ios[i];

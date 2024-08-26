@@ -5,6 +5,7 @@ using namespace emp;
 using namespace std;
 
 int port, party;
+char *ip;
 int repeat, sz;
 const int threads = 1;
 
@@ -78,14 +79,13 @@ void test_inner_product(BoolIO<NetIO> *ios[threads], int party) {
 }
 
 int main(int argc, char **argv) {
-  parse_party_and_port(argv, &party, &port);
+  party = atoi (argv[1]);
+	port = atoi (argv[2]);
+  ip = argv[3];
   BoolIO<NetIO> *ios[threads];
   for (int i = 0; i < threads; ++i)
     ios[i] = new BoolIO<NetIO>(
-        new NetIO(party == ALICE ? nullptr : "127.0.0.1", port + i),
-        // new NetIO(party == ALICE ? nullptr : "172.31.2.203", port + i),
-        // new NetIO(party == ALICE ? "172.31.5.65" : "172.31.5.65", port + i),
-        // new NetIO(party == ALICE ? nullptr : "127.0.0.1", port + i),
+        new NetIO(party == ALICE ? nullptr : ip, port + i),
         party == ALICE);
 
   std::cout << std::endl << "------------ ";
@@ -94,15 +94,15 @@ int main(int argc, char **argv) {
   ;
 
   if (argc < 3) {
-    std::cout << "usage: [binary] PARTY PORT POLY_NUM POLY_DIMENSION"
+    std::cout << "usage: [binary] PARTY PORT IP POLY_NUM POLY_DIMENSION"
               << std::endl;
     return -1;
-  } else if (argc < 5) {
+  } else if (argc < 6) {
     repeat = 1;
     sz = 10000000;
   } else {
-    repeat = atoi(argv[3]);
-    sz = atoi(argv[4]);
+    repeat = atoi(argv[4]);
+    sz = atoi(argv[5]);
   }
 
   test_inner_product(ios, party);
