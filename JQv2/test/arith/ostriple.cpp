@@ -484,8 +484,8 @@ int main(int argc, char **argv) {
   NetIO *ios[threads];
   for (int i = 0; i < threads; ++i)
     // ios[i] = new NetIO(party == ALICE ? nullptr : "127.0.0.1", port + i);
-    ios[i] = new NetIO(party == ALICE ? nullptr : "172.31.26.27", port + i);
-    // ios[i] = new NetIO(party == ALICE ? "172.31.39.103" : "172.31.39.103", port + i);
+    // ios[i] = new NetIO(party == ALICE ? nullptr : "172.31.26.27", port + i);
+    ios[i] = new NetIO(party == ALICE ? "172.31.29.55" : "172.31.29.55", port + i);
 
   std::cout << std::endl
             << "------------ triple generation test ------------" << std::endl

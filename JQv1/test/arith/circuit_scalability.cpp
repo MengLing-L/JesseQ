@@ -146,9 +146,9 @@ int main(int argc, char **argv) {
   parse_party_and_port(argv, &party, &port);
   NetIO *ios[threads];
   for (int i = 0; i < threads; ++i)
-    ios[i] = new NetIO(party == ALICE ? nullptr : "172.31.26.27", port + i);
+    // ios[i] = new NetIO(party == ALICE ? nullptr : "172.31.26.27", port + i);
     // ios[i] = new NetIO(party == ALICE ? nullptr : "172.31.38.235", port + i);
-    // ios[i] = new NetIO(party == ALICE ? "172.31.39.103" : "172.31.39.103", port + i);
+    ios[i] = new NetIO(party == ALICE ? "172.31.29.55" : "172.31.29.55", port + i);
 
   std::cout << std::endl
             << "------------ circuit zero-knowledge proof test ------------"
