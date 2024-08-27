@@ -24,22 +24,24 @@ int main(int argc, char **argv) {
   FpOSTriple<NetIO> os(party, threads, ios);
   OSTriple<BoolIO<NetIO>> bos(party, threads, bios);
   int len = 1024 * 1024 * 10 * 10 * 3;
+  int chunk = 1024 * 100;
+  int num_of_chunk  = len / chunk;
 
-  __uint128_t* a = new __uint128_t[len + 1];
+  __uint128_t* a = new __uint128_t[chunk];
 
-  for (int i = 0; i < len; ++i) {
+
+  for (int i = 0; i < chunk; ++i) {
     a[i] = os.random_val_input();
   }
-  a[len] = os.random_val_input();
 
   auto start = clock_start();
-  for (int i = 0; i < len; ++i) { 
-      mult_mod(a[i], a[i + 1]);
+  for (int i = 0; i < num_of_chunk; ++i) { 
+    for (int i = 0; i < chunk; ++i) { 
+        mult_mod(a[i], a[i]);
+    }
   }
   
   cout << party << "\tMul Speed: \t" << (time_from(start) * 7)/1000 << "ms \t" << endl;
-  int chunk = 1024 * 100;
-  int num_of_chunk  = len / chunk;
 
 
   block *ab = new block[chunk];
@@ -67,9 +69,9 @@ int main(int argc, char **argv) {
   cout << party << "\t Binary Mul Speed: \t" << (time_from(start) * 7)/1000 << "ms \t" << endl;
 
   start = clock_start();
-  // for (int i = 0; i < num_of_chunk; ++i) { 
-    block hash_output = Hash::hash_for_block(a, 16 * len);
-  // }
+  for (int i = 0; i < num_of_chunk; ++i) { 
+    block hash_output = Hash::hash_for_block(a, 16 * chunk);
+  }
   cout << party << "\tHash Speed: \t" << (time_from(start))/1000 << "ms \t" << endl;
 
   for (int i = 0; i < threads; ++i) {
