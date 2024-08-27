@@ -84,15 +84,32 @@ public:
     if (num == 0)
       return;
     io->flush();
+    // if (party == ALICE) {
+    //   block hash_output = Hash::hash_for_block(buffer, num * 8);
+    //   io->send_data(&hash_output, sizeof(block));
+    // } else {
+    //   block hash_output = Hash::hash_for_block(buffer, num * 8), output_recv;
+    //   io->recv_data(&output_recv, sizeof(block));
+    //   if (HIGH64(hash_output) == HIGH64(output_recv) && LOW64(hash_output) == LOW64(output_recv))
+    //     std::cout<<"JQv2 success!\n";
+    //   else std::cout<<"JQv2 fail!\n";
+    // }
     if (party == ALICE) {
-      block hash_output = Hash::hash_for_block(buffer, num * 8);
-      io->send_data(&hash_output, sizeof(block));
+      __uint128_t pro;
+      pro = buffer[0];
+      for (int i = 1; i < num; i++) {
+        pro = mult_mod(pro, buffer[i]);
+      } 
+      io->send_data(&pro, sizeof(__uint128_t));
     } else {
-      block hash_output = Hash::hash_for_block(buffer, num * 8), output_recv;
-      io->recv_data(&output_recv, sizeof(block));
-      if (HIGH64(hash_output) == HIGH64(output_recv) && LOW64(hash_output) == LOW64(output_recv))
-        std::cout<<"JQv2 success!\n";
-      else std::cout<<"JQv2 fail!\n";
+      __uint128_t pro, output_recv;
+      pro = buffer[0];
+      for (int i = 1; i < num; i++) {
+        pro = mult_mod(pro, buffer[i]);
+      } 
+      io->recv_data(&output_recv, sizeof(__uint128_t));
+      if (HIGH64(pro) != HIGH64(output_recv) || LOW64(pro) != LOW64(output_recv))
+        std::cout<<"JQv1 fail!\n";
     }
     num = 0;
   }

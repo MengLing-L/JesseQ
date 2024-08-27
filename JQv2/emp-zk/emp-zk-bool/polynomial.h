@@ -104,15 +104,32 @@ public:
     if (num == 0)
       return;
     io->flush();
+    // if (party == ALICE) {
+    //   block hash_output = Hash::hash_for_block(buffer, num * 16);
+    //   io->send_data(&hash_output, sizeof(block));
+    // } else {
+    //   block hash_output = Hash::hash_for_block(buffer, num * 16), output_recv;
+    //   io->recv_data(&output_recv, sizeof(block));
+    //   if (HIGH64(hash_output) == HIGH64(output_recv) && LOW64(hash_output) == LOW64(output_recv))
+    //     std::cout<<"JQv1 success!\n";
+    //   else std::cout<<"JQv1 fail!\n";
+    // }
+    io->flush();
+    block seed = io->get_hash_block();
+    block share_seed;
+    PRG(&seed).random_block(&share_seed, 1);
+    block *chi = new block[num];
+    uni_hash_coeff_gen(chi, share_seed, num);
+    block sum;
     if (party == ALICE) {
-      block hash_output = Hash::hash_for_block(buffer, num * 16);
-      io->send_data(&hash_output, sizeof(block));
+      vector_inn_prdt_sum_red(&sum, chi, buffer, num);
+      io->send_data(&sum, sizeof(block));
     } else {
-      block hash_output = Hash::hash_for_block(buffer, num * 16), output_recv;
+      block output_recv;
+      vector_inn_prdt_sum_red(&sum, chi, buffer, num);
       io->recv_data(&output_recv, sizeof(block));
-      if (HIGH64(hash_output) == HIGH64(output_recv) && LOW64(hash_output) == LOW64(output_recv))
-        std::cout<<"JQv1 success!\n";
-      else std::cout<<"JQv1 fail!\n";
+      if (HIGH64(sum) != HIGH64(output_recv) || LOW64(sum) != LOW64(output_recv))
+        std::cout<<"JQv1 fail!\n";
     }
     num = 0;
   }

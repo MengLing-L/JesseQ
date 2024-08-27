@@ -72,7 +72,7 @@ int main(int argc, char **argv) {
 
   start = clock_start();
   for (int i = 0; i < num_of_chunk; ++i) { 
-    block hash_output = Hash::hash_for_block(a, 16 * chunk);
+    Hash::hash_for_block(a, 16 * chunk);
   }
   cout << party << "\tHash Speed: \t" << (time_from(start))/1000 << "ms \t" << endl;
 

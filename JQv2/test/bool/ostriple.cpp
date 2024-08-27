@@ -14,6 +14,7 @@ using namespace emp;
 using namespace std;
 
 int port, party;
+char *ip;
 const int threads = 1;
 
 void random_input_set(bool*& in, int len) {
@@ -366,13 +367,13 @@ void test_ostriple(BoolIO<NetIO> *ios[threads + 1], int party) {
 }
 
 int main(int argc, char **argv) {
-  parse_party_and_port(argv, &party, &port);
+  party = atoi (argv[1]);
+	port = atoi (argv[2]);
+  ip = argv[3];
   BoolIO<NetIO> *ios[threads];
   for (int i = 0; i < threads; ++i)
     ios[i] = new BoolIO<NetIO>(
-        new NetIO(party == ALICE ? nullptr : "127.0.0.1", port + i),
-        // new NetIO(party == ALICE ? nullptr : "172.31.26.27", port + i),
-        // new NetIO(party == ALICE ? "172.31.29.55" : "172.31.29.55", port + i),
+        new NetIO(party == ALICE ? nullptr : ip, port + i),
         party == ALICE);
 
   std::cout << std::endl

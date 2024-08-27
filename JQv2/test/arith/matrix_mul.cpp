@@ -111,19 +111,33 @@ void test_circuit_zk(NetIO *ios[threads + 1], int party, int matrix_sz) {
   }
 
   if (party == ALICE) {
-    block hash_output = Hash::hash_for_block(mat_ab, test_n * 8);
-    ios[0]->send_data(&hash_output, sizeof(block));
+    // block hash_output = Hash::hash_for_block(mat_ab, test_n * 8);
+    // ios[0]->send_data(&hash_output, sizeof(block));
+    __uint128_t pro;
+    pro = mat_ab[0];
+    for (int i = 1; i < test_n; i++) {
+      pro = mult_mod(pro, mat_ab[i]);
+    } 
+    ios[0]->send_data(&pro, sizeof(__uint128_t));
   } else {
     for (int i = 0; i < test_n; ++i) {
       uint64_t constant = 0;
       constant = PR - cr[i];
       ostriple.auth_constant(constant, mat_ab[i]);
     }
-    block hash_output = Hash::hash_for_block(mat_ab, test_n * 8), output_recv;
-    ios[0]->recv_data(&output_recv, sizeof(block));
-    if (HIGH64(hash_output) == HIGH64(output_recv) && LOW64(hash_output) == LOW64(output_recv))
-      std::cout<<"JQv2 success!\n";
-    else std::cout<<"JQv2 fail!\n";
+    // block hash_output = Hash::hash_for_block(mat_ab, test_n * 8), output_recv;
+    // ios[0]->recv_data(&output_recv, sizeof(block));
+    // if (HIGH64(hash_output) == HIGH64(output_recv) && LOW64(hash_output) == LOW64(output_recv))
+    //   std::cout<<"JQv2 success!\n";
+    // else std::cout<<"JQv2 fail!\n";
+    __uint128_t pro, output_recv;
+    pro = mat_ab[0];
+    for (int i = 1; i < test_n; i++) {
+      pro = mult_mod(pro, mat_ab[i]);
+    } 
+    ios[0]->recv_data(&output_recv, sizeof(__uint128_t));
+    if (HIGH64(pro) != HIGH64(output_recv) || LOW64(pro) != LOW64(output_recv))
+      std::cout<<"JQv1 fail!\n";
   }
 
   std::cout<< "communication" << test_n * 2 *  sizeof(uint64_t) + sizeof(block) << " bytes." << endl;

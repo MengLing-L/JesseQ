@@ -5,6 +5,7 @@ using namespace emp;
 using namespace std;
 
 int port, party;
+char *ip;
 const int threads = 1;
 
 void test_circuit_zk(NetIO *ios[threads + 1], int party,
@@ -67,12 +68,12 @@ void test_circuit_zk(NetIO *ios[threads + 1], int party,
     setup += time_from(start);
 
     
-
+    
     if (party == ALICE) {
       start = clock_start();
       db = PR - br;
       db = add_mod(HIGH64(b_u_0), db);
-      ios[0]->send_data(&db, sizeof(uint64_t));
+      
       for (int i = 0; i < chunk; ++i) {
         d[i] = PR - ar;
         d[i] = add_mod(HIGH64(ao[i]), d[i]);
@@ -81,6 +82,7 @@ void test_circuit_zk(NetIO *ios[threads + 1], int party,
       }
       d[chunk] = PR - ar;
       d[chunk] = add_mod(HIGH64(ao[chunk]), d[chunk]);
+      ios[0]->send_data(&db, sizeof(uint64_t));
       ios[0]->send_data(d, sizeof(uint64_t) * (chunk+1));
       
     } else {
@@ -107,12 +109,20 @@ void test_circuit_zk(NetIO *ios[threads + 1], int party,
     }
 
     if (party == ALICE) {
-      block hash_output = Hash::hash_for_block(ab, sizeof(__uint128_t) * (chunk));
-      ios[0]->send_data(&hash_output, sizeof(block));
+      __uint128_t pro;
+      pro = ab[0];
+      for (int i = 1; i < chunk; i++) {
+        pro = mult_mod(pro, ab[i]);
+      } 
+      ios[0]->send_data(&pro, sizeof(__uint128_t));
     } else {
-      block hash_output = Hash::hash_for_block(ab, sizeof(__uint128_t) * (chunk)), output_recv;
-      ios[0]->recv_data(&output_recv, sizeof(block));
-      if (HIGH64(hash_output) != HIGH64(output_recv) || LOW64(hash_output) != LOW64(output_recv))
+      __uint128_t pro, output_recv;
+      pro = ab[0];
+      for (int i = 1; i < chunk; i++) {
+        pro = mult_mod(pro, ab[i]);
+      } 
+      ios[0]->recv_data(&output_recv, sizeof(__uint128_t));
+      if (HIGH64(pro) != HIGH64(output_recv) || LOW64(pro) != LOW64(output_recv))
         std::cout<<"JQv1 fail!\n";
     }
     prove += time_from(start);
@@ -143,12 +153,12 @@ void test_circuit_zk(NetIO *ios[threads + 1], int party,
 }
 
 int main(int argc, char **argv) {
-  parse_party_and_port(argv, &party, &port);
+  party = atoi (argv[1]);
+	port = atoi (argv[2]);
+  ip = argv[3];
   NetIO *ios[threads];
   for (int i = 0; i < threads; ++i)
-    // ios[i] = new NetIO(party == ALICE ? nullptr : "172.31.26.27", port + i);
-    // ios[i] = new NetIO(party == ALICE ? nullptr : "172.31.38.235", port + i);
-    ios[i] = new NetIO(party == ALICE ? "172.31.29.55" : "172.31.29.55", port + i);
+    ios[i] = new NetIO(party == ALICE ? nullptr : ip, port + i);
 
   std::cout << std::endl
             << "------------ circuit zero-knowledge proof test ------------"
@@ -156,13 +166,10 @@ int main(int argc, char **argv) {
 
   int num = 0;
   if (argc < 3) {
-    std::cout << "usage: [binary] PARTY PORT LOG(NUM_GATES)" << std::endl;
+    std::cout << "usage: [binary] PARTY PORT IP" << std::endl;
     return -1;
-  } else if (argc == 3) {
-    num = 2;
-  } else {
-    num = atoi(argv[3]);
   }
+  num = 2;
 
   test_circuit_zk(ios, party, num);
 

@@ -5,6 +5,7 @@ using namespace emp;
 using namespace std;
 
 int port, party;
+char *ip;
 const int threads = 1;
 
 void extreme_layered_circuit(uint64_t &in) {
@@ -480,12 +481,12 @@ void test_ostriple(NetIO *ios[threads + 1], int party) {
 
 
 int main(int argc, char **argv) {
-  parse_party_and_port(argv, &party, &port);
+  party = atoi (argv[1]);
+	port = atoi (argv[2]);
+  ip = argv[3];
   NetIO *ios[threads];
   for (int i = 0; i < threads; ++i)
-    // ios[i] = new NetIO(party == ALICE ? nullptr : "127.0.0.1", port + i);
-    // ios[i] = new NetIO(party == ALICE ? nullptr : "172.31.26.27", port + i);
-    ios[i] = new NetIO(party == ALICE ? "172.31.29.55" : "172.31.29.55", port + i);
+    ios[i] = new NetIO(party == ALICE ? nullptr : ip, port + i);
 
   std::cout << std::endl
             << "------------ triple generation test ------------" << std::endl

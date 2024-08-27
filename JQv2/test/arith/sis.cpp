@@ -140,19 +140,33 @@ void test_sis_proof(NetIO *ios[threads + 1], int party, int n, int m) {
   }
 
   if (party == ALICE) {
-    block hash_output = Hash::hash_for_block(vec_t, (n+m) * 16);
-    ios[0]->send_data(&hash_output, sizeof(block));
+    // block hash_output = Hash::hash_for_block(vec_t, (n+m) * 16);
+    // ios[0]->send_data(&hash_output, sizeof(block));
+    __uint128_t pro;
+    pro = vec_t[0];
+    for (int i = 1; i < (n+m); i++) {
+      pro = mult_mod(pro, vec_t[i]);
+    } 
+    ios[0]->send_data(&pro, sizeof(__uint128_t));
   } else {
     for (int i = 0; i < (n+m); ++i) {
       uint64_t constant = 0;
       constant = t[i];
       ostriple.auth_constant(constant, vec_t[i]);
     }
-    block hash_output = Hash::hash_for_block(vec_t,  (n+m) * 16), output_recv;
-    ios[0]->recv_data(&output_recv, sizeof(block));
-    if (HIGH64(hash_output) == HIGH64(output_recv) && LOW64(hash_output) == LOW64(output_recv))
-      std::cout<<"JQv2 success!\n";
-    else std::cout<<"JQv2 fail!\n";
+    // block hash_output = Hash::hash_for_block(vec_t,  (n+m) * 16), output_recv;
+    // ios[0]->recv_data(&output_recv, sizeof(block));
+    // if (HIGH64(hash_output) == HIGH64(output_recv) && LOW64(hash_output) == LOW64(output_recv))
+    //   std::cout<<"JQv2 success!\n";
+    // else std::cout<<"JQv2 fail!\n";
+    __uint128_t pro, output_recv;
+    pro = vec_t[0];
+    for (int i = 1; i < (n+m); i++) {
+      pro = mult_mod(pro, vec_t[i]);
+    } 
+    ios[0]->recv_data(&output_recv, sizeof(__uint128_t));
+    if (HIGH64(pro) != HIGH64(output_recv) || LOW64(pro) != LOW64(output_recv))
+      std::cout<<"JQv1 fail!\n";
   }
 
   auto timeuse = time_from(start);

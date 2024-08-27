@@ -13,6 +13,7 @@ using namespace emp;
 using namespace std;
 
 int port, party;
+char *ip;
 const int threads = 1;
 
 void test_compute_and_gate_check_JQv1(OSTriple<BoolIO<NetIO>> *os,
@@ -96,38 +97,32 @@ void test_compute_and_gate_check_JQv1(OSTriple<BoolIO<NetIO>> *os,
       }
     }
 
-    if (party == ALICE) {
-      block hash_output = Hash::hash_for_block(ab, sizeof(block) * (chunk));
-      io[0].send_data(&hash_output, sizeof(block));
-    } else {
-      block hash_output = Hash::hash_for_block(ab, sizeof(block) * (chunk)), output_recv;
-      io[0].recv_data(&output_recv, sizeof(block));
-      if (HIGH64(hash_output) != HIGH64(output_recv) || LOW64(hash_output) != LOW64(output_recv))
-        std::cout<<"JQv1 fail!\n";
-    }
-    // io[0].flush();
-    // block seed = io[0].get_hash_block();
-    // block share_seed;
-    // PRG(&seed).random_block(&share_seed, 1);
-    // block *chi = new block[chunk];
-    // uni_hash_coeff_gen(chi, share_seed, chunk);
-    // block sum;
-    // gfmul(ab[0], ab[1], &sum);
     // if (party == ALICE) {
-    //   vector_inn_prdt_sum_red(&sum, chi, ab, chunk);
-    //   io[0].send_data(&sum, sizeof(block));
+    //   block hash_output = Hash::hash_for_block(ab, sizeof(block) * (chunk));
+    //   io[0].send_data(&hash_output, sizeof(block));
     // } else {
-    //   for(int i = 0; i < chunk; i++) {
-    //     block tmp;
-    //     gfmul(chi[i], ab[i], &tmp);
-    //     sum = tmp;
-    //   }
-    //   block output_recv;
-    //   vector_inn_prdt_sum_red(&sum, chi, ab, chunk);
+    //   block hash_output = Hash::hash_for_block(ab, sizeof(block) * (chunk)), output_recv;
     //   io[0].recv_data(&output_recv, sizeof(block));
-    //   if (HIGH64(sum) != HIGH64(output_recv) || LOW64(sum) != LOW64(output_recv))
+    //   if (HIGH64(hash_output) != HIGH64(output_recv) || LOW64(hash_output) != LOW64(output_recv))
     //     std::cout<<"JQv1 fail!\n";
     // }
+    io[0].flush();
+    block seed = io[0].get_hash_block();
+    block share_seed;
+    PRG(&seed).random_block(&share_seed, 1);
+    block *chi = new block[chunk];
+    uni_hash_coeff_gen(chi, share_seed, chunk);
+    block sum;
+    if (party == ALICE) {
+      vector_inn_prdt_sum_red(&sum, chi, ab, chunk);
+      io[0].send_data(&sum, sizeof(block));
+    } else {
+      block output_recv;
+      vector_inn_prdt_sum_red(&sum, chi, ab, chunk);
+      io[0].recv_data(&output_recv, sizeof(block));
+      if (HIGH64(sum) != HIGH64(output_recv) || LOW64(sum) != LOW64(output_recv))
+        std::cout<<"JQv1 fail!\n";
+    }
     prove += time_from(start);
   }
 
@@ -170,13 +165,13 @@ void test_circuit_zk(BoolIO<NetIO> *ios[threads + 1], int party) {
 }
 
 int main(int argc, char **argv) {
-  parse_party_and_port(argv, &party, &port);
+  party = atoi (argv[1]);
+	port = atoi (argv[2]);
+  ip = argv[3];
   BoolIO<NetIO> *ios[threads];
   for (int i = 0; i < threads; ++i)
     ios[i] = new BoolIO<NetIO>(
-        // new NetIO(party == ALICE ? nullptr : "127.0.0.1", port + i),
-        // new NetIO(party == ALICE ? nullptr : "172.31.26.27", port + i),
-        new NetIO(party == ALICE ? "172.31.29.55" : "172.31.29.55", port + i),
+        new NetIO(party == ALICE ? nullptr : ip, port + i),
         party == ALICE);
 
   std::cout << std::endl
