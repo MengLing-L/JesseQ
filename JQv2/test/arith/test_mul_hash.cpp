@@ -35,9 +35,11 @@ int main(int argc, char **argv) {
   }
 
   auto start = clock_start();
+  __uint128_t pro;
+  pro = mult_mod(a[0], a[1]);
   for (int i = 0; i < num_of_chunk; ++i) { 
-    for (int i = 0; i < chunk; ++i) { 
-        mult_mod(a[i], a[i]);
+    for (int i = 0; i < chunk ; ++i) { 
+        pro = mult_mod(pro, a[i]);
     }
   }
   
@@ -62,7 +64,7 @@ int main(int argc, char **argv) {
   gfmul(ab[0], ab[1], &tmp);
   for (int j = 0; j < num_of_chunk; ++j) { 
     for(int i = 0; i < chunk; i++) {
-      gfmul(ab_[i], ab[i], &tmp);
+      gfmul(tmp, ab[i], &tmp);
     }
   }
 
