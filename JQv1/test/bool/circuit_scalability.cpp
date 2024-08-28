@@ -45,8 +45,8 @@ std::string getCPUVendor() {
 void test_compute_and_gate_check_JQv1(OSTriple<BoolIO<NetIO>> *os,
                                  BoolIO<NetIO> *io) {
   PRG prg;
-  // long long len = 300000000;
-  // int chunk = 30000000;
+  long long len = 300000000;
+  int chunk = 30000000;
   bool cpu_flag = false;
   std::string vendor = getCPUVendor();
   if (vendor == "GenuineIntel") {
@@ -57,8 +57,8 @@ void test_compute_and_gate_check_JQv1(OSTriple<BoolIO<NetIO>> *os,
   } else {
       std::cout << "Unknown CPU manufacturer.\n";
   }
-  long long len = 1024 * 1024 * 10 * 10 * 3;
-  int chunk = 1024 * 1024 * 10;
+  // long long len = 1024 * 1024 * 10 * 10 * 3;
+  // int chunk = 1024 * 1024 * 10;
   int num_of_chunk = len / chunk;
   blake3_hasher hasher;
   blake3_hasher_init(&hasher);
