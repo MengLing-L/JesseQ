@@ -4,6 +4,7 @@ find_package(OpenSSL REQUIRED)
 
 find_package(BLAKE3 REQUIRED)
 find_path(BLAKE3_INCLUDE_DIRS NAMES blake3.h)
+find_library(BLAKE3_LIBRARIES NAMES libblake3.so PATHS /usr/local/lib REQUIRED)
 message(STATUS "BLAKE3_LIBRARIES: ${BLAKE3_LIBRARIES}")
 find_path(EMP-ZK_INCLUDE_DIR NAMES emp-zk/emp-zk.h)
 find_library(EMP-ZK_LIBRARY NAMES emp-zk)
