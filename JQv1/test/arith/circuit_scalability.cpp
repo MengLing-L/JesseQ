@@ -51,7 +51,7 @@ void test_circuit_zk(NetIO *ios[threads + 1], int party,
       std::cout << "Unknown CPU manufacturer.\n";
   }
   long long test_n = 1024 * 1024 * 10 * 10 * 3;
-  int chunk = 1024 * 1024 * 10;
+  int chunk = 1024 * 10;
   int num_of_chunk = test_n / chunk;
   FpOSTriple<NetIO> ostriple(party, threads, ios);
   blake3_hasher hasher;
