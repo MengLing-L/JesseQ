@@ -19,7 +19,12 @@ else
     if command -v apt-get >/dev/null; then
         sudo apt-get install -y software-properties-common
         sudo apt-get update
-        sudo apt-get install -y cmake git build-essential libssl-dev libblake3-dev
+        sudo apt-get install -y cmake git build-essential libssl-dev
+		git clone https://github.com/BLAKE3-team/BLAKE3.git
+		cd BLAKE3/c/
+		cmake -DBUILD_SHARED_LIBS=ON .
+		make -j4
+		sudo make install
     elif command -v yum >/dev/null; then
         sudo yum install -y python3 gcc make git cmake gcc-c++ openssl-devel epel-release blake3
     else
