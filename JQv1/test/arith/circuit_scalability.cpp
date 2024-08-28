@@ -160,15 +160,14 @@ void test_circuit_zk(NetIO *ios[threads + 1], int party,
       if (cpu_flag) {
         auto multime = clock_start();
         block hash_output = Hash::hash_for_block(ab, sizeof(uint64_t) * (chunk));
-        cout << chunk << "hash time \t" << time_from(multime) << "\t" << party << " " << endl;
+        // cout << chunk << "hash time \t" << time_from(multime) << "\t" << party << " " << endl;
         ios[0]->send_data(&hash_output, sizeof(block));
-        cout << chunk << "sha-256 hash time \t" << time_from(multime) << "\t" << party << " " << endl;
       } else {
         auto multime = clock_start();
         blake3_hasher_update(&hasher, ab, sizeof(uint64_t) * (chunk));
         blake3_hasher_finalize(&hasher, output, BLAKE3_OUT_LEN);
         ios[0]->send_data(&output, BLAKE3_OUT_LEN);
-        cout << chunk << "blake hash time \t" << time_from(multime) << "\t" << party << " " << endl;
+        // cout << chunk << "blake hash time \t" << time_from(multime) << "\t" << party << " " << endl;
       }
       
     } else {
@@ -183,21 +182,20 @@ void test_circuit_zk(NetIO *ios[threads + 1], int party,
       // if (HIGH64(pro) != HIGH64(output_recv) || LOW64(pro) != LOW64(output_recv))
       //   std::cout<<"JQv1 fail!\n";
       if (cpu_flag) {
-        auto multime = clock_start();
+        // auto multime = clock_start();
         block hash_output = Hash::hash_for_block(ab, sizeof(uint64_t) * (chunk));
-        cout << chunk << "hash time \t" << time_from(multime) << "\t" << party << " " << endl;
+        // cout << chunk << "SHA-256 hash time \t" << time_from(multime) << "\t" << party << " " << endl;
         ios[0]->recv_data(&output_recv, sizeof(block));
         if (memcmp(&hash_output, &output_recv, sizeof(block)) != 0)
           std::cout<<"JQv1 fail!\n";
-        cout << chunk << "sha-256 hash time \t" << time_from(multime) << "\t" << party << " " << endl;
       } else {
-        auto multime = clock_start();
+        // auto multime = clock_start();
         blake3_hasher_update(&hasher, ab, sizeof(uint64_t) * (chunk));
         blake3_hasher_finalize(&hasher, output, BLAKE3_OUT_LEN);
         ios[0]->recv_data(&output_recv, BLAKE3_OUT_LEN);
         if (memcmp(output, output_recv, BLAKE3_OUT_LEN) != 0)
           std::cout<<"JQv1 fail!\n";
-        cout << chunk << "blake hash time \t" << time_from(multime) << "\t" << party << " " << endl;
+        // cout << chunk << "blake hash time \t" << time_from(multime) << "\t" << party << " " << endl;
       }
     }
     prove += time_from(start);

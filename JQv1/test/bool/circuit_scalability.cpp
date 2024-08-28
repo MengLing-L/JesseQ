@@ -22,11 +22,41 @@ int port, party;
 char *ip;
 const int threads = 1;
 
+std::string getCPUVendor() {
+    std::ifstream cpuinfo("/proc/cpuinfo");
+    if (!cpuinfo) {
+        // std::cerr << "Error: Unable to open /proc/cpuinfo\n";
+        return "Unknown";
+    }
+
+    std::string line, vendor = "Unknown";
+    while (std::getline(cpuinfo, line)) {
+        if (line.find("vendor_id") != std::string::npos) {
+            size_t pos = line.find(':');
+            if (pos != std::string::npos) {
+                vendor = line.substr(pos + 2);
+                break;
+            }
+        }
+    }
+    return vendor;
+}
+
 void test_compute_and_gate_check_JQv1(OSTriple<BoolIO<NetIO>> *os,
                                  BoolIO<NetIO> *io) {
   PRG prg;
   // long long len = 300000000;
   // int chunk = 30000000;
+  bool cpu_flag = false;
+  std::string vendor = getCPUVendor();
+  if (vendor == "GenuineIntel") {
+      std::cout << "This is an Intel CPU.\n";
+  } else if (vendor == "AuthenticAMD") {
+      std::cout << "This is an AMD CPU.\n";
+      cpu_flag = true;
+  } else {
+      std::cout << "Unknown CPU manufacturer.\n";
+  }
   long long len = 1024 * 1024 * 10 * 10 * 3;
   int chunk = 1024 * 1024 * 10;
   int num_of_chunk = len / chunk;
@@ -106,42 +136,58 @@ void test_compute_and_gate_check_JQv1(OSTriple<BoolIO<NetIO>> *os,
       }
     }
 
+    if (party == ALICE) {
+      if (cpu_flag) {
+        // auto multime = clock_start();
+        block hash_output = Hash::hash_for_block(ab, sizeof(uint64_t) * (chunk));
+        // cout << chunk << "hash time \t" << time_from(multime) << "\t" << party << " " << endl;
+        io[0].send_data(&hash_output, sizeof(block));
+      } else {
+        // auto multime = clock_start();
+        blake3_hasher_update(&hasher, ab, sizeof(block) * (chunk));
+        blake3_hasher_finalize(&hasher, output, BLAKE3_OUT_LEN);
+        io[0].send_data(&output, BLAKE3_OUT_LEN);
+        // cout << chunk << "blake hash time \t" << time_from(multime) << "\t" << party << " " << endl;
+      }
+    } else {
+      if (cpu_flag) {
+        // auto multime = clock_start();
+        block hash_output = Hash::hash_for_block(ab, sizeof(uint64_t) * (chunk));
+        // cout << chunk << "SHA-256 hash time \t" << time_from(multime) << "\t" << party << " " << endl;
+        io[0].recv_data(&output_recv, sizeof(block));
+        if (memcmp(&hash_output, &output_recv, sizeof(block)) != 0)
+          std::cout<<"JQv1 fail!\n";
+      } else {
+        // auto multime = clock_start();
+        blake3_hasher_update(&hasher, ab, sizeof(block) * (chunk));
+        blake3_hasher_finalize(&hasher, output, BLAKE3_OUT_LEN);
+        io[0].recv_data(&output_recv, BLAKE3_OUT_LEN);
+        if (memcmp(output, output_recv, BLAKE3_OUT_LEN) != 0)
+          std::cout<<"JQv1 fail!\n";
+        // cout << chunk << "blake hash time \t" << time_from(multime) << "\t" << party << " " << endl;
+      }
+    }
+    // io[0].flush();
+    // block seed = io[0].get_hash_block();
+    // block share_seed;
+    // PRG(&seed).random_block(&share_seed, 1);
+    // block *chi = new block[chunk];
+    // uni_hash_coeff_gen(chi, share_seed, chunk);
+    // block sum;
     // if (party == ALICE) {
     //   auto multime = clock_start();
-    //   blake3_hasher_update(&hasher, ab, sizeof(block) * (chunk));
-    //   blake3_hasher_finalize(&hasher, output, BLAKE3_OUT_LEN);
-    //   io[0].send_data(&output, BLAKE3_OUT_LEN);
-    //   cout << chunk << "blake hash time \t" << time_from(multime) << "\t" << party << " " << endl;
+    //   vector_inn_prdt_sum_red(&sum, chi, ab, chunk);
+    //   cout << chunk << "mul time \t" << time_from(multime) << "\t" << party << " " << endl;
+    //   io[0].send_data(&sum, sizeof(block));
     // } else {
     //   auto multime = clock_start();
-    //   blake3_hasher_update(&hasher, ab, sizeof(block) * (chunk));
-    //   blake3_hasher_finalize(&hasher, output, BLAKE3_OUT_LEN);
-    //   io[0].recv_data(&output_recv, BLAKE3_OUT_LEN);
-    //   if (memcmp(output, output_recv, BLAKE3_OUT_LEN) != 0)
+    //   block output_recv;
+    //   vector_inn_prdt_sum_red(&sum, chi, ab, chunk);
+    //   cout << chunk << "mul time \t" << time_from(multime) << "\t" << party << " " << endl;
+    //   io[0].recv_data(&output_recv, sizeof(block));
+    //   if (HIGH64(sum) != HIGH64(output_recv) || LOW64(sum) != LOW64(output_recv))
     //     std::cout<<"JQv1 fail!\n";
-    //   cout << chunk << "blake hash time \t" << time_from(multime) << "\t" << party << " " << endl;
     // }
-    io[0].flush();
-    block seed = io[0].get_hash_block();
-    block share_seed;
-    PRG(&seed).random_block(&share_seed, 1);
-    block *chi = new block[chunk];
-    uni_hash_coeff_gen(chi, share_seed, chunk);
-    block sum;
-    if (party == ALICE) {
-      auto multime = clock_start();
-      vector_inn_prdt_sum_red(&sum, chi, ab, chunk);
-      cout << chunk << "mul time \t" << time_from(multime) << "\t" << party << " " << endl;
-      io[0].send_data(&sum, sizeof(block));
-    } else {
-      auto multime = clock_start();
-      block output_recv;
-      vector_inn_prdt_sum_red(&sum, chi, ab, chunk);
-      cout << chunk << "mul time \t" << time_from(multime) << "\t" << party << " " << endl;
-      io[0].recv_data(&output_recv, sizeof(block));
-      if (HIGH64(sum) != HIGH64(output_recv) || LOW64(sum) != LOW64(output_recv))
-        std::cout<<"JQv1 fail!\n";
-    }
     prove += time_from(start);
   }
 
