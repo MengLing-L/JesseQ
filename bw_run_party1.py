@@ -190,4 +190,10 @@ JQv2_bool = '''
 print(JQv2_bool)
 subprocess.call(["bash", "-c", JQv2_bool])
 
+ban = '''
+sudo tc qdisc del dev ens5 root
+'''
+print(ban)
+subprocess.call(["bash", "-c", ban])
+
 

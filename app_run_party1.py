@@ -62,6 +62,12 @@ inner = '''
 print(inner)
 subprocess.call(["bash", "-c", inner])
 
+ban = '''
+sudo tc qdisc del dev ens5 root
+'''
+print(ban)
+subprocess.call(["bash", "-c", ban])
+
 
 
 
