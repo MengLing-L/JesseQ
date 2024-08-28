@@ -131,11 +131,11 @@ void test_circuit_zk(NetIO *ios[threads + 1], int party,
       block hash_output = Hash::hash_for_block(ab, sizeof(uint64_t) * (chunk));
       cout << chunk << "hash time \t" << time_from(multime) << "\t" << party << " " << endl;
       ios[0]->send_data(&hash_output, sizeof(block));
-      auto multime = clock_start();
-      blake3_hasher_update(&hasher, ab, sizeof(uint64_t) * (chunk));
-      blake3_hasher_finalize(&hasher, output, BLAKE3_OUT_LEN);
-      ios[0]->send_data(&output, BLAKE3_OUT_LEN);
-      cout << chunk << "blake hash time \t" << time_from(multime) << "\t" << party << " " << endl;
+      // auto multime = clock_start();
+      // blake3_hasher_update(&hasher, ab, sizeof(uint64_t) * (chunk));
+      // blake3_hasher_finalize(&hasher, output, BLAKE3_OUT_LEN);
+      // ios[0]->send_data(&output, BLAKE3_OUT_LEN);
+      // cout << chunk << "blake hash time \t" << time_from(multime) << "\t" << party << " " << endl;
     } else {
       auto multime = clock_start();
       __uint128_t pro, output_recv;
