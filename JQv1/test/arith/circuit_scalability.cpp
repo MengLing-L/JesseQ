@@ -149,13 +149,13 @@ void test_circuit_zk(NetIO *ios[threads + 1], int party,
 
     if (party == ALICE) {
       
-      // auto multime = clock_start();
-      // __uint128_t pro;
-      // pro = ab[0];
-      // for (int i = 1; i < chunk; i++) {
-      //   pro = mult_mod(pro, ab[i]);
-      // } 
-      // cout << chunk << "mul time \t" << time_from(multime) << "\t" << party << " " << endl;
+      auto multime = clock_start();
+      __uint128_t pro;
+      pro = ab[0];
+      for (int i = 1; i < chunk; i++) {
+        pro = mult_mod(pro, ab[i]);
+      } 
+      cout << chunk << "mul time \t" << time_from(multime) << "\t" << party << " " << endl;
       // ios[0]->send_data(&pro, sizeof(__uint128_t));
       if (cpu_flag) {
         // auto multime = clock_start();
@@ -163,11 +163,11 @@ void test_circuit_zk(NetIO *ios[threads + 1], int party,
         // cout << chunk << "SHA-256 hash time \t" << time_from(multime) << "\t" << party << " " << endl;
         ios[0]->send_data(&hash_output, sizeof(block));
       } else {
-        // auto multime = clock_start();
+        auto multime = clock_start();
         blake3_hasher_update(&hasher, ab, sizeof(uint64_t) * (chunk));
         blake3_hasher_finalize(&hasher, output, BLAKE3_OUT_LEN);
         ios[0]->send_data(&output, BLAKE3_OUT_LEN);
-        // cout << chunk << "blake hash time \t" << time_from(multime) << "\t" << party << " " << endl;
+        cout << chunk << "blake hash time \t" << time_from(multime) << "\t" << party << " " << endl;
       }
       
     } else {
