@@ -14,12 +14,40 @@ int port, party;
 char *ip;
 const int threads = 1;
 
+std::string getCPUVendor() {
+    std::ifstream cpuinfo("/proc/cpuinfo");
+    if (!cpuinfo) {
+        // std::cerr << "Error: Unable to open /proc/cpuinfo\n";
+        return "Unknown";
+    }
+
+    std::string line, vendor = "Unknown";
+    while (std::getline(cpuinfo, line)) {
+        if (line.find("vendor_id") != std::string::npos) {
+            size_t pos = line.find(':');
+            if (pos != std::string::npos) {
+                vendor = line.substr(pos + 2);
+                break;
+            }
+        }
+    }
+    return vendor;
+}
+
 void test_circuit_zk(NetIO *ios[threads + 1], int party,
                      int input_sz_lg) {
 
   // long long chunk = 1 << input_sz_lg;
   // long long test_n = 300000000;
   // int chunk = 30000000;
+  std::string vendor = getCPUVendor();
+  if (vendor == "GenuineIntel") {
+      std::cout << "This is an Intel CPU.\n";
+  } else if (vendor == "AuthenticAMD") {
+      std::cout << "This is an AMD CPU.\n";
+  } else {
+      std::cout << "Unknown CPU manufacturer.\n";
+  }
   long long test_n = 1024 * 1024 * 10 * 10 * 3;
   int chunk = 1024 * 1024 * 10;
   int num_of_chunk = test_n / chunk;
