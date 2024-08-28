@@ -1,11 +1,12 @@
 #!/usr/python
 import subprocess
-keygen = '''
-ssh-keygen
-cat ~/.ssh/*.pub
-'''
-print(keygen)
-subprocess.call(["bash", "-c", keygen])
+
+# keygen = '''
+# ssh-keygen
+# cat ~/.ssh/*.pub
+# '''
+# print(keygen)
+# subprocess.call(["bash", "-c", keygen])
 
 
 install_packages = '''
