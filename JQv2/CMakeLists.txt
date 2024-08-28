@@ -16,6 +16,7 @@ add_library(${NAME} SHARED ${sources})
 install(DIRECTORY emp-zk DESTINATION include/)
 install(FILES cmake/emp-zk-config.cmake DESTINATION cmake/)
 install(TARGETS ${NAME} DESTINATION lib)
+include(cmake/emp-zk-config.cmake)
 
 ENABLE_TESTING()
 ADD_SUBDIRECTORY(test)
