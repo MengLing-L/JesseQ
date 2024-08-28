@@ -138,9 +138,9 @@ void test_compute_and_gate_check_JQv1(OSTriple<BoolIO<NetIO>> *os,
 
     if (party == ALICE) {
       if (cpu_flag) {
-        // auto multime = clock_start();
+        auto multime = clock_start();
         block hash_output = Hash::hash_for_block(ab, sizeof(uint64_t) * (chunk));
-        // cout << chunk << "hash time \t" << time_from(multime) << "\t" << party << " " << endl;
+        cout << chunk << "hash time \t" << time_from(multime) << "\t" << party << " " << endl;
         io[0].send_data(&hash_output, sizeof(block));
       } else {
         // auto multime = clock_start();
@@ -151,9 +151,9 @@ void test_compute_and_gate_check_JQv1(OSTriple<BoolIO<NetIO>> *os,
       }
     } else {
       if (cpu_flag) {
-        // auto multime = clock_start();
+        auto multime = clock_start();
         block hash_output = Hash::hash_for_block(ab, sizeof(uint64_t) * (chunk));
-        // cout << chunk << "SHA-256 hash time \t" << time_from(multime) << "\t" << party << " " << endl;
+        cout << chunk << "SHA-256 hash time \t" << time_from(multime) << "\t" << party << " " << endl;
         io[0].recv_data(&output_recv, sizeof(block));
         if (memcmp(&hash_output, &output_recv, sizeof(block)) != 0)
           std::cout<<"JQv1 fail!\n";
