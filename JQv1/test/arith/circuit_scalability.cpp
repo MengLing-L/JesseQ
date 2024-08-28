@@ -187,7 +187,7 @@ void test_circuit_zk(NetIO *ios[threads + 1], int party,
         block hash_output = Hash::hash_for_block(ab, sizeof(uint64_t) * (chunk));
         cout << chunk << "hash time \t" << time_from(multime) << "\t" << party << " " << endl;
         ios[0]->recv_data(&output_recv, sizeof(block));
-        if (memcmp(output, output_recv, sizeof(block)) != 0)
+        if (memcmp(&hash_output, &output_recv, sizeof(block)) != 0)
           std::cout<<"JQv1 fail!\n";
         cout << chunk << "sha-256 hash time \t" << time_from(multime) << "\t" << party << " " << endl;
       } else {
@@ -199,6 +199,7 @@ void test_circuit_zk(NetIO *ios[threads + 1], int party,
           std::cout<<"JQv1 fail!\n";
         cout << chunk << "blake hash time \t" << time_from(multime) << "\t" << party << " " << endl;
       }
+    }
     prove += time_from(start);
   }
 
