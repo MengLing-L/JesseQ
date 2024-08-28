@@ -4,6 +4,12 @@
 #include "emp-tool/emp-tool.h"
 #include "emp-zk/emp-zk-arith/ostriple.h"
 #include "emp-zk/emp-zk-bool/emp-zk-bool.h"
+#include "blake3.h"
+#include <errno.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <unistd.h>
 
 template <typename IO> class FpPolyProof {
 public:
@@ -16,6 +22,8 @@ public:
   uint64_t *buffer1 = nullptr;
   FpOSTriple<IO> *ostriple;
   int num;
+  blake3_hasher hasher;
+  uint8_t output[BLAKE3_OUT_LEN], output_recv[BLAKE3_OUT_LEN];
 
   FpPolyProof(int party, IO *io, FpOSTriple<IO> *ostriple) {
     this->party = party;
@@ -29,6 +37,7 @@ public:
       this->delta = LOW64(ostriple->delta);
     }
     num = 0;
+    blake3_hasher_init(&(this->hasher));
   }
 
   ~FpPolyProof() {
@@ -84,33 +93,34 @@ public:
     if (num == 0)
       return;
     io->flush();
-    // if (party == ALICE) {
-    //   block hash_output = Hash::hash_for_block(buffer, num * 8);
-    //   io->send_data(&hash_output, sizeof(block));
-    // } else {
-    //   block hash_output = Hash::hash_for_block(buffer, num * 8), output_recv;
-    //   io->recv_data(&output_recv, sizeof(block));
-    //   if (HIGH64(hash_output) == HIGH64(output_recv) && LOW64(hash_output) == LOW64(output_recv))
-    //     std::cout<<"JQv2 success!\n";
-    //   else std::cout<<"JQv2 fail!\n";
-    // }
     if (party == ALICE) {
-      __uint128_t pro;
-      pro = buffer[0];
-      for (int i = 1; i < num; i++) {
-        pro = mult_mod(pro, buffer[i]);
-      } 
-      io->send_data(&pro, sizeof(__uint128_t));
+      blake3_hasher_update(&hasher, buffer, sizeof(uint64_t) * (num));
+      blake3_hasher_finalize(&hasher, output, BLAKE3_OUT_LEN);
+      io->send_data(&output, BLAKE3_OUT_LEN);
     } else {
-      __uint128_t pro, output_recv;
-      pro = buffer[0];
-      for (int i = 1; i < num; i++) {
-        pro = mult_mod(pro, buffer[i]);
-      } 
-      io->recv_data(&output_recv, sizeof(__uint128_t));
-      if (HIGH64(pro) != HIGH64(output_recv) || LOW64(pro) != LOW64(output_recv))
+      blake3_hasher_update(&hasher, buffer, sizeof(uint64_t) * (num));
+      blake3_hasher_finalize(&hasher, output, BLAKE3_OUT_LEN);
+      io->recv_data(&output_recv, BLAKE3_OUT_LEN);
+      if (memcmp(output, output_recv, BLAKE3_OUT_LEN) != 0)
         std::cout<<"JQv1 fail!\n";
     }
+    // if (party == ALICE) {
+    //   __uint128_t pro;
+    //   pro = buffer[0];
+    //   for (int i = 1; i < num; i++) {
+    //     pro = mult_mod(pro, buffer[i]);
+    //   } 
+    //   io->send_data(&pro, sizeof(__uint128_t));
+    // } else {
+    //   __uint128_t pro, output_recv;
+    //   pro = buffer[0];
+    //   for (int i = 1; i < num; i++) {
+    //     pro = mult_mod(pro, buffer[i]);
+    //   } 
+    //   io->recv_data(&output_recv, sizeof(__uint128_t));
+    //   if (HIGH64(pro) != HIGH64(output_recv) || LOW64(pro) != LOW64(output_recv))
+    //     std::cout<<"JQv1 fail!\n";
+    // }
     num = 0;
   }
 

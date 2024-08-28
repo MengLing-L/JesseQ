@@ -1,7 +1,7 @@
 #Testing macro
 macro (add_test_executable_with_lib folder _name)
 	add_executable(test_${folder}_${_name} "${folder}/${_name}.cpp")
-	target_link_libraries(test_${folder}_${_name} ${EMP-OT_LIBRARIES} emp-zk)
+	target_link_libraries(test_${folder}_${_name} ${BLAKE3_LIBRARIES} ${EMP-OT_LIBRARIES} emp-zk)
 endmacro()
 
 macro (add_test_case folder _name)

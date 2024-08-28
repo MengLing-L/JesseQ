@@ -3,6 +3,13 @@
 
 #include "emp-ot/emp-ot.h"
 #include "emp-tool/emp-tool.h"
+#include "blake3.h"
+#include <errno.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <unistd.h>
+
 
 template <typename IO> class PolyProof {
 public:
@@ -17,6 +24,8 @@ public:
   int num;
   GaloisFieldPacking pack;
   FerretCOT<IO> *ferret = nullptr;
+  blake3_hasher hasher;
+  uint8_t output[BLAKE3_OUT_LEN], output_recv[BLAKE3_OUT_LEN];
 
   PolyProof(int party, IO *io, FerretCOT<IO> *ferret) {
     this->party = party;
@@ -31,6 +40,7 @@ public:
       buffer = new block[buffer_sz];
     }
     num = 0;
+    blake3_hasher_init(&(this->hasher));
   }
 
   ~PolyProof() {
@@ -104,33 +114,34 @@ public:
     if (num == 0)
       return;
     io->flush();
-    // if (party == ALICE) {
-    //   block hash_output = Hash::hash_for_block(buffer, num * 16);
-    //   io->send_data(&hash_output, sizeof(block));
-    // } else {
-    //   block hash_output = Hash::hash_for_block(buffer, num * 16), output_recv;
-    //   io->recv_data(&output_recv, sizeof(block));
-    //   if (HIGH64(hash_output) == HIGH64(output_recv) && LOW64(hash_output) == LOW64(output_recv))
-    //     std::cout<<"JQv1 success!\n";
-    //   else std::cout<<"JQv1 fail!\n";
-    // }
-    io->flush();
-    block seed = io->get_hash_block();
-    block share_seed;
-    PRG(&seed).random_block(&share_seed, 1);
-    block *chi = new block[num];
-    uni_hash_coeff_gen(chi, share_seed, num);
-    block sum;
     if (party == ALICE) {
-      vector_inn_prdt_sum_red(&sum, chi, buffer, num);
-      io->send_data(&sum, sizeof(block));
+      blake3_hasher_update(&hasher, buffer, sizeof(block) * (num));
+      blake3_hasher_finalize(&hasher, output, BLAKE3_OUT_LEN);
+      io->send_data(&output, BLAKE3_OUT_LEN);
     } else {
-      block output_recv;
-      vector_inn_prdt_sum_red(&sum, chi, buffer, num);
-      io->recv_data(&output_recv, sizeof(block));
-      if (HIGH64(sum) != HIGH64(output_recv) || LOW64(sum) != LOW64(output_recv))
+      blake3_hasher_update(&hasher, buffer, sizeof(block) * (num));
+      blake3_hasher_finalize(&hasher, output, BLAKE3_OUT_LEN);
+      io->recv_data(&output_recv, BLAKE3_OUT_LEN);
+      if (memcmp(output, output_recv, BLAKE3_OUT_LEN) != 0)
         std::cout<<"JQv1 fail!\n";
     }
+    // io->flush();
+    // block seed = io->get_hash_block();
+    // block share_seed;
+    // PRG(&seed).random_block(&share_seed, 1);
+    // block *chi = new block[num];
+    // uni_hash_coeff_gen(chi, share_seed, num);
+    // block sum;
+    // if (party == ALICE) {
+    //   vector_inn_prdt_sum_red(&sum, chi, buffer, num);
+    //   io->send_data(&sum, sizeof(block));
+    // } else {
+    //   block output_recv;
+    //   vector_inn_prdt_sum_red(&sum, chi, buffer, num);
+    //   io->recv_data(&output_recv, sizeof(block));
+    //   if (HIGH64(sum) != HIGH64(output_recv) || LOW64(sum) != LOW64(output_recv))
+    //     std::cout<<"JQv1 fail!\n";
+    // }
     num = 0;
   }
 

@@ -1,6 +1,12 @@
 #include "emp-tool/emp-tool.h"
 #include <emp-zk/emp-zk.h>
 #include <iostream>
+#include "blake3.h"
+#include <errno.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <unistd.h>
 using namespace emp;
 using namespace std;
 
@@ -12,12 +18,15 @@ void test_circuit_zk(NetIO *ios[threads + 1], int party,
                      int input_sz_lg) {
 
   // long long chunk = 1 << input_sz_lg;
-  // long long test_n = 300000000;
-  // int chunk = 30000000;
-  long long test_n = 1024 * 1024 * 10 * 10 * 3;
-  int chunk = 1024 *100;
+  long long test_n = 300000000;
+  int chunk = 30000000;
+  // long long test_n = 1024 * 1024 * 10 * 10 * 3;
+  // int chunk = 1024 * 1024 * 10;
   int num_of_chunk = test_n / chunk;
   FpOSTriple<NetIO> ostriple(party, threads, ios);
+  blake3_hasher hasher;
+  blake3_hasher_init(&hasher);
+  uint8_t output[BLAKE3_OUT_LEN], output_recv[BLAKE3_OUT_LEN];
   
   uint64_t *d = new uint64_t[chunk + 1];
   __uint128_t *ao = new __uint128_t[chunk + 1];
@@ -109,21 +118,42 @@ void test_circuit_zk(NetIO *ios[threads + 1], int party,
     }
 
     if (party == ALICE) {
-      __uint128_t pro;
-      pro = ab[0];
-      for (int i = 1; i < chunk; i++) {
-        pro = mult_mod(pro, ab[i]);
-      } 
-      ios[0]->send_data(&pro, sizeof(__uint128_t));
+      
+      // auto multime = clock_start();
+      // __uint128_t pro;
+      // pro = ab[0];
+      // for (int i = 1; i < chunk; i++) {
+      //   pro = mult_mod(pro, ab[i]);
+      // } 
+      // cout << chunk << "mul time \t" << time_from(multime) << "\t" << party << " " << endl;
+      // ios[0]->send_data(&pro, sizeof(__uint128_t));
+      // auto multime = clock_start();
+      // block hash_output = Hash::hash_for_block(ab, sizeof(uint64_t) * (chunk));
+      // cout << chunk << "hash time \t" << time_from(multime) << "\t" << party << " " << endl;
+      // ios[0]->send_data(&hash_output, sizeof(block));
+      auto multime = clock_start();
+      blake3_hasher_update(&hasher, ab, sizeof(uint64_t) * (chunk));
+      blake3_hasher_finalize(&hasher, output, BLAKE3_OUT_LEN);
+      ios[0]->send_data(&output, BLAKE3_OUT_LEN);
+      cout << chunk << "blake hash time \t" << time_from(multime) << "\t" << party << " " << endl;
     } else {
-      __uint128_t pro, output_recv;
-      pro = ab[0];
-      for (int i = 1; i < chunk; i++) {
-        pro = mult_mod(pro, ab[i]);
-      } 
-      ios[0]->recv_data(&output_recv, sizeof(__uint128_t));
-      if (HIGH64(pro) != HIGH64(output_recv) || LOW64(pro) != LOW64(output_recv))
+      // auto multime = clock_start();
+      // __uint128_t pro, output_recv;
+      // pro = ab[0];
+      // for (int i = 1; i < chunk; i++) {
+      //   pro = mult_mod(pro, ab[i]);
+      // } 
+      // cout << chunk << "mul time \t" << time_from(multime) << "\t" << party << " " << endl;
+      // ios[0]->recv_data(&output_recv, sizeof(__uint128_t));
+      // if (HIGH64(pro) != HIGH64(output_recv) || LOW64(pro) != LOW64(output_recv))
+      //   std::cout<<"JQv1 fail!\n";
+      auto multime = clock_start();
+      blake3_hasher_update(&hasher, ab, sizeof(uint64_t) * (chunk));
+      blake3_hasher_finalize(&hasher, output, BLAKE3_OUT_LEN);
+      ios[0]->recv_data(&output_recv, BLAKE3_OUT_LEN);
+      if (memcmp(output, output_recv, BLAKE3_OUT_LEN) != 0)
         std::cout<<"JQv1 fail!\n";
+      cout << chunk << "blake hash time \t" << time_from(multime) << "\t" << party << " " << endl;
     }
     prove += time_from(start);
   }

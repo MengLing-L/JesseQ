@@ -1,17 +1,26 @@
 #!/usr/python
 import subprocess
+keygen = '''
+ssh-keygen
+cat ~/.ssh/*.pub
+'''
+print(keygen)
+subprocess.call(["bash", "-c", keygen])
+
+
 install_packages = '''
 if [ "$(uname)" == "Darwin" ]; then
 	brew list openssl || brew install openssl
+	brew list blake3 || brew install blake3
  	brew list pkg-config || brew install pkg-config
  	brew list cmake || brew install cmake
 else
     if command -v apt-get >/dev/null; then
         sudo apt-get install -y software-properties-common
         sudo apt-get update
-        sudo apt-get install -y cmake git build-essential libssl-dev
+        sudo apt-get install -y cmake git build-essential libssl-dev libblake3-dev
     elif command -v yum >/dev/null; then
-        sudo yum install -y python3 gcc make git cmake gcc-c++ openssl-devel
+        sudo yum install -y python3 gcc make git cmake gcc-c++ openssl-devel epel-release blake3
     else
         echo "System not supported yet!"
     fi
@@ -63,3 +72,4 @@ for k in ['JQv1','JQv2']:
 		template = JQ_install_template.replace("X", k)
 		print(template)
 		subprocess.call(["bash", "-c", template])
+

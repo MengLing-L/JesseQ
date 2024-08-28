@@ -3,6 +3,12 @@
 #include "emp-tool/emp-tool.h"
 #include <emp-zk/emp-zk.h>
 #include <iostream>
+#include "blake3.h"
+#include <errno.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <unistd.h>
 using namespace emp;
 using namespace std;
 
@@ -23,29 +29,40 @@ int main(int argc, char **argv) {
 
   FpOSTriple<NetIO> os(party, threads, ios);
   OSTriple<BoolIO<NetIO>> bos(party, threads, bios);
-  int len = 1024 * 1024 * 10 * 10 * 3;
-  int chunk = 1024 * 100;
+  int len = 1024;
+  int chunk = 1024;
   int num_of_chunk  = len / chunk;
 
-  __uint128_t* a = new __uint128_t[chunk];
-
-
-  for (int i = 0; i < chunk; ++i) {
-    a[i] = os.random_val_input();
-  }
+  
 
   auto start = clock_start();
-  __uint128_t pro;
-  pro = mult_mod(a[0], a[1]);
-  for (int i = 0; i < num_of_chunk; ++i) { 
-    for (int i = 0; i < chunk ; ++i) { 
-        pro = mult_mod(pro, a[i]);
-    }
+  // pro = mult_mod(a[0], a[1]);
+  // for (int j = 0; j < num_of_chunk; ++j) { 
+  //   for (int i = 0; i < chunk; ++i) {
+  //     a[i] = os.random_val_input();
+  //     b[i] = os.random_val_input();
+  //   }
+  //   start = clock_start();
+  //   for (int i = 0; i < chunk ; ++i) { 
+  //       mult_mod(b[i], a[i]);
+  //   }
+  //   cout << party << "\tMul Speed: \t" << (time_from(start) * 7) << "us \t" << endl;
+  // }
+
+  uint64_t* a = new uint64_t[chunk];
+  uint64_t* b = new uint64_t[chunk];
+
+  for (int i = 0; i < chunk; ++i) {
+    a[i] = mod(rand());
+    b[i] = mod(rand());
   }
+  start = clock_start();
+  for (int i = 0; i < chunk ; ++i) { 
+      mult_mod(b[i], a[i]);
+  }
+  cout << party << "\tMul Speed: \t" << (time_from(start)) << "us \t" << endl;
   
-  cout << party << "\tMul Speed: \t" << (time_from(start) * 7)/1000 << "ms \t" << endl;
-
-
+ 
   block *ab = new block[chunk];
   block *ab_ = new block[chunk];
   bos.random_bits_input(ab, chunk);
@@ -68,17 +85,33 @@ int main(int argc, char **argv) {
     }
   }
 
-  cout << party << "\t Binary Mul Speed: \t" << (time_from(start) * 7)/1000 << "ms \t" << endl;
+  cout << party << "\t Binary Mul Speed: \t" << (time_from(start) * 7) << "us \t" << endl;
 
   start = clock_start();
   for (int i = 0; i < num_of_chunk; ++i) { 
-    Hash::hash_for_block(a, 16 * chunk);
+    Hash::hash_for_block(a, 8 * chunk);
   }
-  cout << party << "\tHash Speed: \t" << (time_from(start))/1000 << "ms \t" << endl;
+  cout << party << "\tHash Speed: \t" << (time_from(start)) << "us \t" << endl;
+
+
+  blake3_hasher hasher;
+  blake3_hasher_init(&hasher);
+  uint8_t output[BLAKE3_OUT_LEN];
+  start = clock_start();
+  for (int i = 0; i < num_of_chunk; ++i) { 
+    blake3_hasher_update(&hasher, a, 8 * chunk);
+    blake3_hasher_finalize(&hasher, output, BLAKE3_OUT_LEN);
+  }
+  cout << party << "\tblake3 Hash Speed: \t" << (time_from(start)) << "us \t" << endl;
+
+  
 
   for (int i = 0; i < threads; ++i) {
     delete ios[i];
   }
   delete[] a;
+  delete[] b;
+  delete[] ab;
+  delete[] ab_;
   return 0;
 }
