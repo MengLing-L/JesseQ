@@ -8,7 +8,7 @@ print(run)
 subprocess.call(["bash", "-c", run])
 
 run = '''
-python3 app_run_party1.py
+python3 bw_run_party1_jqv1_bool.py
 '''
 print(run)
 subprocess.call(["bash", "-c", run])

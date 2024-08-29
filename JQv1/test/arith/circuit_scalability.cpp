@@ -130,23 +130,25 @@ void test_circuit_zk(NetIO *ios[threads + 1], int party,
       d[chunk] = PR - ar;
       d[chunk] = add_mod(HIGH64(ao[chunk]), d[chunk]);
       ios[0]->send_data(&db, sizeof(uint64_t));
-      ios[0]->send_data(d, sizeof(uint64_t) * (chunk+1));
+      // ios[0]->send_data(d, sizeof(uint64_t) * (chunk+1));
       
     } else {
       ios[0]->recv_data(&db, sizeof(uint64_t));
       start = clock_start();
-      ios[0]->recv_data(d, sizeof(uint64_t) * (chunk+1));
+      // ios[0]->recv_data(d, sizeof(uint64_t) * (chunk+1));
     }
 
     for (int i = 0; i < chunk; ++i) {
       __uint128_t tmp;
       if (party == ALICE) {
+        ios[0]->send_data(d + i, sizeof(uint64_t) * (2));
         __uint128_t val = mod((ao[i] >> 64) + (b_u_0 >> 64), pr);
         __uint128_t mac = mod((ao[i] & 0xFFFFFFFFFFFFFFFFULL) + (b_u_0 & 0xFFFFFFFFFFFFFFFFULL), pr);
         b_u_0 = (val << 64) ^ mac;
         db = add_mod(d[i], db);
         ostriple.auth_compute_mul_send_with_setup(ao[i], b_u_0, ao[i + 1], d[i], db, ab[i]);
       } else {
+        ios[0]->recv_data(d + i, sizeof(uint64_t) * (2));
         b_u_0 = mod(ao[i] + b_u_0, pr);
         db = add_mod(d[i], db);
         tmp = ao[i + 1];
