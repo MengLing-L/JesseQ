@@ -12,11 +12,12 @@ JQv1_bool = '''
 '''
 print(JQv1_bool)
 subprocess.call(["bash", "-c", JQv1_bool])
-JQv2_bool = '''
-./JQv2/bin/test_bool_ostriple  1 12345 0
-'''
-print(JQv2_bool)
-subprocess.call(["bash", "-c", JQv2_bool])
+
+# JQv2_bool = '''
+# ./JQv2/bin/test_bool_ostriple  1 12345 0
+# '''
+# print(JQv2_bool)
+# subprocess.call(["bash", "-c", JQv2_bool])
 
 ban = '''
 sudo tc qdisc del dev ens5 root
