@@ -167,6 +167,7 @@ void test_compute_and_gate_check_JQv1(OSTriple<BoolIO<NetIO>> *os,
           std::cout<<"JQv1 fail!\n";
       }
     }
+    prove += time_from(start);
   }
 
   cout << "Setup time: " << setup / 1000 << "ms " << party
