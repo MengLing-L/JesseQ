@@ -152,7 +152,6 @@ void test_circuit_zk(NetIO *ios[threads + 1], int party,
         block hash_output = Hash::hash_for_block(ab, sizeof(uint64_t) * (chunk));
         ios[0]->send_data(&hash_output, sizeof(block));
       } else {
-        auto multime = clock_start();
         blake3_hasher_update(&hasher, ab, sizeof(uint64_t) * (chunk));
         blake3_hasher_finalize(&hasher, output, BLAKE3_OUT_LEN);
         ios[0]->send_data(&output, BLAKE3_OUT_LEN);
