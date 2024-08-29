@@ -13,6 +13,12 @@ JQv1_arith = '''
 print(JQv1_arith)
 subprocess.call(["bash", "-c", JQv1_arith])
 
+JQv2_arith = '''
+./JQv2/bin/test_arith_ostriple 1 12345 0
+'''
+print(JQv2_arith)
+subprocess.call(["bash", "-c", JQv2_arith])
+
 ban = '''
 sudo tc qdisc del dev ens5 root
 sudo tc qdisc add dev ens5 root tbf rate 500Mbit latency 15ms burst 1125k
@@ -25,6 +31,12 @@ JQv1_arith = '''
 '''
 print(JQv1_arith)
 subprocess.call(["bash", "-c", JQv1_arith])
+
+JQv2_arith = '''
+./JQv2/bin/test_arith_ostriple 1 12345 0
+'''
+print(JQv2_arith)
+subprocess.call(["bash", "-c", JQv2_arith])
 
 
 ban = '''
@@ -40,6 +52,12 @@ JQv1_arith = '''
 print(JQv1_arith)
 subprocess.call(["bash", "-c", JQv1_arith])
 
+JQv2_arith = '''
+./JQv2/bin/test_arith_ostriple 1 12345 0
+'''
+print(JQv2_arith)
+subprocess.call(["bash", "-c", JQv2_arith])
+
 
 ban = '''
 sudo tc qdisc del dev ens5 root
@@ -53,6 +71,12 @@ JQv1_arith = '''
 '''
 print(JQv1_arith)
 subprocess.call(["bash", "-c", JQv1_arith])
+
+JQv2_arith = '''
+./JQv2/bin/test_arith_ostriple 1 12345 0
+'''
+print(JQv2_arith)
+subprocess.call(["bash", "-c", JQv2_arith])
 
 # ban = '''
 # sudo tc qdisc del dev ens5 root
