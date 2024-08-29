@@ -116,7 +116,6 @@ void test_compute_and_gate_check_JQv1(OSTriple<BoolIO<NetIO>> *os,
     if (party == ALICE) {
         for (int i = 0; i < chunk; ++i) {
           d[i] = getLSB(a[i]) ^ ar;
-          io[0].send_bit(d[i]);
           br = ar ^ br;
           ar = ar & br;
         }
@@ -124,12 +123,11 @@ void test_compute_and_gate_check_JQv1(OSTriple<BoolIO<NetIO>> *os,
 
         // io[0].send_data_internal(d, chunk + 1);
         io[0].send_bit(ar);
+        io[0].send_bit(d[0]);
       } else {
-        for (int i = 0; i < chunk; ++i) {
-          d[i] = io[0].recv_bit();
-        }
         // io[0].recv_data_internal(d, chunk + 1);
         ar = io[0].recv_bit();
+        d[0] = io[0].recv_bit();
       }
 
 
@@ -137,9 +135,11 @@ void test_compute_and_gate_check_JQv1(OSTriple<BoolIO<NetIO>> *os,
       block tmp;
       b_u_0 = a[i] ^ b_u_0;
       if (party == ALICE) {
+        io[0].send_bit(d[i]);
         db = db ^ d[i];
         os->auth_compute_and_send_with_setup(a[i], b_u_0, a[i + 1], d[i], db, d[i + 1] ^  getLSB(a[i + 1]), ab[i]);
       } else {
+        d[i] = io[0].recv_bit();
         db = db ^ d[i];
         tmp = a[i + 1];
         os->adjust_kc(tmp, d[i + 1]);
