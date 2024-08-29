@@ -135,11 +135,11 @@ void test_compute_and_gate_check_JQv1(OSTriple<BoolIO<NetIO>> *os,
       block tmp;
       b_u_0 = a[i] ^ b_u_0;
       if (party == ALICE) {
-        io[0].send_bit(d[i]);
+        io[0].send_bit(d[i + 1]);
         db = db ^ d[i];
         os->auth_compute_and_send_with_setup(a[i], b_u_0, a[i + 1], d[i], db, d[i + 1] ^  getLSB(a[i + 1]), ab[i]);
       } else {
-        d[i] = io[0].recv_bit();
+        d[i + 1] = io[0].recv_bit();
         db = db ^ d[i];
         tmp = a[i + 1];
         os->adjust_kc(tmp, d[i + 1]);
