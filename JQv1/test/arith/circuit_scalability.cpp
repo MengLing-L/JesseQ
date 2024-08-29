@@ -72,7 +72,15 @@ void test_circuit_zk(NetIO *ios[threads + 1], int party,
   auto setup= 0;
   auto prove= 0;
 
+  start= clock_start();
   uint64_t ar = 2, br = 3;
+  for (int i = 0; i < test_n; ++i) {
+    br = add_mod(ar, br);
+    ar = mult_mod(ar, br);
+  }
+  cout << test_n << "Plant test eval\t" << double(test_n)/(time_from(start))*1000000 << "\t" << party << " " << endl;
+
+  ar = 2, br = 3;
   for (int j = 0; j < num_of_chunk; ++j) {
     start = clock_start();
     for (int i = 0; i < chunk; ++i) {

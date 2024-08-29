@@ -81,7 +81,15 @@ void test_compute_and_gate_check_JQv1(OSTriple<BoolIO<NetIO>> *os,
   auto setup= 0;
   auto prove= 0;
 
+  start= clock_start();
   bool ar = true, br = false;
+  for (int i = 0; i < len; ++i) {
+    br = ar ^ br;
+    ar = ar & br;
+  }
+  cout << len << "Plant test eval\t" << double(len)/(time_from(start))*1000000 << "\t" << party << " " << endl;
+  
+  ar = true, br = false;
   for (int j = 0; j < num_of_chunk; ++j) {
     start = clock_start();
     for (int i = 0; i < chunk; ++i) {
