@@ -9,7 +9,7 @@ print(ban)
 subprocess.call(["bash", "-c", ban])
 
 JQv1_bool = '''
-./JQv1/bin/test_bool_circuit_scalability 2 12345 172.31.24.125
+./JQv1/bin/test_bool_circuit_scalability 2 12345 172.31.28.201
 '''
 print(JQv1_bool)
 subprocess.call(["bash", "-c", JQv1_bool])
@@ -23,7 +23,7 @@ print(ban)
 subprocess.call(["bash", "-c", ban])
 
 JQv1_bool = '''
-./JQv1/bin/test_bool_circuit_scalability 2 12345 172.31.24.125
+./JQv1/bin/test_bool_circuit_scalability 2 12345 172.31.28.201
 '''
 print(JQv1_bool)
 subprocess.call(["bash", "-c", JQv1_bool])
@@ -37,7 +37,7 @@ print(ban)
 subprocess.call(["bash", "-c", ban])
 
 JQv1_bool = '''
-./JQv1/bin/test_bool_circuit_scalability 2 12345 172.31.24.125
+./JQv1/bin/test_bool_circuit_scalability 2 12345 172.31.28.201
 '''
 print(JQv1_bool)
 subprocess.call(["bash", "-c", JQv1_bool])
@@ -50,7 +50,7 @@ print(ban)
 subprocess.call(["bash", "-c", ban])
 
 JQv1_bool = '''
-./JQv1/bin/test_bool_circuit_scalability 2 12345 172.31.24.125
+./JQv1/bin/test_bool_circuit_scalability 2 12345 172.31.28.201
 '''
 print(JQv1_bool)
 subprocess.call(["bash", "-c", JQv1_bool])
@@ -64,7 +64,7 @@ print(ban)
 subprocess.call(["bash", "-c", ban])
 
 JQv1_bool = '''
-./JQv1/bin/test_bool_circuit_scalability 2 12345 172.31.24.125
+./JQv1/bin/test_bool_circuit_scalability 2 12345 172.31.28.201
 '''
 print(JQv1_bool)
 subprocess.call(["bash", "-c", JQv1_bool])
@@ -77,7 +77,7 @@ print(ban)
 subprocess.call(["bash", "-c", ban])
 
 JQv1_bool = '''
-./JQv1/bin/test_bool_circuit_scalability 2 12345 172.31.24.125
+./JQv1/bin/test_bool_circuit_scalability 2 12345 172.31.28.201
 '''
 print(JQv1_bool)
 subprocess.call(["bash", "-c", JQv1_bool])
@@ -90,7 +90,7 @@ print(ban)
 subprocess.call(["bash", "-c", ban])
 
 JQv1_bool = '''
-./JQv1/bin/test_bool_circuit_scalability 2 12345 172.31.24.125
+./JQv1/bin/test_bool_circuit_scalability 2 12345 172.31.28.201
 '''
 print(JQv1_bool)
 subprocess.call(["bash", "-c", JQv1_bool])
@@ -103,7 +103,7 @@ print(ban)
 subprocess.call(["bash", "-c", ban])
 
 JQv1_bool = '''
-./JQv1/bin/test_bool_circuit_scalability 2 12345 172.31.24.125
+./JQv1/bin/test_bool_circuit_scalability 2 12345 172.31.28.201
 '''
 print(JQv1_bool)
 subprocess.call(["bash", "-c", JQv1_bool])
