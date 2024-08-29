@@ -40,7 +40,7 @@ subprocess.call(["bash", "-c", JQv1_bool])
 
 ban = '''
 sudo tc qdisc del dev ens5 root
-sudo tc qdisc add dev ens5 root tbf rate 30Mbit latency 15ms burst 400k
+sudo tc qdisc add dev ens5 root tbf rate 30Mbit latency 15ms burst 800k
 '''
 print(ban)
 subprocess.call(["bash", "-c", ban])
@@ -59,7 +59,7 @@ subprocess.call(["bash", "-c", JQv1_bool])
 
 ban = '''
 sudo tc qdisc del dev ens5 root
-sudo tc qdisc add dev ens5 root tbf rate 50Mbit latency 15ms burst 600k
+sudo tc qdisc add dev ens5 root tbf rate 50Mbit latency 15ms burst 1000k
 '''
 print(ban)
 subprocess.call(["bash", "-c", ban])
