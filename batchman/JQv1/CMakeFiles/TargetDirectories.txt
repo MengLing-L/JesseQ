@@ -1,0 +1,16 @@
+/Users/studio/Project/JesseQ1/batchman/JQv1/CMakeFiles/emp-zk.dir
+/Users/studio/Project/JesseQ1/batchman/JQv1/CMakeFiles/test.dir
+/Users/studio/Project/JesseQ1/batchman/JQv1/CMakeFiles/edit_cache.dir
+/Users/studio/Project/JesseQ1/batchman/JQv1/CMakeFiles/rebuild_cache.dir
+/Users/studio/Project/JesseQ1/batchman/JQv1/CMakeFiles/list_install_components.dir
+/Users/studio/Project/JesseQ1/batchman/JQv1/CMakeFiles/install.dir
+/Users/studio/Project/JesseQ1/batchman/JQv1/CMakeFiles/install/local.dir
+/Users/studio/Project/JesseQ1/batchman/JQv1/CMakeFiles/install/strip.dir
+/Users/studio/Project/JesseQ1/batchman/JQv1/test/CMakeFiles/test_arith_stack_batched_matmul_v1.dir
+/Users/studio/Project/JesseQ1/batchman/JQv1/test/CMakeFiles/test.dir
+/Users/studio/Project/JesseQ1/batchman/JQv1/test/CMakeFiles/edit_cache.dir
+/Users/studio/Project/JesseQ1/batchman/JQv1/test/CMakeFiles/rebuild_cache.dir
+/Users/studio/Project/JesseQ1/batchman/JQv1/test/CMakeFiles/list_install_components.dir
+/Users/studio/Project/JesseQ1/batchman/JQv1/test/CMakeFiles/install.dir
+/Users/studio/Project/JesseQ1/batchman/JQv1/test/CMakeFiles/install/local.dir
+/Users/studio/Project/JesseQ1/batchman/JQv1/test/CMakeFiles/install/strip.dir
