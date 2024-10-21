@@ -120,29 +120,26 @@ void test_circuit_zk(NetIO *ios[threads + 1], int party,
       start = clock_start();
       db = PR - br;
       db = add_mod(HIGH64(b_u_0), db);
-      
-      for (int i = 0; i < chunk; ++i) {
-        d[i] = PR - ar;
-        d[i] = add_mod(HIGH64(ao[i]), d[i]);
-        br = add_mod(ar, br);
-        ar = mult_mod(ar, br);
-      }
-      d[chunk] = PR - ar;
-      d[chunk] = add_mod(HIGH64(ao[chunk]), d[chunk]);
+
+      d[0] = PR - ar;
+      d[0] = add_mod(HIGH64(ao[0]), d[0]);
       ios[0]->send_data(&db, sizeof(uint64_t));
       ios[0]->send_data(&d[0], sizeof(uint64_t));
-      // ios[0]->send_data(d, sizeof(uint64_t) * (chunk+1));
       
     } else {
-      ios[0]->recv_data(&db, sizeof(uint64_t));
       start = clock_start();
+      ios[0]->recv_data(&db, sizeof(uint64_t));
       ios[0]->recv_data(&d[0], sizeof(uint64_t));
-      // ios[0]->recv_data(d, sizeof(uint64_t) * (chunk+1));
     }
 
     for (int i = 0; i < chunk; ++i) {
+      
       __uint128_t tmp;
       if (party == ALICE) {
+        br = add_mod(ar, br);
+        ar = mult_mod(ar, br);
+        d[i + 1] = PR - ar;
+        d[i + 1] = add_mod(HIGH64(ao[i + 1]), d[i + 1]);
         ios[0]->send_data(d + i + 1, sizeof(uint64_t));
         __uint128_t val = mod((ao[i] >> 64) + (b_u_0 >> 64), pr);
         __uint128_t mac = mod((ao[i] & 0xFFFFFFFFFFFFFFFFULL) + (b_u_0 & 0xFFFFFFFFFFFFFFFFULL), pr);
