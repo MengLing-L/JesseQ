@@ -1,3 +1,4 @@
+#include "emp-zk/emp-zk-arith/ostriple.h"
 #include "emp-tool/emp-tool.h"
 #include <emp-zk/emp-zk.h>
 #include <iostream>
@@ -110,7 +111,7 @@ int main(int argc, char **argv) {
   }
   delete[] a;
   delete[] b;
-  // delete[] ab;
-  // delete[] ab_;
+  delete[] ab;
+  delete[] ab_;
   return 0;
 }
