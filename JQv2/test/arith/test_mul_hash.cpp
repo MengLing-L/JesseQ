@@ -48,8 +48,8 @@ int main(int argc, char **argv) {
   //   cout << party << "\tMul Speed: \t" << (time_from(start)) << "us \t" << endl;
   // }
 
-  uint64_t* a = new uint64_t[chunk];
-  uint64_t* b = new uint64_t[chunk];
+  __uint128_t* a = new __uint128_t[chunk];
+  __uint128_t* b = new __uint128_t[chunk];
 
   for (int i = 0; i < chunk; ++i) {
     a[i] = rand() % PR;
