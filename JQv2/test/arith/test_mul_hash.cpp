@@ -23,7 +23,7 @@ int main(int argc, char **argv) {
 
   for (int i = 0; i < threads; ++i)
     bios[i] = new BoolIO<NetIO>(
-        new NetIO(party == ALICE ? nullptr : "127.0.0.1", port + i),
+        new NetIO(party == ALICE ? nullptr : "127.0.0.1", port + threads + 1 + i),
         party == ALICE);
 
   FpOSTriple<NetIO> ostriple(party, threads, ios);
@@ -32,34 +32,34 @@ int main(int argc, char **argv) {
   int chunk = 1024000;
   int num_of_chunk  = len / chunk;
 
-  // __uint128_t* a = new __uint128_t[chunk];
-  // __uint128_t* b = new __uint128_t[chunk];
+  __uint128_t* a = new __uint128_t[chunk];
+  __uint128_t* b = new __uint128_t[chunk];
 
-  // auto start = clock_start();
-  // // __uint128_t pro = mult_mod(a[0], a[1]);
-  // for (int j = 0; j < num_of_chunk; ++j) { 
-  //   for (int i = 0; i < chunk; ++i) {
-  //     a[i] = ostriple.random_val_input();
-  //     b[i] = ostriple.random_val_input();
-  //   }
-  //   start = clock_start();
-  //   for (int i = 0; i < chunk ; ++i) { 
-  //       mult_mod(b[i], a[i]);
-  //   }
-  //   cout << party << "\tMul Speed: \t" << (time_from(start)) << "us \t" << endl;
-  // }
-  uint64_t* a = new uint64_t[chunk];
-  uint64_t* b = new uint64_t[chunk];
-
-  for (int i = 0; i < chunk; ++i) {
-    a[i] = rand() % PR;
-    b[i] = rand() % PR;
-  }
   auto start = clock_start();
-  for (int i = 0; i < chunk ; ++i) { 
-      mult_mod(b[i], a[i]);
+  // __uint128_t pro = mult_mod(a[0], a[1]);
+  for (int j = 0; j < num_of_chunk; ++j) { 
+    for (int i = 0; i < chunk; ++i) {
+      a[i] = ostriple.random_val_input();
+      b[i] = ostriple.random_val_input();
+    }
+    start = clock_start();
+    for (int i = 0; i < chunk ; ++i) { 
+        mult_mod(b[i], a[i]);
+    }
+    cout << party << "\tMul Speed: \t" << (time_from(start)) << "us \t" << endl;
   }
-  cout << party << "\tMul Speed: \t" << (time_from(start)) << "us \t" << endl;
+  // uint64_t* a = new uint64_t[chunk];
+  // uint64_t* b = new uint64_t[chunk];
+
+  // for (int i = 0; i < chunk; ++i) {
+  //   a[i] = rand() % PR;
+  //   b[i] = rand() % PR;
+  // }
+  // auto start = clock_start();
+  // for (int i = 0; i < chunk ; ++i) { 
+  //     mult_mod(b[i], a[i]);
+  // }
+  // cout << party << "\tMul Speed: \t" << (time_from(start)) << "us \t" << endl;
   
  
   block *ab = new block[chunk];
