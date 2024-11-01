@@ -39,15 +39,15 @@ int main(int argc, char **argv) {
   auto start1 = 0;
   __uint128_t pro = 1;
   for (int i = 0; i < chunk; ++i) {
-    // a[i] = ostriple.random_val_input();
-    b[i] = ostriple.random_val_input();
+    a[i] = ostriple.random_val_input();
+    // b[i] = ostriple.random_val_input();
     //a[i] = rand() % PR;
     //b[i] = rand() % PR;
   }
   for (int j = 0; j < num_of_chunk; ++j) { 
     start = clock_start();
     for (int i = 0; i < (chunk); ++i) { 
-        pro = mult_mod(LOW64(b[i]), LOW64(pro));
+        pro = mult_mod(LOW64(a[i]), LOW64(pro));
     }
     start1 += time_from(start);
   }
