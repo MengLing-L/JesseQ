@@ -29,8 +29,8 @@ int main(int argc, char **argv) {
   FpOSTriple<NetIO> ostriple(party, threads, ios);
   OSTriple<BoolIO<NetIO>> bos(party, threads, bios);
   int len = 2048000;
-  int chunk = 204800;
-  int num_of_chunk  = len / chunk;
+  int chunk = 2048000;
+  int num_of_chunk  = len / chunk * 10;
 
   __uint128_t* a = new __uint128_t[chunk];
   __uint128_t* b = new __uint128_t[chunk];
@@ -38,15 +38,15 @@ int main(int argc, char **argv) {
   auto start = clock_start();
   auto start1 = 0;
   __uint128_t pro = 1;
+  for (int i = 0; i < chunk; ++i) {
+    // a[i] = ostriple.random_val_input();
+    b[i] = ostriple.random_val_input();
+    //a[i] = rand() % PR;
+    //b[i] = rand() % PR;
+  }
   for (int j = 0; j < num_of_chunk; ++j) { 
-    for (int i = 0; i < chunk; ++i) {
-      a[i] = ostriple.random_val_input();
-      b[i] = ostriple.random_val_input();
-      //a[i] = rand() % PR;
-      //b[i] = rand() % PR;
-    }
     start = clock_start();
-    for (int i = 0; i < chunk ; ++i) { 
+    for (int i = 0; i < (chunk / 10); ++i) { 
         pro = mult_mod(LOW64(b[i]), LOW64(pro));
     }
     start1 += time_from(start);
