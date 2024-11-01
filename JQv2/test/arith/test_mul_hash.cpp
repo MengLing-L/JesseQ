@@ -29,38 +29,39 @@ int main(int argc, char **argv) {
 
   FpOSTriple<NetIO> os(party, threads, ios);
   OSTriple<BoolIO<NetIO>> bos(party, threads, bios);
-  int len = 1024;
-  int chunk = 1024;
+  int len = 1024000;
+  int chunk = 1024000;
   int num_of_chunk  = len / chunk;
 
-  
+  __uint128_t* a = new __uint128_t[chunk];
+  __uint128_t* b = new __uint128_t[chunk];
 
   auto start = clock_start();
-  // pro = mult_mod(a[0], a[1]);
-  // for (int j = 0; j < num_of_chunk; ++j) { 
-  //   for (int i = 0; i < chunk; ++i) {
-  //     a[i] = os.random_val_input();
-  //     b[i] = os.random_val_input();
-  //   }
-  //   start = clock_start();
-  //   for (int i = 0; i < chunk ; ++i) { 
-  //       mult_mod(b[i], a[i]);
-  //   }
-  //   cout << party << "\tMul Speed: \t" << (time_from(start) * 7) << "us \t" << endl;
+  // __uint128_t pro = mult_mod(a[0], a[1]);
+  for (int j = 0; j < num_of_chunk; ++j) { 
+    for (int i = 0; i < chunk; ++i) {
+      a[i] = os.random_val_input();
+      b[i] = os.random_val_input();
+    }
+    start = clock_start();
+    for (int i = 0; i < chunk ; ++i) { 
+        mult_mod(b[i], a[i]);
+    }
+    cout << party << "\tMul Speed: \t" << (time_from(start)) << "us \t" << endl;
+  }
+
+  // uint64_t* a = new uint64_t[chunk];
+  // uint64_t* b = new uint64_t[chunk];
+
+  // for (int i = 0; i < chunk; ++i) {
+  //   a[i] = rand() % PR;
+  //   b[i] = rand() % PR;
   // }
-
-  uint64_t* a = new uint64_t[chunk];
-  uint64_t* b = new uint64_t[chunk];
-
-  for (int i = 0; i < chunk; ++i) {
-    a[i] = mod(rand());
-    b[i] = mod(rand());
-  }
-  start = clock_start();
-  for (int i = 0; i < chunk ; ++i) { 
-      mult_mod(b[i], a[i]);
-  }
-  cout << party << "\tMul Speed: \t" << (time_from(start)) << "us \t" << endl;
+  // start = clock_start();
+  // for (int i = 0; i < chunk ; ++i) { 
+  //     mult_mod(b[i], a[i]);
+  // }
+  // cout << party << "\tMul Speed: \t" << (time_from(start)) << "us \t" << endl;
   
  
   block *ab = new block[chunk];
