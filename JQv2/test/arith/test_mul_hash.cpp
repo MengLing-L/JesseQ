@@ -23,9 +23,7 @@ int main(int argc, char **argv) {
     ios[i] = new NetIO(party == ALICE ? nullptr : "127.0.0.1", port + i);
 
   for (int i = 0; i < threads; ++i)
-    bios[i] = new BoolIO<NetIO>(
-        new NetIO(party == ALICE ? nullptr : "127.0.0.1", port + i),
-        party == ALICE);
+    bios[i] = new BoolIO<NetIO>(ios[i], party == ALICE);
 
   FpOSTriple<NetIO> os(party, threads, ios);
   OSTriple<BoolIO<NetIO>> bos(party, threads, bios);
