@@ -18,15 +18,15 @@ const int threads = 1;
 int main(int argc, char **argv) {
   parse_party_and_port(argv, &party, &port);
   NetIO *ios[threads];
-  BoolIO<NetIO> *bios[threads];
+  // BoolIO<NetIO> *bios[threads];
   for (int i = 0; i < threads; ++i)
     ios[i] = new NetIO(party == ALICE ? nullptr : "127.0.0.1", port + i);
 
-  for (int i = 0; i < threads; ++i)
-    bios[i] = new BoolIO<NetIO>(ios[i], party == ALICE);
+  // for (int i = 0; i < threads; ++i)
+  //   bios[i] = new BoolIO<NetIO>(ios[i], party == ALICE);
 
   FpOSTriple<NetIO> os(party, threads, ios);
-  OSTriple<BoolIO<NetIO>> bos(party, threads, bios);
+  // OSTriple<BoolIO<NetIO>> bos(party, threads, bios);
   int len = 1024000;
   int chunk = 1024000;
   int num_of_chunk  = len / chunk;
@@ -62,29 +62,29 @@ int main(int argc, char **argv) {
   // cout << party << "\tMul Speed: \t" << (time_from(start)) << "us \t" << endl;
   
  
-  block *ab = new block[chunk];
-  block *ab_ = new block[chunk];
-  bos.random_bits_input(ab, chunk);
-  bos.random_bits_input(ab_, chunk);
+  // block *ab = new block[chunk];
+  // block *ab_ = new block[chunk];
+  // bos.random_bits_input(ab, chunk);
+  // bos.random_bits_input(ab_, chunk);
 
-  bios[0]->flush();
-  block seed = bios[0]->get_hash_block();
-  block share_seed;
-  PRG(&seed).random_block(&share_seed, 1);
-  block *chi = new block[chunk];
-  // cout << "send" << share_seed << endl;
-  uni_hash_coeff_gen(chi, share_seed, chunk);
+  // bios[0]->flush();
+  // block seed = bios[0]->get_hash_block();
+  // block share_seed;
+  // PRG(&seed).random_block(&share_seed, 1);
+  // block *chi = new block[chunk];
+  // // cout << "send" << share_seed << endl;
+  // uni_hash_coeff_gen(chi, share_seed, chunk);
 
-  start = clock_start();
-  block tmp;
-  gfmul(ab[0], ab[1], &tmp);
-  for (int j = 0; j < num_of_chunk; ++j) { 
-    for(int i = 0; i < chunk; i++) {
-      gfmul(tmp, ab[i], &tmp);
-    }
-  }
+  // start = clock_start();
+  // block tmp;
+  // gfmul(ab[0], ab[1], &tmp);
+  // for (int j = 0; j < num_of_chunk; ++j) { 
+  //   for(int i = 0; i < chunk; i++) {
+  //     gfmul(tmp, ab[i], &tmp);
+  //   }
+  // }
 
-  cout << party << "\t Binary Mul Speed: \t" << (time_from(start) * 7) << "us \t" << endl;
+  // cout << party << "\t Binary Mul Speed: \t" << (time_from(start) * 7) << "us \t" << endl;
 
   start = clock_start();
   for (int i = 0; i < num_of_chunk; ++i) { 
@@ -110,7 +110,7 @@ int main(int argc, char **argv) {
   }
   delete[] a;
   delete[] b;
-  delete[] ab;
-  delete[] ab_;
+  // delete[] ab;
+  // delete[] ab_;
   return 0;
 }
