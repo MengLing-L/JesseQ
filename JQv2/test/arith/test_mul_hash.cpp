@@ -47,7 +47,7 @@ int main(int argc, char **argv) {
   for (int j = 0; j < num_of_chunk; ++j) { 
     start = clock_start();
     for (int i = 0; i < (chunk); ++i) { 
-        pro = mult_mod(LOW64(a[i]), LOW64(pro));
+        pro = mult_mod(LOW64(a[i]), pro);
     }
     start1 += time_from(start);
   }
