@@ -108,6 +108,7 @@ int main(int argc, char **argv) {
 
   for (int i = 0; i < threads; ++i) {
     delete ios[i];
+    delete bios[i];
   }
   delete[] a;
   delete[] b;
