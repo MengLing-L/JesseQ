@@ -30,7 +30,7 @@ int main(int argc, char **argv) {
   OSTriple<BoolIO<NetIO>> bos(party, threads, bios);
   int len = 2048000;
   int chunk = 2048000;
-  int num_of_chunk  = len / chunk * 10;
+  int num_of_chunk  = len / chunk;
 
   __uint128_t* a = new __uint128_t[chunk];
   __uint128_t* b = new __uint128_t[chunk];
@@ -46,7 +46,7 @@ int main(int argc, char **argv) {
   }
   for (int j = 0; j < num_of_chunk; ++j) { 
     start = clock_start();
-    for (int i = 0; i < (chunk / 10); ++i) { 
+    for (int i = 0; i < (chunk); ++i) { 
         pro = mult_mod(LOW64(b[i]), LOW64(pro));
     }
     start1 += time_from(start);
