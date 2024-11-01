@@ -48,7 +48,6 @@ int main(int argc, char **argv) {
   //   }
   //   cout << party << "\tMul Speed: \t" << (time_from(start)) << "us \t" << endl;
   // }
-  srand(time(NULL));
   uint64_t* a = new uint64_t[chunk];
   uint64_t* b = new uint64_t[chunk];
 
