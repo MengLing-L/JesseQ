@@ -157,6 +157,14 @@ void test_circuit_zk(NetIO *ios[threads + 1], int party,
     }
 
     if (party == ALICE) {
+      auto multime = clock_start();
+      __uint128_t pro;
+      pro = ab[0];
+      for (int i = 1; i < chunk; i++) {
+        pro = mult_mod(pro, ab[i]);
+      } 
+      cout << chunk << "mul time \t" << time_from(multime) << "\t" << party << " " << endl;
+      auto hashtime = clock_start();
       if (cpu_flag) {
         block hash_output = Hash::hash_for_block(ab, sizeof(uint64_t) * (chunk));
         ios[0]->send_data(&hash_output, sizeof(block));
@@ -165,6 +173,7 @@ void test_circuit_zk(NetIO *ios[threads + 1], int party,
         blake3_hasher_finalize(&hasher, output, BLAKE3_OUT_LEN);
         ios[0]->send_data(&output, BLAKE3_OUT_LEN);
       }
+      cout << chunk << "hash time \t" << time_from(hashtime) << "\t" << party << " " << endl;
       
     } else {
       if (cpu_flag) {
