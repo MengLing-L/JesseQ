@@ -164,16 +164,20 @@ void test_circuit_zk(NetIO *ios[threads + 1], int party,
         pro = mult_mod(pro, LOW64(ab[i]));
       } 
       cout << chunk << "mul time \t" << time_from(multime) << "\t" << party << " " << endl;
-      auto hashtime = clock_start();
+      
       if (cpu_flag) {
+        auto hashtime = clock_start();
         block hash_output = Hash::hash_for_block(ab, sizeof(uint64_t) * (chunk));
+        cout << chunk << "hash time \t" << time_from(hashtime) << "\t" << party << " " << endl;
         ios[0]->send_data(&hash_output, sizeof(block));
       } else {
+        auto hashtime = clock_start();
         blake3_hasher_update(&hasher, ab, sizeof(uint64_t) * (chunk));
         blake3_hasher_finalize(&hasher, output, BLAKE3_OUT_LEN);
+        cout << chunk << "hash time \t" << time_from(hashtime) << "\t" << party << " " << endl;
         ios[0]->send_data(&output, BLAKE3_OUT_LEN);
       }
-      cout << chunk << "hash time \t" << time_from(hashtime) << "\t" << party << " " << endl;
+      
       
     } else {
       if (cpu_flag) {
