@@ -161,7 +161,7 @@ void test_circuit_zk(NetIO *ios[threads + 1], int party,
       __uint128_t pro;
       pro = ab[0];
       for (int i = 1; i < chunk; i++) {
-        pro = mult_mod(pro, ab[i]);
+        pro = mult_mod(pro, LOW64(ab[i]));
       } 
       cout << chunk << "mul time \t" << time_from(multime) << "\t" << party << " " << endl;
       auto hashtime = clock_start();
