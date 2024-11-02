@@ -115,7 +115,7 @@ int main(int argc, char **argv) {
     delete bios[i];
   }
   delete[] a;
-  delete[] b;
+  // delete[] b;
   delete[] ab;
   delete[] ab_;
   return 0;
