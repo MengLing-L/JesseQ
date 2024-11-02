@@ -153,6 +153,7 @@ void test_compute_and_gate_check_JQv1(OSTriple<BoolIO<NetIO>> *os,
     PRG(&seed).random_block(&share_seed, 1);
     block *chi = new block[chunk];
     uni_hash_coeff_gen(chi, share_seed, chunk);
+    block sum;
     if (party == ALICE) {
       auto multime = clock_start();
       vector_inn_prdt_sum_red(&sum, chi, ab, chunk);
