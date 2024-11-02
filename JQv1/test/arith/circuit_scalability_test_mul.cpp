@@ -38,8 +38,8 @@ void test_circuit_zk(NetIO *ios[threads + 1], int party,
                      int input_sz_lg) {
 
   // long long chunk = 1 << input_sz_lg;
-  long long test_n = 40000000;
-  int chunk = 20000000;
+  long long test_n = 30000000;
+  int chunk = 10000000;
   bool cpu_flag = false;
   std::string vendor = getCPUVendor();
   if (vendor == "GenuineIntel") {
