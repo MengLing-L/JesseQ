@@ -33,7 +33,7 @@ int main(int argc, char **argv) {
   int num_of_chunk  = len / chunk;
 
   __uint128_t* a = new __uint128_t[chunk];
-  // __uint128_t* b = new __uint128_t[chunk];
+  __uint128_t* b = new __uint128_t[chunk];
 
   auto start = clock_start();
   auto start1 = 0;
@@ -116,7 +116,7 @@ int main(int argc, char **argv) {
     delete bios[i];
   }
   delete[] a;
-  // delete[] b;
+  delete[] b;
   delete[] ab;
   delete[] ab_;
   return 0;
