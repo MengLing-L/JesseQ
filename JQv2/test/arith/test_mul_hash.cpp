@@ -39,9 +39,9 @@ int main(int argc, char **argv) {
   auto start1 = 0;
   __uint128_t pro = 1;
   for (int i = 0; i < chunk; ++i) {
-    // a[i] = ostriple.random_val_input();
+    a[i] = ostriple.random_val_input();
     // b[i] = ostriple.random_val_input();
-    a[i] = rand() % PR;
+    // a[i] = rand() % PR;
     //b[i] = rand() % PR;
   }
   for (int j = 0; j < num_of_chunk; ++j) { 
