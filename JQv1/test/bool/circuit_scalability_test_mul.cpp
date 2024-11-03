@@ -148,9 +148,9 @@ void test_compute_and_gate_check_JQv1(OSTriple<BoolIO<NetIO>> *os,
     }
 
     block tmp;
-    gfmul(ab[0], ab[1], &tmp);
     if (party == ALICE) {
       auto multime = clock_start();
+      gfmul(ab[0], ab[1], &tmp);
       for(int i = 0; i < chunk; i++) {
         gfmul(tmp, ab[i], &tmp);
       }
