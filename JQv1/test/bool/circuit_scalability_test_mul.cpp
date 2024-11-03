@@ -57,8 +57,8 @@ void test_compute_and_gate_check_JQv1(OSTriple<BoolIO<NetIO>> *os,
   } else {
       std::cout << "Unknown CPU manufacturer.\n";
   }
-  long long len = 1024 * 1024 * 10 * 10 * 3;
-  int chunk = 1024 * 1024 * 10;
+  long long len = 100000000;
+  int chunk = 1000000;
   int num_of_chunk = len / chunk;
   blake3_hasher hasher;
   blake3_hasher_init(&hasher);
@@ -157,7 +157,7 @@ void test_compute_and_gate_check_JQv1(OSTriple<BoolIO<NetIO>> *os,
       cout << chunk << "mul time \t" << time_from(multime) << "\t" << party << " " << endl;
       if (cpu_flag) {
         auto hashtime = clock_start();
-        block hash_output = Hash::hash_for_block(ab, sizeof(uint64_t) * (chunk));
+        block hash_output = Hash::hash_for_block(ab, sizeof(block) * (chunk));
         cout << chunk << "hashtime time \t" << time_from(multime) << "\t" << party << " " << endl;
         io[0].send_data(&hash_output, sizeof(block));
       } else {
@@ -169,7 +169,7 @@ void test_compute_and_gate_check_JQv1(OSTriple<BoolIO<NetIO>> *os,
       }
     } else {
       if (cpu_flag) {
-        block hash_output = Hash::hash_for_block(ab, sizeof(uint64_t) * (chunk));
+        block hash_output = Hash::hash_for_block(ab, sizeof(block) * (chunk));
         io[0].recv_data(&output_recv, sizeof(block));
         if (memcmp(&hash_output, &output_recv, sizeof(block)) != 0)
           std::cout<<"JQv1 fail!\n";
