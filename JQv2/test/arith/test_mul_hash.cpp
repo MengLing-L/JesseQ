@@ -114,9 +114,6 @@ int main(int argc, char **argv) {
   cout << party << "\tHash Speed: \t" << (time_from(start)) << "us \t" << endl;
 
 
-  blake3_hasher hasher;
-  blake3_hasher_init(&hasher);
-  uint8_t output[BLAKE3_OUT_LEN];
   start = clock_start();
   for (int i = 0; i < num_of_chunk; ++i) { 
     blake3_hasher_update(&hasher, ab, sizeof(block) * chunk);
