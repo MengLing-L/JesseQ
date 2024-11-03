@@ -147,16 +147,13 @@ void test_compute_and_gate_check_JQv1(OSTriple<BoolIO<NetIO>> *os,
       }
     }
 
-    io[0].flush();
-    block seed = io[0].get_hash_block();
-    block share_seed;
-    PRG(&seed).random_block(&share_seed, 1);
-    block *chi = new block[chunk];
-    uni_hash_coeff_gen(chi, share_seed, chunk);
-    block sum;
+    block tmp;
+    gfmul(ab[0], ab[1], &tmp);
     if (party == ALICE) {
       auto multime = clock_start();
-      vector_inn_prdt_sum_red(&sum, chi, ab, chunk);
+      for(int i = 0; i < chunk; i++) {
+        gfmul(tmp, ab[i], &tmp);
+      }
       cout << chunk << "mul time \t" << time_from(multime) << "\t" << party << " " << endl;
       if (cpu_flag) {
         auto hashtime = clock_start();
