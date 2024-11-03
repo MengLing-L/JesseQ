@@ -28,8 +28,8 @@ int main(int argc, char **argv) {
 
   FpOSTriple<NetIO> ostriple(party, threads, ios);
   OSTriple<BoolIO<NetIO>> bos(party, threads, bios);
-  int len = 1000000;
-  int chunk = 1000000;
+  int len = 10000000;
+  int chunk = 10000000;
   int num_of_chunk  = len / chunk;
 
   __uint128_t* a = new __uint128_t[chunk];
@@ -123,7 +123,6 @@ int main(int argc, char **argv) {
   
 
   for (int i = 0; i < threads; ++i) {
-    delete ios[i];
     delete bios[i];
   }
   delete[] a;
