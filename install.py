@@ -15,6 +15,7 @@ if [ "$(uname)" == "Darwin" ]; then
 	brew list blake3 || brew install blake3
  	brew list pkg-config || brew install pkg-config
  	brew list cmake || brew install cmake
+	brew list gmp || brew install gmp
 else
     if command -v apt-get >/dev/null; then
         sudo apt-get install -y software-properties-common

@@ -1,7 +1,7 @@
 #Testing macro
 macro (add_test_executable_with_lib folder _name)
 	add_executable(test_${folder}_${_name} "${folder}/${_name}.cpp")
-	target_link_libraries(test_${folder}_${_name} ${BLAKE3_LIBRARIES} ${EMP-OT_LIBRARIES} emp-zk)
+	target_link_libraries(test_${folder}_${_name} ${GMP_LIBRARIES} ${BLAKE3_LIBRARIES} ${EMP-OT_LIBRARIES} emp-zk)
 endmacro()
 
 macro (add_test_case folder _name)
@@ -24,4 +24,5 @@ add_test_case_with_run(arith inner_prdt)
 add_test_case_with_run(arith matrix_mul)
 add_test_case_with_run(arith sis)
 add_test_case_with_run(arith test_mul_hash)
+add_test_case_with_run(arith openssl_gmp_test_mul)
 
