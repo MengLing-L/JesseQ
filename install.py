@@ -20,7 +20,7 @@ else
     if command -v apt-get >/dev/null; then
         sudo apt-get install -y software-properties-common
         sudo apt-get update
-        sudo apt-get install -y cmake git build-essential libssl-dev
+        sudo apt-get install -y cmake git build-essential libssl-dev libgmp3-dev
 		git clone https://github.com/BLAKE3-team/BLAKE3.git
 		cd BLAKE3/c/
 		cmake -DBUILD_SHARED_LIBS=ON .
