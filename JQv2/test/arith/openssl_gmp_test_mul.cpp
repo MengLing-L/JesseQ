@@ -12,35 +12,6 @@
 using namespace emp;
 using namespace std;
 
-std::string bignum_to_string(const BIGNUM *bn) {
-    // char *bn_str = BN_bn2hex(bn);
-    int num_bytes = BN_num_bytes(bn);
-
-    // 使用 BN_bn2bin
-    unsigned char *bin_data = new unsigned char[num_bytes];
-    BN_bn2bin(bn, bin_data);
-    std::string result(reinterpret_cast<const char*>(bin_data), num_bytes);
-    // BIGNUM *bn1 = BN_bin2bn(bin_data, num_bytes, NULL);
-    // if (BN_cmp(bn1, bn)!=0){
-    //     cout << "faild" << endl;
-    // }
-    // OPENSSL_free(bn_str);
-    return result;
-}
-
-char *bignums_to_char_ptr(const std::vector<BIGNUM *> &bignums) {
-    std::string result;
-
-    for (const auto &bn : bignums) {
-        result += bignum_to_string(bn);
-    }
-
-    char *char_ptr = new char[result.size() + 1];
-    strcpy(char_ptr, result.c_str());
-
-    return char_ptr;
-}
-
 
 void test_openssl_multiplication(int chunk, const char *bstr, int bitlen) {
     BIGNUM  *bound, *result;
@@ -54,18 +25,15 @@ void test_openssl_multiplication(int chunk, const char *bstr, int bitlen) {
 
     std::vector<BIGNUM*> a(chunk);
     // BIGNUM **a = new BIGNUM*[chunk];
-    std::vector<BIGNUM*> b(chunk);
 
     for (int i = 0; i < chunk; ++i) {
         a[i] = BN_new();
         BN_rand_range(a[i], bound);
-        b[i] = BN_new();
-        BN_rand_range(b[i], bound);
     }
     
     auto start = clock_start();
     for (int i = 0; i < (chunk); ++i) { 
-        BN_mod_mul(result, a[i], b[i], bound, ctx);
+        BN_mod_mul(result, a[i], a[i], bound, ctx);
     }
     cout << "Openssl Mul Speed: \t" << time_from(start)<< "us \t" << endl;
 
@@ -102,7 +70,6 @@ void test_openssl_multiplication(int chunk, const char *bstr, int bitlen) {
 
     for (int i = 0; i < chunk; ++i) {
         BN_free(a[i]);
-        BN_free(b[i]);
     }
     BN_free(bound);
     BN_free(result);
@@ -111,15 +78,13 @@ void test_openssl_multiplication(int chunk, const char *bstr, int bitlen) {
 
 void test_u64_multiplication(int chunk, int bitlen) {
     uint64_t* aa = new uint64_t[chunk];
-    uint64_t* bb = new uint64_t[chunk];
 
     for (int i = 0; i < chunk; ++i) {
         aa[i] = rand() % PR;
-        bb[i] = rand() % PR;
     }
     auto start = clock_start();
     for (int i = 0; i < chunk ; ++i) { 
-        mult_mod(bb[i], aa[i]);
+        mult_mod(aa[i], aa[i]);
         // bb[i] * aa[i];
     }
     cout << "uint64_t Mul Speed: \t" << (time_from(start)) << "us \t" << endl;
@@ -190,7 +155,6 @@ void test_128_multiplication(int chunk, int bitlen) {
 void test_gmp_multiplication(int chunk, const char *bstr, int bitlen) {
 
     mpz_t *a = new mpz_t[chunk];
-    mpz_t *b = new mpz_t[chunk];
 
     gmp_randstate_t state;
     gmp_randinit_mt(state); 
@@ -203,14 +167,12 @@ void test_gmp_multiplication(int chunk, const char *bstr, int bitlen) {
 
     for (int i = 0; i < (chunk); ++i) { 
         mpz_init(a[i]);
-        mpz_init(b[i]);
         mpz_urandomm(a[i], state, bound);
-        mpz_urandomm(b[i], state, bound);
     }
 
     auto start = clock_start();
     for (int i = 0; i < (chunk); ++i) { 
-        mpz_mul(res, a[i], b[i]);
+        mpz_mul(res, a[i], a[i]);
         mpz_mod(res, res, bound);
     }
     cout << "GMP Mul Speed: \t\t" << time_from(start)<< "us \t" << endl;
@@ -246,7 +208,6 @@ void test_gmp_multiplication(int chunk, const char *bstr, int bitlen) {
 
     for (int i = 0; i < (chunk); ++i) { 
         mpz_clear(a[i]);
-        mpz_clear(b[i]);
     }
 
     mpz_clear(bound);
