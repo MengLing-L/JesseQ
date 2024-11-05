@@ -9,6 +9,9 @@ message(STATUS "BLAKE3_LIBRARIES: ${BLAKE3_LIBRARIES}")
 find_path(EMP-ZK_INCLUDE_DIR NAMES emp-zk/emp-zk.h)
 find_library(EMP-ZK_LIBRARY NAMES emp-zk)
 
+# find_package(GMP REQUIRED)
+find_path(GMP_INCLUDE_DIRS NAMES gmp.h)
+find_library(GMP_LIBRARIES NAMES libgmp.so PATHS /usr/local/lib REQUIRED)
 if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
 	IF(${CMAKE_SYSTEM_PROCESSOR} MATCHES "(aarch64)|(arm64)")
 		# M1 Apple
@@ -19,17 +22,17 @@ if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
 		set(GMP_DIR /usr/local/opt/gmp)
 		# find_package(GMP REQUIRED PATHS /usr/local/opt/gmp NO_DEFAULT_PATH)
 	ENDIF(${CMAKE_SYSTEM_PROCESSOR} MATCHES "(aarch64)|(arm64)" )
+	find_path(GMP_INCLUDE_DIRS gmp.h
+		PATHS ${GMP_DIR}/include
+		NO_DEFAULT_PATH
+	)
+	find_library(GMP_LIBRARIES gmp
+		PATHS ${GMP_DIR}/lib
+		NO_DEFAULT_PATH
+	)
 endif()
 
-find_path(GMP_INCLUDE_DIRS gmp.h
-    PATHS ${GMP_DIR}/include
-    NO_DEFAULT_PATH
-)
 
-find_library(GMP_LIBRARIES gmp
-    PATHS ${GMP_DIR}/lib
-    NO_DEFAULT_PATH
-)
 
 include(FindPackageHandleStandardArgs)
 
