@@ -77,25 +77,25 @@ void test_openssl_multiplication(int chunk, const char *bstr, int bitlen) {
 
 
 void test_u64_multiplication(int chunk, int bitlen) {
-    __uint128_t* aa = new __uint128_t[chunk];
+    __uint128_t* a = new __uint128_t[chunk];
 
-    for (int i = 0; i < chunk; ++i) {
-        aa[i] = rand() % PR;
-    }
     auto start = clock_start();
     __uint128_t pro = 1;
-    for (int i = 0; i < chunk; ++i) { 
-        pro = mult_mod(LOW64(aa[i]), pro);
-        // mult_mod(LOW64(a[i]), LOW64(b[i]));
-        // pro = LOW64(a[i]) * pro % PR;
+    for (int i = 0; i < chunk; ++i) {
+        a[i] = rand() % PR;
     }
-    cout << "uint64_t Mul Speed: \t" << time_from(start)<< "us \t" << endl;
+
+    start = clock_start();
+    for (int i = 0; i < (chunk); ++i) { 
+        pro = mult_mod(LOW64(a[i]), pro);
+    }
+    cout << "\tMul Speed: \t" << time_from(start)<< "us \t" << endl;
     size_t total_bytes = chunk * sizeof(uint64_t);
 
     char *binary_data = new char[total_bytes];
 
     for (int i = 0; i < chunk; ++i) {
-        std::memcpy(binary_data + i * sizeof(uint64_t), &aa[i], sizeof(uint64_t));
+        std::memcpy(binary_data + i * sizeof(uint64_t), &a[i], sizeof(uint64_t));
     }
 
     start = clock_start();
