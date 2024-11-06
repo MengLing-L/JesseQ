@@ -189,7 +189,7 @@ int main(int argc, char **argv) {
         party == ALICE);
   
   OSTriple<BoolIO<NetIO>> bos(party, threads, bios);
-  int chunk = 10000000;
+  int chunk = 1000000;
 
  
   // __uint128_t* a = new __uint128_t[chunk];
