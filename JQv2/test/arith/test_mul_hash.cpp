@@ -39,7 +39,6 @@ int main(int argc, char **argv) {
   __uint128_t* b = new __uint128_t[chunk];
 
   auto start = clock_start();
-  auto start1 = 0;
   __uint128_t pro = 1;
   for (int i = 0; i < chunk; ++i) {
     a[i] = ostriple.random_val_input();
@@ -49,15 +48,12 @@ int main(int argc, char **argv) {
   }
   if (party == ALICE){
     start = clock_start();
-    for (int j = 0; j < num_of_chunk; ++j) { 
-      for (int i = 0; i < (chunk); ++i) { 
-          pro = mult_mod(LOW64(a[i]), pro);
-          // mult_mod(LOW64(a[i]), LOW64(b[i]));
-          // pro = LOW64(a[i]) * pro % PR;
-      }
-      start1 += time_from(start);
+    for (int i = 0; i < (chunk); ++i) { 
+        pro = mult_mod(LOW64(a[i]), pro);
+        // mult_mod(LOW64(a[i]), LOW64(b[i]));
+        // pro = LOW64(a[i]) * pro % PR;
     }
-    cout << "\tMul Speed: \t" << start1<< "us \t" << endl;
+    cout << "\tMul Speed: \t" << time_from(start)<< "us \t" << endl;
     start = clock_start();
     for (int i = 0; i < num_of_chunk; ++i) { 
       Hash::hash_for_block(a, 8 * chunk);
