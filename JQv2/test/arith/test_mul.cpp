@@ -141,18 +141,39 @@ void test_gmp_multiplication(int chunk, const char *bstr, int bitlen) {
 
 }
 
-void test_61mul_hash(int chunk){
-    __uint128_t* a = new __uint128_t[chunk];
-    auto start = clock_start();
-    __uint128_t pro = 1;
-    for (int i = 0; i < chunk; ++i) {
-      a[i] = rand() % PR;
-    }
+int main(int argc, char **argv) {
+  parse_party_and_port(argv, &party, &port);
+  BoolIO<NetIO> *bios[threads];
+  for (int i = 0; i < threads; ++i)
+    bios[i] = new BoolIO<NetIO>(
+        new NetIO(party == ALICE ? nullptr : "127.0.0.1", port + threads + 1 + i),
+        party == ALICE);
+  
+  OSTriple<BoolIO<NetIO>> bos(party, threads, bios);
+  int chunk = 10000000;
+
+ 
+  __uint128_t* a = new __uint128_t[chunk];
+
+  auto start = clock_start();
+  __uint128_t pro = 1;
+  for (int i = 0; i < chunk; ++i) {
+    a[i] = rand() % PR;
+  }
+
+  if (party == ALICE){
+    const char *str = "2305843009213693951";
+
+    cout << " ---------------- " << chunk << " " << 61 << "-bit field multiplications" << " ---------------- " << endl;
+
     start = clock_start();
     for (int i = 0; i < (chunk); ++i) { 
         pro = mult_mod(LOW64(a[i]), pro);
     }
     cout << "Mul Speed: \t\t\t" << time_from(start)<< " us \t" << endl;
+    test_openssl_multiplication(chunk, str, 61);
+
+    test_gmp_multiplication(chunk, str, 61);
     size_t total_bytes = chunk * sizeof(uint64_t);
 
     char *binary_data = new char[total_bytes];
@@ -177,68 +198,8 @@ void test_61mul_hash(int chunk){
     blake3_hasher_finalize(&hasher, output, BLAKE3_OUT_LEN);
     
     cout << "blake3 Speed: \t\t\t" << time_from(start) << " us \t" << endl;
-    delete[] a;
-}
 
-int main(int argc, char **argv) {
-  parse_party_and_port(argv, &party, &port);
-  BoolIO<NetIO> *bios[threads];
-  for (int i = 0; i < threads; ++i)
-    bios[i] = new BoolIO<NetIO>(
-        new NetIO(party == ALICE ? nullptr : "127.0.0.1", port + threads + 1 + i),
-        party == ALICE);
-  
-  OSTriple<BoolIO<NetIO>> bos(party, threads, bios);
-  int chunk = 1000000;
 
- 
-  // __uint128_t* a = new __uint128_t[chunk];
-
-  // auto start = clock_start();
-  // __uint128_t pro = 1;
-  // for (int i = 0; i < chunk; ++i) {
-  //   a[i] = rand() % PR;
-  // }
-
-  if (party == ALICE){
-    const char *str = "2305843009213693951";
-
-    cout << " ---------------- " << chunk << " " << 61 << "-bit field multiplications" << " ---------------- " << endl;
-
-    // start = clock_start();
-    // for (int i = 0; i < (chunk); ++i) { 
-    //     pro = mult_mod(LOW64(a[i]), pro);
-    // }
-    // cout << "Mul Speed: \t\t\t" << time_from(start)<< " us \t" << endl;
-    test_openssl_multiplication(chunk, str, 61);
-
-    test_gmp_multiplication(chunk, str, 61);
-    // size_t total_bytes = chunk * sizeof(uint64_t);
-
-    // char *binary_data = new char[total_bytes];
-
-    // for (int i = 0; i < chunk; ++i) {
-    //     std::memcpy(binary_data + i * sizeof(uint64_t), &a[i], sizeof(uint64_t));
-    // }
-
-    // delete[] a;  
-
-    // start = clock_start();
-    // Hash::hash_for_block(binary_data, total_bytes);
-    // // cout <<  "Openssl's BN as input Hash Speed: \t" << (time_from(start)) << "us \t"<< " input length:" << length << " bytes" << endl;
-    // cout <<  "SHA256 Speed: \t\t\t" << (time_from(start)) << " us \t" << endl;
-
-    // blake3_hasher hasher;
-    // blake3_hasher_init(&hasher);
-    // uint8_t output[BLAKE3_OUT_LEN];
-
-    // start = clock_start();
-    // blake3_hasher_update(&hasher, binary_data, total_bytes);
-    // blake3_hasher_finalize(&hasher, output, BLAKE3_OUT_LEN);
-    
-    // cout << "blake3 Speed: \t\t\t" << time_from(start) << " us \t" << endl;
-
-    test_61mul_hash(chunk);
   }
 
   block *ab = new block[chunk];
@@ -248,7 +209,7 @@ int main(int argc, char **argv) {
     const char *str128 = "340282366920938463463374607431768211459";
 
     cout << " ---------------- " << chunk << " " << 128 << "-bit field multiplications" << " ---------------- " << endl;
-    auto start = clock_start();
+    start = clock_start();
     block tmp;
     gfmul(ab[0], ab[1], &tmp);
     for (int i = 0; i < chunk; ++i) { 
