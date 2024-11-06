@@ -77,14 +77,15 @@ void test_openssl_multiplication(int chunk, const char *bstr, int bitlen) {
 
 
 void test_u64_multiplication(int chunk, int bitlen) {
-    uint64_t* aa = new uint64_t[chunk];
+    __uint128_t* aa = new __uint128_t[chunk];
 
     for (int i = 0; i < chunk; ++i) {
         aa[i] = rand() % PR;
     }
     auto start = clock_start();
+    __uint128_t pro = 1;
     for (int i = 0; i < chunk ; ++i) { 
-        mult_mod(aa[i], aa[i]);
+        pro = mult_mod(LOW64(aa[i]), pro);
         // bb[i] * aa[i];
     }
     cout << "uint64_t Mul Speed: \t" << (time_from(start)) << "us \t" << endl;
