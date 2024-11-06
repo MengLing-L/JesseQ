@@ -15,8 +15,17 @@ int port, party;
 const int threads = 1;
 
 int main(int argc, char **argv) {
+  parse_party_and_port(argv, &party, &port);
+  BoolIO<NetIO> *bios[threads];
+  for (int i = 0; i < threads; ++i)
+    bios[i] = new BoolIO<NetIO>(
+        new NetIO(party == ALICE ? nullptr : "127.0.0.1", port + threads + 1 + i),
+        party == ALICE);
+  
+  OSTriple<BoolIO<NetIO>> bos(party, threads, bios);
   int chunk = 1000000;
 
+ 
   __uint128_t* a = new __uint128_t[chunk];
 
   auto start = clock_start();
@@ -25,24 +34,27 @@ int main(int argc, char **argv) {
     a[i] = rand() % PR;
   }
 
-  start = clock_start();
-  for (int i = 0; i < (chunk); ++i) { 
-      pro = mult_mod(LOW64(a[i]), pro);
+  if (party == ALICE){
+    start = clock_start();
+    for (int i = 0; i < (chunk); ++i) { 
+        pro = mult_mod(LOW64(a[i]), pro);
+    }
+    cout << "\tMul Speed: \t" << time_from(start)<< "us \t" << endl;
   }
-  cout << "\tMul Speed: \t" << time_from(start)<< "us \t" << endl;
 
   block *ab = new block[chunk];
-  PRG prg;
-  prg.random_block(ab, chunk);
+  bos.random_bits_input(ab, chunk);
 
-  start = clock_start();
-  block tmp;
-  gfmul(ab[0], ab[1], &tmp);
-  for (int i = 0; i < chunk; ++i) { 
-      // cout << LOW64(ab[i]) << endl;
-      gfmul(tmp, ab[i], &tmp);
+  if (party == ALICE){
+    start = clock_start();
+    block tmp;
+    gfmul(ab[0], ab[1], &tmp);
+    for (int i = 0; i < chunk; ++i) { 
+        // cout << LOW64(ab[i]) << endl;
+        gfmul(tmp, ab[i], &tmp);
+    }
+    cout << "__m128i Mul Speed: \t" << (time_from(start)) << "us \t" << endl;
   }
-  cout << "__m128i Mul Speed: \t" << (time_from(start)) << "us \t" << endl;
 
 
   delete[] a;  
