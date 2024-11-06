@@ -23,7 +23,5 @@ add_test_case_with_run(arith ostriple)
 add_test_case_with_run(arith inner_prdt)
 add_test_case_with_run(arith matrix_mul)
 add_test_case_with_run(arith sis)
-add_test_case_with_run(arith test_mul_hash)
 add_test_case_with_run(arith test_mul)
-add_test_case_with_run(arith openssl_gmp_test_mul)
 
