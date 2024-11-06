@@ -39,36 +39,36 @@ void test_openssl_multiplication(int chunk, const char *bstr, int bitlen) {
     }
     cout << "Openssl Mul Speed: \t\t" << time_from(start)<< " us \t" << endl;
 
-    size_t total_bytes = 0;
-    for (int i = 0; i < (chunk); ++i) { 
-        total_bytes += BN_num_bytes(a[i]);
-    }
+    // size_t total_bytes = 0;
+    // for (int i = 0; i < (chunk); ++i) { 
+    //     total_bytes += BN_num_bytes(a[i]);
+    // }
 
-    char *binary_data = new char[total_bytes];
+    // char *binary_data = new char[total_bytes];
 
-    size_t current = 0;
-    for (int i = 0; i < chunk; ++i) {
-        int num_bytes = BN_num_bytes(a[i]);
-        unsigned char *bin_data = new unsigned char[num_bytes];
-        BN_bn2bin(a[i], bin_data);
-        std::memcpy(binary_data + current, &bin_data, num_bytes);
-        current += num_bytes;
-    }
+    // size_t current = 0;
+    // for (int i = 0; i < chunk; ++i) {
+    //     int num_bytes = BN_num_bytes(a[i]);
+    //     unsigned char *bin_data = new unsigned char[num_bytes];
+    //     BN_bn2bin(a[i], bin_data);
+    //     std::memcpy(binary_data + current, &bin_data, num_bytes);
+    //     current += num_bytes;
+    // }
 
-    start = clock_start();
-    Hash::hash_for_block(binary_data, total_bytes);
-    // cout <<  "Openssl's BN as input Hash Speed: \t" << (time_from(start)) << "us \t"<< " input length:" << length << " bytes" << endl;
-    cout <<  "Openssl as input SHA256 Speed: \t" << (time_from(start)) << " us \t" << endl;
+    // start = clock_start();
+    // Hash::hash_for_block(binary_data, total_bytes);
+    // // cout <<  "Openssl's BN as input Hash Speed: \t" << (time_from(start)) << "us \t"<< " input length:" << length << " bytes" << endl;
+    // cout <<  "Openssl as input SHA256 Speed: \t" << (time_from(start)) << " us \t" << endl;
 
-    blake3_hasher hasher;
-    blake3_hasher_init(&hasher);
-    uint8_t output[BLAKE3_OUT_LEN];
+    // blake3_hasher hasher;
+    // blake3_hasher_init(&hasher);
+    // uint8_t output[BLAKE3_OUT_LEN];
 
-    start = clock_start();
-    blake3_hasher_update(&hasher, binary_data, total_bytes);
-    blake3_hasher_finalize(&hasher, output, BLAKE3_OUT_LEN);
+    // start = clock_start();
+    // blake3_hasher_update(&hasher, binary_data, total_bytes);
+    // blake3_hasher_finalize(&hasher, output, BLAKE3_OUT_LEN);
     
-    cout << "Openssl as input blake3 Speed: \t" << (time_from(start)) << " us \t" << endl;
+    // cout << "Openssl as input blake3 Speed: \t" << (time_from(start)) << " us \t" << endl;
 
     for (int i = 0; i < chunk; ++i) {
         BN_free(a[i]);
@@ -102,34 +102,34 @@ void test_gmp_multiplication(int chunk, const char *bstr, int bitlen) {
     }
     cout << "GMP Mul Speed: \t\t\t" << time_from(start)<< " us \t" << endl;
 
-    size_t total_bytes = 0;
-    for (int i = 0; i < (chunk); ++i) { 
-        total_bytes += (mpz_sizeinbase(a[i], 2) / 8);
-    }
+    // size_t total_bytes = 0;
+    // for (int i = 0; i < (chunk); ++i) { 
+    //     total_bytes += (mpz_sizeinbase(a[i], 2) / 8);
+    // }
 
-    char *binary_data = new char[total_bytes];
+    // char *binary_data = new char[total_bytes];
 
-    size_t current = 0;
-    for (int i = 0; i < chunk; ++i) {
-        int num_bytes = mpz_sizeinbase(a[i], 2) / 8;
-        mpz_export(binary_data + current, nullptr, 1, sizeof(unsigned char), 0, 0, a[i]);
-        current += num_bytes;
-    }
+    // size_t current = 0;
+    // for (int i = 0; i < chunk; ++i) {
+    //     int num_bytes = mpz_sizeinbase(a[i], 2) / 8;
+    //     mpz_export(binary_data + current, nullptr, 1, sizeof(unsigned char), 0, 0, a[i]);
+    //     current += num_bytes;
+    // }
 
-    start = clock_start();
-    Hash::hash_for_block(binary_data, total_bytes);
-    // cout <<  "Openssl's BN as input Hash Speed: \t" << (time_from(start)) << "us \t"<< " input length:" << length << " bytes" << endl;
-    cout <<  "GMP as input SHA256 Speed: \t" << (time_from(start)) << " us \t" << endl;
+    // start = clock_start();
+    // Hash::hash_for_block(binary_data, total_bytes);
+    // // cout <<  "Openssl's BN as input Hash Speed: \t" << (time_from(start)) << "us \t"<< " input length:" << length << " bytes" << endl;
+    // cout <<  "GMP as input SHA256 Speed: \t" << (time_from(start)) << " us \t" << endl;
 
-    blake3_hasher hasher;
-    blake3_hasher_init(&hasher);
-    uint8_t output[BLAKE3_OUT_LEN];
+    // blake3_hasher hasher;
+    // blake3_hasher_init(&hasher);
+    // uint8_t output[BLAKE3_OUT_LEN];
 
-    start = clock_start();
-    blake3_hasher_update(&hasher, binary_data, total_bytes);
-    blake3_hasher_finalize(&hasher, output, BLAKE3_OUT_LEN);
+    // start = clock_start();
+    // blake3_hasher_update(&hasher, binary_data, total_bytes);
+    // blake3_hasher_finalize(&hasher, output, BLAKE3_OUT_LEN);
     
-    cout << "GMP as input blake3 Speed: \t" << (time_from(start)) << " us \t" << endl;
+    // cout << "GMP as input blake3 Speed: \t" << (time_from(start)) << " us \t" << endl;
 
     for (int i = 0; i < (chunk); ++i) { 
         mpz_clear(a[i]);
@@ -171,6 +171,9 @@ int main(int argc, char **argv) {
         pro = mult_mod(LOW64(a[i]), pro);
     }
     cout << "Mul Speed: \t\t\t" << time_from(start)<< " us \t" << endl;
+    test_openssl_multiplication(chunk, str, 61);
+
+    test_gmp_multiplication(chunk, str, 61);
     size_t total_bytes = chunk * sizeof(uint64_t);
 
     char *binary_data = new char[total_bytes];
@@ -196,9 +199,7 @@ int main(int argc, char **argv) {
     
     cout << "blake3 Speed: \t\t\t" << time_from(start) << " us \t" << endl;
 
-    test_openssl_multiplication(chunk, str, 61);
 
-    test_gmp_multiplication(chunk, str, 61);
   }
 
   block *ab = new block[chunk];
@@ -225,11 +226,14 @@ int main(int argc, char **argv) {
         std::memcpy(binary_data + i * sizeof(block), &ab[i], sizeof(block));
     }
     delete[] ab;  
+    test_openssl_multiplication(chunk, str128, 128);
+
+    test_gmp_multiplication(chunk, str128, 128);
 
     start = clock_start();
     Hash::hash_for_block(binary_data, total_bytes);
     // cout <<  "Openssl's BN as input Hash Speed: \t" << (time_from(start)) << "us \t"<< " input length:" << length << " bytes" << endl;
-    cout <<  "__m128i as input SHA256 Speed: \t" << (time_from(start)) << "us \t" << endl;
+    cout <<  "SHA256 Speed: \t\t\t" << (time_from(start)) << "us \t" << endl;
 
     blake3_hasher hasher;
     blake3_hasher_init(&hasher);
@@ -239,11 +243,9 @@ int main(int argc, char **argv) {
     blake3_hasher_update(&hasher, binary_data, total_bytes);
     blake3_hasher_finalize(&hasher, output, BLAKE3_OUT_LEN);
     
-    cout << "__m128i as input blake3 Speed: \t" << (time_from(start)) << "us \t" << endl;
+    cout << "blake3 Speed: \t\t\t" << (time_from(start)) << "us \t" << endl;
 
-    test_openssl_multiplication(chunk, str128, 128);
-
-    test_gmp_multiplication(chunk, str128, 128);
+    
   }
 
 
