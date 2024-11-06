@@ -44,14 +44,16 @@ int main(int argc, char **argv) {
     // a[i] = rand() % PR;
     //b[i] = rand() % PR;
   }
-  for (int j = 0; j < num_of_chunk; ++j) { 
-    start = clock_start();
-    for (int i = 0; i < (chunk); ++i) { 
-        pro = mult_mod(LOW64(a[i]), pro);
-        // mult_mod(LOW64(a[i]), LOW64(b[i]));
-        // pro = LOW64(a[i]) * pro % PR;
+  if (party == ALICE){
+    for (int j = 0; j < num_of_chunk; ++j) { 
+      start = clock_start();
+      for (int i = 0; i < (chunk); ++i) { 
+          pro = mult_mod(LOW64(a[i]), pro);
+          // mult_mod(LOW64(a[i]), LOW64(b[i]));
+          // pro = LOW64(a[i]) * pro % PR;
+      }
+      start1 += time_from(start);
     }
-    start1 += time_from(start);
   }
   cout << party << "\tMul Speed: \t" << start1<< "us \t" << endl;
   // uint64_t* a = new uint64_t[chunk];
