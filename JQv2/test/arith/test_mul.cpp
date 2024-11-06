@@ -203,6 +203,9 @@ int main(int argc, char **argv) {
   bos.random_bits_input(ab, chunk);
 
   if (party == ALICE){
+    const char *str128 = "340282366920938463463374607431768211459";
+
+    cout << " ---------------- " << chunk << " " << 128 << "-bit field multiplications" << " ---------------- " << endl;
     start = clock_start();
     block tmp;
     gfmul(ab[0], ab[1], &tmp);
@@ -211,6 +214,33 @@ int main(int argc, char **argv) {
         gfmul(tmp, ab[i], &tmp);
     }
     cout << "__m128i Mul Speed: \t" << (time_from(start)) << "us \t" << endl;
+
+     size_t total_bytes = chunk * sizeof(block);
+    char *binary_data = new char[total_bytes];
+
+    // 将 __m128i 数组转换为 char * 数组
+    for (size_t i = 0; i < chunk; ++i) {
+        std::memcpy(binary_data + i * sizeof(block), &ab[i], sizeof(block));
+    }
+
+    start = clock_start();
+    Hash::hash_for_block(binary_data, total_bytes);
+    // cout <<  "Openssl's BN as input Hash Speed: \t" << (time_from(start)) << "us \t"<< " input length:" << length << " bytes" << endl;
+    cout <<  "__m128i as input SHA256 Speed: \t" << (time_from(start)) << "us \t" << endl;
+
+    blake3_hasher hasher;
+    blake3_hasher_init(&hasher);
+    uint8_t output[BLAKE3_OUT_LEN];
+
+    start = clock_start();
+    blake3_hasher_update(&hasher, binary_data, total_bytes);
+    blake3_hasher_finalize(&hasher, output, BLAKE3_OUT_LEN);
+    
+    cout << "__m128i as input blake3 Speed: \t" << (time_from(start)) << "us \t" << endl;
+
+    test_openssl_multiplication(chunk, str128, 128);
+
+    test_gmp_multiplication(chunk, str128, 128);
   }
 
 
