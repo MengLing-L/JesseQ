@@ -28,8 +28,8 @@ int main(int argc, char **argv) {
 
   FpOSTriple<NetIO> ostriple(party, threads, ios);
   OSTriple<BoolIO<NetIO>> bos(party, threads, bios);
-  int len = 10000000;
-  int chunk = 10000000;
+  int len = 100000;
+  int chunk = 100000;
   int num_of_chunk  = len / chunk;
 
   __uint128_t* a = new __uint128_t[chunk];
