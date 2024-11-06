@@ -84,8 +84,7 @@ void test_u64_multiplication(int chunk, int bitlen) {
     }
     auto start = clock_start();
     __uint128_t pro = 1;
-    start = clock_start();
-    for (int i = 0; i < (chunk); ++i) { 
+    for (int i = 0; i < chunk; ++i) { 
         pro = mult_mod(LOW64(aa[i]), pro);
         // mult_mod(LOW64(a[i]), LOW64(b[i]));
         // pro = LOW64(a[i]) * pro % PR;
