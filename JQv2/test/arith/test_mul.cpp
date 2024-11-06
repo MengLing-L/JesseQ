@@ -179,6 +179,8 @@ int main(int argc, char **argv) {
         std::memcpy(binary_data + i * sizeof(uint64_t), &a[i], sizeof(uint64_t));
     }
 
+    delete[] a;  
+
     start = clock_start();
     Hash::hash_for_block(binary_data, total_bytes);
     // cout <<  "Openssl's BN as input Hash Speed: \t" << (time_from(start)) << "us \t"<< " input length:" << length << " bytes" << endl;
@@ -222,6 +224,7 @@ int main(int argc, char **argv) {
     for (size_t i = 0; i < chunk; ++i) {
         std::memcpy(binary_data + i * sizeof(block), &ab[i], sizeof(block));
     }
+    delete[] ab;  
 
     start = clock_start();
     Hash::hash_for_block(binary_data, total_bytes);
@@ -244,7 +247,5 @@ int main(int argc, char **argv) {
   }
 
 
-  delete[] a;  
-  delete[] ab;  
   return 0;
 }
