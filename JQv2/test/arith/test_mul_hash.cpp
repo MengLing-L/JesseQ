@@ -68,52 +68,52 @@ int main(int argc, char **argv) {
   //     mult_mod(b[i], a[i]);
   // }
   // cout << party << "\tMul Speed: \t" << (time_from(start)) << "us \t" << endl;
-  // start = clock_start();
-  // for (int i = 0; i < num_of_chunk; ++i) { 
-  //   Hash::hash_for_block(a, 8 * chunk);
-  // }
-  // cout << party << "\tHash Speed: \t" << (time_from(start)) << "us \t" << endl;
+  start = clock_start();
+  for (int i = 0; i < num_of_chunk; ++i) { 
+    Hash::hash_for_block(a, 8 * chunk);
+  }
+  cout << party << "\tHash Speed: \t" << (time_from(start)) << "us \t" << endl;
 
 
-  // blake3_hasher hasher;
-  // blake3_hasher_init(&hasher);
-  // uint8_t output[BLAKE3_OUT_LEN];
-  // start = clock_start();
-  // for (int i = 0; i < num_of_chunk; ++i) { 
-  //   blake3_hasher_update(&hasher, a, 8 * chunk);
-  //   blake3_hasher_finalize(&hasher, output, BLAKE3_OUT_LEN);
-  // }
-  // cout << party << "\tblake3 Hash Speed: \t" << (time_from(start)) << "us \t" << endl;
+  blake3_hasher hasher;
+  blake3_hasher_init(&hasher);
+  uint8_t output[BLAKE3_OUT_LEN];
+  start = clock_start();
+  for (int i = 0; i < num_of_chunk; ++i) { 
+    blake3_hasher_update(&hasher, a, 8 * chunk);
+    blake3_hasher_finalize(&hasher, output, BLAKE3_OUT_LEN);
+  }
+  cout << party << "\tblake3 Hash Speed: \t" << (time_from(start)) << "us \t" << endl;
  
-  // block *ab = new block[chunk];
-  // block *ab_ = new block[chunk];
-  // bos.random_bits_input(ab, chunk);
+  block *ab = new block[chunk];
+  block *ab_ = new block[chunk];
+  bos.random_bits_input(ab, chunk);
+  
+  start = clock_start();
+  block tmp;
+  gfmul(ab[0], ab[1], &tmp);
+  for (int j = 0; j < num_of_chunk; ++j) { 
+    for(int i = 0; i < chunk; i++) {
+      gfmul(tmp, ab[i], &tmp);
+    }
+  }
 
-  // start = clock_start();
-  // block tmp;
-  // gfmul(ab[0], ab[1], &tmp);
-  // for (int j = 0; j < num_of_chunk; ++j) { 
-  //   for(int i = 0; i < chunk; i++) {
-  //     gfmul(tmp, ab[i], &tmp);
-  //   }
-  // }
-
-  // cout << party << "\t Binary Mul Speed: \t" << (time_from(start)) << "us \t" << endl;
+  cout << party << "\t Binary Mul Speed: \t" << (time_from(start)) << "us \t" << endl;
 
   
-  // start = clock_start();
-  // for (int i = 0; i < num_of_chunk; ++i) { 
-  //   Hash::hash_for_block(ab, sizeof(block) * chunk);
-  // }
-  // cout << party << "\tHash Speed: \t" << (time_from(start)) << "us \t" << endl;
+  start = clock_start();
+  for (int i = 0; i < num_of_chunk; ++i) { 
+    Hash::hash_for_block(ab, sizeof(block) * chunk);
+  }
+  cout << party << "\tHash Speed: \t" << (time_from(start)) << "us \t" << endl;
 
 
-  // start = clock_start();
-  // for (int i = 0; i < num_of_chunk; ++i) { 
-  //   blake3_hasher_update(&hasher, ab, sizeof(block) * chunk);
-  //   blake3_hasher_finalize(&hasher, output, BLAKE3_OUT_LEN);
-  // }
-  // cout << party << "\tblake3 Hash Speed: \t" << (time_from(start)) << "us \t" << endl;
+  start = clock_start();
+  for (int i = 0; i < num_of_chunk; ++i) { 
+    blake3_hasher_update(&hasher, ab, sizeof(block) * chunk);
+    blake3_hasher_finalize(&hasher, output, BLAKE3_OUT_LEN);
+  }
+  cout << party << "\tblake3 Hash Speed: \t" << (time_from(start)) << "us \t" << endl;
   
 
   for (int i = 0; i < threads; ++i) {
@@ -121,7 +121,7 @@ int main(int argc, char **argv) {
   }
   delete[] a;
   delete[] b;
-  // delete[] ab;
+  delete[] ab;
   // delete[] ab_;
   return 0;
 }
