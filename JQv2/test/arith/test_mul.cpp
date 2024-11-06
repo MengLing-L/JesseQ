@@ -31,6 +31,19 @@ int main(int argc, char **argv) {
   }
   cout << "\tMul Speed: \t" << time_from(start)<< "us \t" << endl;
 
+  block *ab = new block[chunk];
+  PRG prg;
+  prg.random_block(ab, chunk);
+
+  auto start = clock_start();
+  block tmp;
+  gfmul(ab[0], ab[1], &tmp);
+  for (int i = 0; i < chunk; ++i) { 
+      // cout << LOW64(ab[i]) << endl;
+      gfmul(tmp, ab[i], &tmp);
+  }
+  cout << "__m128i Mul Speed: \t" << (time_from(start)) << "us \t" << endl;
+
 
   delete[] a;  
   return 0;
