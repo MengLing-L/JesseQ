@@ -84,12 +84,13 @@ void test_u64_multiplication(int chunk, int bitlen) {
     }
     auto start = clock_start();
     __uint128_t pro = 1;
-    for (int i = 0; i < chunk ; ++i) { 
+    start = clock_start();
+    for (int i = 0; i < (chunk); ++i) { 
         pro = mult_mod(LOW64(aa[i]), pro);
-        // bb[i] * aa[i];
+        // mult_mod(LOW64(a[i]), LOW64(b[i]));
+        // pro = LOW64(a[i]) * pro % PR;
     }
-    cout << "uint64_t Mul Speed: \t" << (time_from(start)) << "us \t" << endl;
-
+    cout << "uint64_t Mul Speed: \t" << time_from(start)<< "us \t" << endl;
     size_t total_bytes = chunk * sizeof(uint64_t);
 
     char *binary_data = new char[total_bytes];
