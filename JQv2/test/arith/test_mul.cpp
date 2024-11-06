@@ -35,7 +35,7 @@ int main(int argc, char **argv) {
   PRG prg;
   prg.random_block(ab, chunk);
 
-  auto start = clock_start();
+  start = clock_start();
   block tmp;
   gfmul(ab[0], ab[1], &tmp);
   for (int i = 0; i < chunk; ++i) { 
@@ -46,5 +46,6 @@ int main(int argc, char **argv) {
 
 
   delete[] a;  
+  delete[] ab;  
   return 0;
 }
