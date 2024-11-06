@@ -219,7 +219,7 @@ void test_gmp_multiplication(int chunk, const char *bstr, int bitlen) {
 
 int main(int argc, char **argv) {
     
-    int chunk = 100000;
+    int chunk = 1000000;
 
     const char *str = "2305843009213693951";
 
