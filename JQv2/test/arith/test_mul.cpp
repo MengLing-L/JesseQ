@@ -153,14 +153,12 @@ int main(int argc, char **argv) {
   int chunk = 1000000;
 
  
-
+  auto start = clock_start();  
   if (party == ALICE){
     const char *str = "2305843009213693951";
 
     cout << " ---------------- " << chunk << " " << 61 << "-bit field multiplications" << " ---------------- " << endl;
     __uint128_t* a = new __uint128_t[chunk];
-
-    auto start = clock_start();
     __uint128_t pro = 1;
     for (int i = 0; i < chunk; ++i) {
         a[i] = rand() % PR;
