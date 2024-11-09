@@ -153,10 +153,10 @@ int main(int argc, char **argv) {
   int chunk = 1000000;
 
  
-  __uint128_t* a = new __uint128_t[chunk];
+  uint64_t* a = new uint64_t[chunk];
 
   auto start = clock_start();
-  __uint128_t pro = 1;
+  uint64_t pro = 1;
   for (int i = 0; i < chunk; ++i) {
     a[i] = rand() % PR;
   }
@@ -168,7 +168,7 @@ int main(int argc, char **argv) {
 
     start = clock_start();
     for (int i = 0; i < (chunk); ++i) { 
-        pro = mult_mod(LOW64(a[i]), pro);
+        pro = mult_mod(a[i], pro);
     }
     cout << "Mul Speed: \t\t\t" << time_from(start)<< " us \t" << endl;
     test_openssl_multiplication(chunk, str, 61);
