@@ -153,10 +153,10 @@ int main(int argc, char **argv) {
   int chunk = 1000000;
 
  
-  uint64_t* a = new uint64_t[chunk];
+  __uint128_t* a = new __uint128_t[chunk];
 
   auto start = clock_start();
-  uint64_t pro = 1;
+  __uint128_t pro = 1;
   for (int i = 0; i < chunk; ++i) {
     a[i] = rand() % PR;
   }
