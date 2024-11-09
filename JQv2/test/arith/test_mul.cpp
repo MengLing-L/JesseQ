@@ -153,19 +153,18 @@ int main(int argc, char **argv) {
   int chunk = 1000000;
 
  
-  __uint128_t* a = new __uint128_t[chunk];
-
-  auto start = clock_start();
-  __uint128_t pro = 1;
-  for (int i = 0; i < chunk; ++i) {
-    a[i] = rand() % PR;
-  }
 
   if (party == ALICE){
     const char *str = "2305843009213693951";
 
     cout << " ---------------- " << chunk << " " << 61 << "-bit field multiplications" << " ---------------- " << endl;
+    __uint128_t* a = new __uint128_t[chunk];
 
+    auto start = clock_start();
+    __uint128_t pro = 1;
+    for (int i = 0; i < chunk; ++i) {
+        a[i] = rand() % PR;
+    }
     start = clock_start();
     for (int i = 0; i < (chunk); ++i) { 
         pro = mult_mod(a[i], pro);
