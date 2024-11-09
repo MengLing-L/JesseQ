@@ -161,6 +161,7 @@ int main(int argc, char **argv) {
     __uint128_t* a = new __uint128_t[chunk];
     __uint128_t pro = 1;
     for (int i = 0; i < chunk; ++i) {
+        std::srand(std::time(0));
         a[i] = rand() % PR;
     }
     start = clock_start();
@@ -215,11 +216,11 @@ int main(int argc, char **argv) {
     }
     cout << "__m128i Mul Speed: \t\t" << (time_from(start)) << "us \t" << endl;
 
-     size_t total_bytes = chunk * sizeof(block);
+    size_t total_bytes = chunk * sizeof(block);
     char *binary_data = new char[total_bytes];
 
     // 将 __m128i 数组转换为 char * 数组
-    for (size_t i = 0; i < chunk; ++i) {
+    for (int i = 0; i < chunk; ++i) {
         std::memcpy(binary_data + i * sizeof(block), &ab[i], sizeof(block));
     }
     delete[] ab;  
