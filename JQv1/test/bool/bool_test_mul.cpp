@@ -154,7 +154,7 @@ void test_compute_and_gate_check_JQv1(OSTriple<BoolIO<NetIO>> *os,
       for(int i = 0; i < chunk; i++) {
         gfmul(tmp, ab[i], &tmp);
       }
-      cout << chunk << " MUL time \t" << time_from(multime) << " us \t" << party << " " << endl;
+      cout << chunk << " MUL time \t\t" << time_from(multime) << " us \t" << party << " " << endl;
       
       auto hashtime = clock_start();
       block hash_output = Hash::hash_for_block(ab, sizeof(block) * (chunk));
