@@ -181,14 +181,14 @@ void test_circuit_zk(NetIO *ios[threads + 1], int party,
       
     } else {
       auto multime = clock_start();
-      __uint128_t pro,output;
+      __uint128_t pro,output_pro;
       pro = ab[0];
       for (int i = 1; i < chunk; i++) {
         pro = mult_mod(pro, LOW64(ab[i]));
       } 
       cout << chunk << "mul time \t" << time_from(multime) << "\t" << party << " " << endl;
-      ios[0]->recv_data(&output, sizeof(__uint128_t));
-      if (output != pro)
+      ios[0]->recv_data(&output_pro, sizeof(__uint128_t));
+      if (output_pro != pro)
             std::cout<<"JQv1 fail!\n";
       if (cpu_flag) {
         block hash_output = Hash::hash_for_block(ab, sizeof(uint64_t) * (chunk));
