@@ -112,32 +112,36 @@ void test_compute_and_gate_check_JQv1(OSTriple<BoolIO<NetIO>> *os,
       }
     }
 
-    block tmp;
+    
     if (party == ALICE) {
       auto multime = clock_start();
-      gfmul(ab[0], ab[1], &tmp);
-      for(int i = 0; i < chunk; i++) {
+      block tmp = ab[0];
+      // gfmul(ab[0], ab[1], &tmp);
+      for(int i = 1; i < chunk; i++) {
         gfmul(tmp, ab[i], &tmp);
       }
-      cout << chunk << " MUL time \t\t" << time_from(multime) << " us \t" << party << " " << endl;
+      cout << chunk << " MUL time \t\t" << time_from(multime) << " us \t" << endl;
+      io[0].send_data(&tmp, sizeof(block));
       
       auto hashtime = clock_start();
       block hash_output = Hash::hash_for_block(ab, sizeof(block) * (chunk));
-      cout << chunk << " SHA256 hash time \t" << time_from(hashtime) << " us \t" << party << " " << endl;
+      cout << chunk << " SHA256 hash time \t" << time_from(hashtime) << " us \t" << endl;
       io[0].send_data(&hash_output, sizeof(block));
     
       hashtime = clock_start();
       blake3_hasher_update(&hasher, ab, sizeof(block) * (chunk));
       blake3_hasher_finalize(&hasher, output, BLAKE3_OUT_LEN);
-      cout << chunk << " BLAKE3 hash time \t" << time_from(hashtime) << " us \t" << party << " " << endl;
+      cout << chunk << " BLAKE3 hash time \t" << time_from(hashtime) << " us \t" << endl;
       io[0].send_data(&output, BLAKE3_OUT_LEN);
       
     } else {
-      
-      gfmul(ab[0], ab[1], &tmp);
-      for(int i = 0; i < chunk; i++) {
+      block tmp = ab[0], output_pro;
+      for(int i = 1; i < chunk; i++) {
         gfmul(tmp, ab[i], &tmp);
       }
+      io[0].recv_data(&output_pro, sizeof(block));
+      if (cmpBlock(&output_pro, &tmp, 1) != 1)
+            std::cout<<"JQv1 fail!\n";
 
       block hash_output = Hash::hash_for_block(ab, sizeof(block) * (chunk));
       io[0].recv_data(&output_recv, sizeof(block));
