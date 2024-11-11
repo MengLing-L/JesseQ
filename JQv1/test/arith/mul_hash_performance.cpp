@@ -10,48 +10,15 @@
 using namespace emp;
 using namespace std;
 
-int port, party;
+int port, party, chunk;
+long long test_n;
 char *ip;
 const int threads = 1;
 
-std::string getCPUVendor() {
-    std::ifstream cpuinfo("/proc/cpuinfo");
-    if (!cpuinfo) {
-        // std::cerr << "Error: Unable to open /proc/cpuinfo\n";
-        return "Unknown";
-    }
-
-    std::string line, vendor = "Unknown";
-    while (std::getline(cpuinfo, line)) {
-        if (line.find("vendor_id") != std::string::npos) {
-            size_t pos = line.find(':');
-            if (pos != std::string::npos) {
-                vendor = line.substr(pos + 2);
-                break;
-            }
-        }
-    }
-    return vendor;
-}
 
 void test_circuit_zk(NetIO *ios[threads + 1], int party,
                      int input_sz_lg) {
 
-  // long long chunk = 1 << input_sz_lg;
-  long long test_n = 30000000;
-  int chunk = 10000000;
-  bool cpu_flag = false;
-  std::string vendor = getCPUVendor();
-  if (vendor == "GenuineIntel") {
-      std::cout << "This is an Intel CPU.\n";
-  } else if (vendor == "AuthenticAMD") {
-      std::cout << "This is an AMD CPU.\n";
-      cpu_flag = true;
-  } else {
-      std::cout << "Unknown CPU manufacturer.\n";
-  }
-  // long long test_n = 1024 * 1024 * 10 * 10 * 3;
-  // int chunk = 1024 * 10;
   int num_of_chunk = test_n / chunk;
   FpOSTriple<NetIO> ostriple(party, threads, ios);
   blake3_hasher hasher;
@@ -69,8 +36,6 @@ void test_circuit_zk(NetIO *ios[threads + 1], int party,
   b_u_0 = b_u;
   
   auto start= clock_start();
-  auto setup= 0;
-  auto prove= 0;
 
   start= clock_start();
   uint64_t ar = 2, br = 3;
@@ -78,7 +43,7 @@ void test_circuit_zk(NetIO *ios[threads + 1], int party,
     br = add_mod(ar, br);
     ar = mult_mod(ar, br);
   }
-  cout << test_n << "Plant test eval\t" << double(test_n)/(time_from(start))*1000000 << "\t" << party << " " << endl;
+  // cout << test_n << "Plant test eval\t" << double(test_n)/(time_from(start))*1000000 << "\t" << party << " " << endl;
 
   ar = 2, br = 3;
   for (int j = 0; j < num_of_chunk; ++j) {
@@ -112,9 +77,6 @@ void test_circuit_zk(NetIO *ios[threads + 1], int party,
     a_u = ao[chunk];
     ostriple.andgate_correctness_check_manage();
     ostriple.check_cnt = 0;
-    setup += time_from(start);
-
-    // cout << "SetUp\t" << endl;
     
     if (party == ALICE) {
       start = clock_start();
@@ -201,7 +163,6 @@ void test_circuit_zk(NetIO *ios[threads + 1], int party,
         std::cout<<"JQv1 fail!\n";
       
     }
-    prove += time_from(start);
   }
 
   // if (party == ALICE) { 
@@ -232,6 +193,8 @@ int main(int argc, char **argv) {
   party = atoi (argv[1]);
 	port = atoi (argv[2]);
   ip = argv[3];
+  test_n = atoi (argv[4]);
+  chunk = atoi (argv[5]);
   NetIO *ios[threads];
   for (int i = 0; i < threads; ++i)
     ios[i] = new NetIO(party == ALICE ? nullptr : ip, port + i);

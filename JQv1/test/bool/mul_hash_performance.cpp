@@ -18,47 +18,15 @@
 using namespace emp;
 using namespace std;
 
-int port, party;
+int port, party, chunk;
+long long len;
 char *ip;
 const int threads = 1;
 
-std::string getCPUVendor() {
-    std::ifstream cpuinfo("/proc/cpuinfo");
-    if (!cpuinfo) {
-        // std::cerr << "Error: Unable to open /proc/cpuinfo\n";
-        return "Unknown";
-    }
-
-    std::string line, vendor = "Unknown";
-    while (std::getline(cpuinfo, line)) {
-        if (line.find("vendor_id") != std::string::npos) {
-            size_t pos = line.find(':');
-            if (pos != std::string::npos) {
-                vendor = line.substr(pos + 2);
-                break;
-            }
-        }
-    }
-    return vendor;
-}
 
 void test_compute_and_gate_check_JQv1(OSTriple<BoolIO<NetIO>> *os,
                                  BoolIO<NetIO> *io) {
   PRG prg;
-  // long long len = 300000000;
-  // int chunk = 30000000;
-  bool cpu_flag = false;
-  std::string vendor = getCPUVendor();
-  if (vendor == "GenuineIntel") {
-      std::cout << "This is an Intel CPU.\n";
-  } else if (vendor == "AuthenticAMD") {
-      std::cout << "This is an AMD CPU.\n";
-      cpu_flag = true;
-  } else {
-      std::cout << "Unknown CPU manufacturer.\n";
-  }
-  long long len = 30000000;
-  int chunk = 10000000;
   int num_of_chunk = len / chunk;
   blake3_hasher hasher;
   blake3_hasher_init(&hasher);
@@ -78,8 +46,6 @@ void test_compute_and_gate_check_JQv1(OSTriple<BoolIO<NetIO>> *os,
   // }
 
   auto start= clock_start();
-  auto setup= 0;
-  auto prove= 0;
 
   // start= clock_start();
   // bool ar = true, br = false;
@@ -103,7 +69,6 @@ void test_compute_and_gate_check_JQv1(OSTriple<BoolIO<NetIO>> *os,
     os->andgate_correctness_check_manage();
     os->check_cnt = 0;
 
-    setup += time_from(start);
 
     start = clock_start();
     if (party == ALICE) {
@@ -186,7 +151,6 @@ void test_compute_and_gate_check_JQv1(OSTriple<BoolIO<NetIO>> *os,
         std::cout<<"JQv1 fail!\n";
       
     }
-    prove += time_from(start);
   }
 
   // cout << "Setup time: " << setup / 1000 << "ms " << party
@@ -231,6 +195,8 @@ int main(int argc, char **argv) {
   party = atoi (argv[1]);
 	port = atoi (argv[2]);
   ip = argv[3];
+  len = atoi (argv[4]);
+  chunk = atoi (argv[5]);
   BoolIO<NetIO> *ios[threads];
   for (int i = 0; i < threads; ++i)
     ios[i] = new BoolIO<NetIO>(
