@@ -144,11 +144,16 @@ void test_gmp_multiplication(int chunk, const char *bstr, int bitlen) {
 int main(int argc, char **argv) {
     parse_party_and_port(argv, &party, &port);
     BoolIO<NetIO> *bios[threads];
+    NetIO *ios[threads];
+    for (int i = 0; i < threads; ++i)
+        ios[i] = new NetIO(party == ALICE ? nullptr : "127.0.0.1", port + i);
+
     for (int i = 0; i < threads; ++i)
         bios[i] = new BoolIO<NetIO>(
             new NetIO(party == ALICE ? nullptr : "127.0.0.1", port + threads + 1 + i),
             party == ALICE);
     
+    FpOSTriple<NetIO> ostriple(party, threads, ios);
     OSTriple<BoolIO<NetIO>> bos(party, threads, bios);
     int chunk = 30000000;
 
@@ -157,8 +162,8 @@ int main(int argc, char **argv) {
     __uint128_t* a = new __uint128_t[chunk];
     __uint128_t pro;
     for (int i = 0; i < chunk; ++i) {
-        std::srand(std::time(0));
-        a[i] = rand() % PR;
+        // a[i] = rand() % PR;
+        a[i] = ostriple.random_val_input();
     }
     const char *str = "2305843009213693951";
 
