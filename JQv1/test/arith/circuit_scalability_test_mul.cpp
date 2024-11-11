@@ -114,7 +114,7 @@ void test_circuit_zk(NetIO *ios[threads + 1], int party,
     ostriple.check_cnt = 0;
     setup += time_from(start);
 
-    cout << "SetUp\t" << endl;
+    // cout << "SetUp\t" << endl;
     
     if (party == ALICE) {
       start = clock_start();
@@ -164,34 +164,44 @@ void test_circuit_zk(NetIO *ios[threads + 1], int party,
         pro = mult_mod(pro, LOW64(ab[i]));
       } 
       cout << chunk << "mul time \t" << time_from(multime) << "\t" << party << " " << endl;
-      
-      if (cpu_flag) {
-        auto hashtime = clock_start();
-        block hash_output = Hash::hash_for_block(ab, sizeof(uint64_t) * (chunk));
-        cout << chunk << "hash time \t" << time_from(hashtime) << "\t" << party << " " << endl;
-        ios[0]->send_data(&hash_output, sizeof(block));
-      } else {
-        auto hashtime = clock_start();
-        blake3_hasher_update(&hasher, ab, sizeof(uint64_t) * (chunk));
-        blake3_hasher_finalize(&hasher, output, BLAKE3_OUT_LEN);
-        cout << chunk << "hash time \t" << time_from(hashtime) << "\t" << party << " " << endl;
-        ios[0]->send_data(&output, BLAKE3_OUT_LEN);
-      }
+      ios[0]->send_data(&pro, sizeof(__uint128_t));
+      // if (cpu_flag) {
+      //   auto hashtime = clock_start();
+      //   block hash_output = Hash::hash_for_block(ab, sizeof(uint64_t) * (chunk));
+      //   cout << chunk << "hash time \t" << time_from(hashtime) << "\t" << party << " " << endl;
+      //   ios[0]->send_data(&hash_output, sizeof(block));
+      // } else {
+      //   auto hashtime = clock_start();
+      //   blake3_hasher_update(&hasher, ab, sizeof(uint64_t) * (chunk));
+      //   blake3_hasher_finalize(&hasher, output, BLAKE3_OUT_LEN);
+      //   cout << chunk << "hash time \t" << time_from(hashtime) << "\t" << party << " " << endl;
+      //   ios[0]->send_data(&output, BLAKE3_OUT_LEN);
+      // }
       
       
     } else {
-      if (cpu_flag) {
-        block hash_output = Hash::hash_for_block(ab, sizeof(uint64_t) * (chunk));
-        ios[0]->recv_data(&output_recv, sizeof(block));
-        if (memcmp(&hash_output, &output_recv, sizeof(block)) != 0)
-          std::cout<<"JQv1 fail!\n";
-      } else {
-        blake3_hasher_update(&hasher, ab, sizeof(uint64_t) * (chunk));
-        blake3_hasher_finalize(&hasher, output, BLAKE3_OUT_LEN);
-        ios[0]->recv_data(&output_recv, BLAKE3_OUT_LEN);
-        if (memcmp(output, output_recv, BLAKE3_OUT_LEN) != 0)
-          std::cout<<"JQv1 fail!\n";
-      }
+      auto multime = clock_start();
+      __uint128_t pro,output;
+      pro = ab[0];
+      for (int i = 1; i < chunk; i++) {
+        pro = mult_mod(pro, LOW64(ab[i]));
+      } 
+      cout << chunk << "mul time \t" << time_from(multime) << "\t" << party << " " << endl;
+      ios[0]->recv_data(&output, sizeof(__uint128_t));
+      if (output != pro)
+            std::cout<<"JQv1 fail!\n";
+      // if (cpu_flag) {
+      //   block hash_output = Hash::hash_for_block(ab, sizeof(uint64_t) * (chunk));
+      //   ios[0]->recv_data(&output_recv, sizeof(block));
+      //   if (memcmp(&hash_output, &output_recv, sizeof(block)) != 0)
+      //     std::cout<<"JQv1 fail!\n";
+      // } else {
+      //   blake3_hasher_update(&hasher, ab, sizeof(uint64_t) * (chunk));
+      //   blake3_hasher_finalize(&hasher, output, BLAKE3_OUT_LEN);
+      //   ios[0]->recv_data(&output_recv, BLAKE3_OUT_LEN);
+      //   if (memcmp(output, output_recv, BLAKE3_OUT_LEN) != 0)
+      //     std::cout<<"JQv1 fail!\n";
+      // }
     }
     prove += time_from(start);
   }
