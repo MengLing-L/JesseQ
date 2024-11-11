@@ -150,26 +150,28 @@ int main(int argc, char **argv) {
             party == ALICE);
     
     OSTriple<BoolIO<NetIO>> bos(party, threads, bios);
-    int chunk = 1000000;
+    int chunk = 30000000;
 
     
     auto start = clock_start();  
     __uint128_t* a = new __uint128_t[chunk];
-    __uint128_t pro = 1;
+    __uint128_t pro;
     for (int i = 0; i < chunk; ++i) {
         std::srand(std::time(0));
         a[i] = rand() % PR;
     }
-    if (party == ALICE){
-        const char *str = "2305843009213693951";
+    const char *str = "2305843009213693951";
 
-        cout << " ---------------- " << chunk << " " << 61 << "-bit field multiplications" << " ---------------- " << endl;
-        
-        start = clock_start();
-        for (int i = 0; i < (chunk); ++i) { 
-            pro = mult_mod(LOW64(a[i]), pro);
-        }
-        cout << "Mul Speed: \t\t\t" << time_from(start)<< " us \t" << endl;
+    cout << " ---------------- " << chunk << " " << 61 << "-bit field multiplications" << " ---------------- " << endl;
+    
+    start = clock_start();
+    pro = a[0];
+    for (int i = 1; i < chunk; i++) {
+        pro = mult_mod(pro, LOW64(a[i]));
+    } 
+    cout << "Mul Speed: \t\t\t" << time_from(start)<< " us \t" << endl;
+    if (party == ALICE){
+       
         test_openssl_multiplication(chunk, str, 61);
 
         test_gmp_multiplication(chunk, str, 61);
@@ -203,20 +205,21 @@ int main(int argc, char **argv) {
 
     block *ab = new block[chunk];
     bos.random_bits_input(ab, chunk);
+    const char *str128 = "340282366920938463463374607431768211459";
+
+    cout << " ---------------- " << chunk << " " << 128 << "-bit field multiplications" << " ---------------- " << endl;
+    start = clock_start();
+    block tmp;
+    gfmul(ab[0], ab[1], &tmp);
+    for (int i = 0; i < chunk; ++i) { 
+        // cout << LOW64(ab[i]) << endl;
+        gfmul(tmp, ab[i], &tmp);
+    }
+    cout << "__m128i Mul Speed: \t\t" << (time_from(start)) << "us \t" << endl;
+
 
     if (party == ALICE){
-        const char *str128 = "340282366920938463463374607431768211459";
-
-        cout << " ---------------- " << chunk << " " << 128 << "-bit field multiplications" << " ---------------- " << endl;
-        start = clock_start();
-        block tmp;
-        gfmul(ab[0], ab[1], &tmp);
-        for (int i = 0; i < chunk; ++i) { 
-            // cout << LOW64(ab[i]) << endl;
-            gfmul(tmp, ab[i], &tmp);
-        }
-        cout << "__m128i Mul Speed: \t\t" << (time_from(start)) << "us \t" << endl;
-
+        
         size_t total_bytes = chunk * sizeof(block);
         char *binary_data = new char[total_bytes];
 
