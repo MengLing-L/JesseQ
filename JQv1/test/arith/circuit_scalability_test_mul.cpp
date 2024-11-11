@@ -165,18 +165,18 @@ void test_circuit_zk(NetIO *ios[threads + 1], int party,
       } 
       cout << chunk << "mul time \t" << time_from(multime) << "\t" << party << " " << endl;
       ios[0]->send_data(&pro, sizeof(__uint128_t));
-      // if (cpu_flag) {
-      //   auto hashtime = clock_start();
-      //   block hash_output = Hash::hash_for_block(ab, sizeof(uint64_t) * (chunk));
-      //   cout << chunk << "hash time \t" << time_from(hashtime) << "\t" << party << " " << endl;
-      //   ios[0]->send_data(&hash_output, sizeof(block));
-      // } else {
-      //   auto hashtime = clock_start();
-      //   blake3_hasher_update(&hasher, ab, sizeof(uint64_t) * (chunk));
-      //   blake3_hasher_finalize(&hasher, output, BLAKE3_OUT_LEN);
-      //   cout << chunk << "hash time \t" << time_from(hashtime) << "\t" << party << " " << endl;
-      //   ios[0]->send_data(&output, BLAKE3_OUT_LEN);
-      // }
+      if (cpu_flag) {
+        auto hashtime = clock_start();
+        block hash_output = Hash::hash_for_block(ab, sizeof(uint64_t) * (chunk));
+        cout << chunk << "hash time \t" << time_from(hashtime) << "\t" << party << " " << endl;
+        ios[0]->send_data(&hash_output, sizeof(block));
+      } else {
+        auto hashtime = clock_start();
+        blake3_hasher_update(&hasher, ab, sizeof(uint64_t) * (chunk));
+        blake3_hasher_finalize(&hasher, output, BLAKE3_OUT_LEN);
+        cout << chunk << "hash time \t" << time_from(hashtime) << "\t" << party << " " << endl;
+        ios[0]->send_data(&output, BLAKE3_OUT_LEN);
+      }
       
       
     } else {
@@ -190,18 +190,18 @@ void test_circuit_zk(NetIO *ios[threads + 1], int party,
       ios[0]->recv_data(&output, sizeof(__uint128_t));
       if (output != pro)
             std::cout<<"JQv1 fail!\n";
-      // if (cpu_flag) {
-      //   block hash_output = Hash::hash_for_block(ab, sizeof(uint64_t) * (chunk));
-      //   ios[0]->recv_data(&output_recv, sizeof(block));
-      //   if (memcmp(&hash_output, &output_recv, sizeof(block)) != 0)
-      //     std::cout<<"JQv1 fail!\n";
-      // } else {
-      //   blake3_hasher_update(&hasher, ab, sizeof(uint64_t) * (chunk));
-      //   blake3_hasher_finalize(&hasher, output, BLAKE3_OUT_LEN);
-      //   ios[0]->recv_data(&output_recv, BLAKE3_OUT_LEN);
-      //   if (memcmp(output, output_recv, BLAKE3_OUT_LEN) != 0)
-      //     std::cout<<"JQv1 fail!\n";
-      // }
+      if (cpu_flag) {
+        block hash_output = Hash::hash_for_block(ab, sizeof(uint64_t) * (chunk));
+        ios[0]->recv_data(&output_recv, sizeof(block));
+        if (memcmp(&hash_output, &output_recv, sizeof(block)) != 0)
+          std::cout<<"JQv1 fail!\n";
+      } else {
+        blake3_hasher_update(&hasher, ab, sizeof(uint64_t) * (chunk));
+        blake3_hasher_finalize(&hasher, output, BLAKE3_OUT_LEN);
+        ios[0]->recv_data(&output_recv, BLAKE3_OUT_LEN);
+        if (memcmp(output, output_recv, BLAKE3_OUT_LEN) != 0)
+          std::cout<<"JQv1 fail!\n";
+      }
     }
     prove += time_from(start);
   }
