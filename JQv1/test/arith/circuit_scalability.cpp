@@ -64,13 +64,18 @@ void test_circuit_zk(NetIO *ios[threads + 1], int party,
   __uint128_t a_u, b_u, b_u_0;
   uint64_t db;
   // ao[0] = ostriple.random_val_input();
-  a_u = ostriple.random_val_input();
-  b_u = ostriple.random_val_input();
-  b_u_0 = b_u;
+
   
   auto start= clock_start();
   auto setup= 0;
+  auto circuit_independe_setup=0;
+  auto start_circuit_in =clock_start();
   auto prove= 0;
+  start_circuit_in = clock_start();
+  a_u = ostriple.random_val_input();
+  b_u = ostriple.random_val_input();
+  b_u_0 = b_u;
+  circuit_independe_setup += time_from(start_circuit_in);
 
   start= clock_start();
   uint64_t ar = 2, br = 3;
@@ -97,7 +102,9 @@ void test_circuit_zk(NetIO *ios[threads + 1], int party,
         tmp = ostriple.auth_compute_mul_send(ao[i], b_u);
         tmp = PR - LOW64(tmp);
         ab[i] = add_mod(LOW64(tmp), LOW64(ab_));
+        start_circuit_in = clock_start();
         ao[i + 1] = ostriple.random_val_input();
+        circuit_independe_setup += time_from(start_circuit_in);
         ab[i] = add_mod(ab[i], LOW64(ao[i + 1]));
       } else {
         b_u = mod(ao[i] + b_u, pr);
@@ -106,7 +113,9 @@ void test_circuit_zk(NetIO *ios[threads + 1], int party,
         tmp = ostriple.auth_compute_mul_recv(ao[i], b_u);
         tmp = PR - tmp;
         ab[i] = add_mod(tmp, ab_);
+        start_circuit_in = clock_start();
         ao[i + 1] = ostriple.random_val_input();
+        circuit_independe_setup += time_from(start_circuit_in);
       }
     }
     a_u = ao[chunk];
@@ -194,11 +203,15 @@ void test_circuit_zk(NetIO *ios[threads + 1], int party,
     ostriple.reveal_check_recv(&(ao[chunk]), &ar, 1);
   }
 
-  cout << "Setup time: " << setup / 1000 << "ms " << party
+  cout << "Total Setup time: " << setup / 1000 << " ms " << party
+        << " " << endl;
+  cout << "Circui-independ Setup time: " << circuit_independe_setup / 1000 << " ms " << party
+        << " " << endl;
+  cout << "Circui-depend Setup time: " << (setup - circuit_independe_setup) / 1000 << " ms " << party
         << " " << endl;
 
-  cout << test_n << "\t" << (prove) << "\t" << party << " " << endl;
-  cout << test_n << "\t" << double(test_n)/(prove)*1000000 << "\t" << party << " " << endl;
+  cout << test_n << "\t Prove time: " << (prove)/ 1000 << " ms " << "\t" << party << " " << endl;
+  cout << test_n << "\t" << double(test_n)/(prove)*1000000 << "\t M/s " << party << " " << endl;
   std::cout << std::endl;
 
   delete[] ao;
