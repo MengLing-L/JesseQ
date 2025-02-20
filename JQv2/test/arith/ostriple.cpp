@@ -6,7 +6,7 @@ using namespace std;
 
 int port, party;
 char *ip;
-const int threads = 1;
+const int threads = 2;
 
 void extreme_layered_circuit(uint64_t &in) {
   if (party == ALICE) {

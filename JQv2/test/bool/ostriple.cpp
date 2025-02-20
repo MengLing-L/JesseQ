@@ -15,7 +15,7 @@ using namespace std;
 
 int port, party;
 char *ip;
-const int threads = 1;
+const int threads = 2;
 
 void random_input_set(bool*& in, int len) {
   if (party == ALICE) {
