@@ -68,10 +68,7 @@ void test_compute_and_gate_check_JQv1(OSTriple<BoolIO<NetIO>> *os,
   block *ab = new block[chunk];
   block a_u, b_u, b_u_0;
   bool db;
-  os->random_bits_input(a, chunk + 1);
-  os->random_bits_input(&b_u, 1);
-  a_u = a[0];
-  b_u_0 = b_u;
+  
   
   // if (party == ALICE) {
   //   prg.random_bool(ain, 2 * chunk);
@@ -80,6 +77,14 @@ void test_compute_and_gate_check_JQv1(OSTriple<BoolIO<NetIO>> *os,
   auto start= clock_start();
   auto setup= 0;
   auto prove= 0;
+  auto circuit_independe_setup=0;
+  auto start_circuit_in =clock_start();
+  start_circuit_in = clock_start();
+  os->random_bits_input(a, chunk + 1);
+  os->random_bits_input(&b_u, 1);
+  a_u = a[0];
+  b_u_0 = b_u;
+  circuit_independe_setup += time_from(start_circuit_in);
 
   // start= clock_start();
   // bool ar = true, br = false;
@@ -173,10 +178,16 @@ void test_compute_and_gate_check_JQv1(OSTriple<BoolIO<NetIO>> *os,
     prove += time_from(start);
   }
 
-  cout << "Setup time: " << setup / 1000 << "ms " << party
+  cout << "Total Setup time: " << (setup + circuit_independe_setup) / 1000 << " ms " << party
+        << " " << endl;
+  cout << "Circui-independ Setup time: " << circuit_independe_setup / 1000 << " ms " << party
+        << " " << endl;
+  cout << "Circui-depend Setup time: " << (setup) / 1000 << " ms " << party
         << " " << endl;
 
-  cout << len << "\t" << (prove) << "\t" << party << " " << endl;
+  // cout << len << "\t" << (prove) << "\t" << party << " " << endl;
+  cout << len << "\t Prove time: " << (prove)/ 1000 << " ms " << "\t" << party << " " << endl;
+
   cout << len << "\t" << double(len)/(prove)*1000000 << "\t" << party << " " << endl;
 
   delete[] a;
