@@ -4,7 +4,7 @@ import subprocess
 
 ban = '''
 sudo tc qdisc del dev ens5 root
-sudo tc qdisc add dev ens5 root handle 1: tbf rate 500Mbit latency 5ms burst 62500k 
+sudo tc qdisc add dev ens5 root handle 1: tbf rate 20Mbit latency 5ms burst 2000k 
 '''
 print(ban)
 subprocess.call(["bash", "-c", ban])
@@ -26,7 +26,7 @@ subprocess.call(["bash", "-c", QS_arith])
 
 ban = '''
 sudo tc qdisc del dev ens5 root
-sudo tc qdisc add dev ens5 root handle 1: tbf rate 1000Mbit latency 5ms burst 100000k 
+sudo tc qdisc add dev ens5 root handle 1: tbf rate 30Mbit latency 5ms burst 3750k 
 '''
 print(ban)
 subprocess.call(["bash", "-c", ban])
@@ -52,7 +52,7 @@ subprocess.call(["bash", "-c", QS_arith])
 
 ban = '''
 sudo tc qdisc del dev ens5 root
-sudo tc qdisc add dev ens5 root handle 1: tbf rate 2000Mbit latency 5ms burst 200000k 
+sudo tc qdisc add dev ens5 root handle 1: tbf rate 50Mbit latency 5ms burst 6250k 
 '''
 print(ban)
 subprocess.call(["bash", "-c", ban])
