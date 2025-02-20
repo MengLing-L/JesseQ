@@ -49,19 +49,19 @@ subprocess.call(["bash", "-c", JQv2_arith])
 
 
 EMP_arith = '''
-./emp-zk/bin/test_arith_circuit_scalability  1 12345 10000
-'''
-print(EMP_arith)
-subprocess.call(["bash", "-c", EMP_arith])
-
-EMP_arith = '''
-./emp-zk/bin/test_arith_circuit_scalability  1 12345 100000
-'''
-print(EMP_arith)
-subprocess.call(["bash", "-c", EMP_arith])
-
-EMP_arith = '''
 ./emp-zk/bin/test_arith_circuit_scalability  1 12345 1000000
+'''
+print(EMP_arith)
+subprocess.call(["bash", "-c", EMP_arith])
+
+EMP_arith = '''
+./emp-zk/bin/test_arith_circuit_scalability  1 12345 10000000
+'''
+print(EMP_arith)
+subprocess.call(["bash", "-c", EMP_arith])
+
+EMP_arith = '''
+./emp-zk/bin/test_arith_circuit_scalability  1 12345 100000000
 '''
 print(EMP_arith)
 subprocess.call(["bash", "-c", EMP_arith])
