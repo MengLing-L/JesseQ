@@ -17,7 +17,7 @@ subprocess.call(["bash", "-c", JQv1_arith])
 
 
 QS_arith = '''
-./emp-zk/bin/test_arith_circuit_scalability 1 12345 0
+./emp-zk/bin/test_bool_circuit_scalability 1 12345 0
 '''
 print(QS_arith)
 subprocess.call(["bash", "-c", QS_arith])
@@ -38,7 +38,7 @@ print(JQv1_arith)
 subprocess.call(["bash", "-c", JQv1_arith])
 
 QS_arith = '''
-./emp-zk/bin/test_arith_circuit_scalability 1 12345 0
+./emp-zk/bin/test_bool_circuit_scalability 1 12345 0
 '''
 print(QS_arith)
 subprocess.call(["bash", "-c", QS_arith])
@@ -64,7 +64,7 @@ print(JQv1_arith)
 subprocess.call(["bash", "-c", JQv1_arith])
 
 QS_arith = '''
-./emp-zk/bin/test_arith_circuit_scalability 1 12345 0
+./emp-zk/bin/test_bool_circuit_scalability 1 12345 0
 '''
 print(QS_arith)
 subprocess.call(["bash", "-c", QS_arith])
