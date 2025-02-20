@@ -9,18 +9,18 @@ sudo tc qdisc add dev ens5 root handle 1: tbf rate 500Mbit latency 5ms burst 625
 print(ban)
 subprocess.call(["bash", "-c", ban])
 
-JQv1_arith = '''
-./JQv1/bin/test_arith_circuit_scalability 2 12345 172.31.44.28
-'''
-print(JQv1_arith)
-subprocess.call(["bash", "-c", JQv1_arith])
+# JQv1_arith = '''
+# ./JQv1/bin/test_arith_circuit_scalability 2 12345 172.31.44.28
+# '''
+# print(JQv1_arith)
+# subprocess.call(["bash", "-c", JQv1_arith])
 
 
 QS_arith = '''
 ./emp-zk/bin/test_arith_circuit_scalability 2 12345 172.31.44.28
 '''
-print(JQv1_arith)
-subprocess.call(["bash", "-c", JQv1_arith])
+print(QS_arith)
+subprocess.call(["bash", "-c", QS_arith])
 
 
 
@@ -31,17 +31,23 @@ sudo tc qdisc add dev ens5 root handle 1: tbf rate 1000Mbit latency 5ms burst 10
 print(ban)
 subprocess.call(["bash", "-c", ban])
 
-JQv1_arith = '''
-./JQv1/bin/test_arith_circuit_scalability 2 12345 172.31.44.28
-'''
-print(JQv1_arith)
-subprocess.call(["bash", "-c", JQv1_arith])
+# JQv1_arith = '''
+# ./JQv1/bin/test_arith_circuit_scalability 2 12345 172.31.44.28
+# '''
+# print(JQv1_arith)
+# subprocess.call(["bash", "-c", JQv1_arith])
 
 QS_arith = '''
 ./emp-zk/bin/test_arith_circuit_scalability 2 12345 172.31.44.28
 '''
-print(JQv1_arith)
-subprocess.call(["bash", "-c", JQv1_arith])
+print(QS_arith)
+subprocess.call(["bash", "-c", QS_arith])
+
+# JQv2_arith = '''
+# ./JQv2/bin/test_arith_ostriple 2 12345 172.31.44.28
+# '''
+# print(JQv2_arith)
+# subprocess.call(["bash", "-c", JQv2_arith])
 
 
 ban = '''
@@ -51,17 +57,18 @@ sudo tc qdisc add dev ens5 root handle 1: tbf rate 2000Mbit latency 5ms burst 20
 print(ban)
 subprocess.call(["bash", "-c", ban])
 
-JQv1_arith = '''
-./JQv1/bin/test_arith_circuit_scalability 2 12345 172.31.44.28
-'''
-print(JQv1_arith)
-subprocess.call(["bash", "-c", JQv1_arith])
+# JQv1_arith = '''
+# ./JQv1/bin/test_arith_circuit_scalability 2 12345 172.31.44.28
+# '''
+# print(JQv1_arith)
+# subprocess.call(["bash", "-c", JQv1_arith])
 
 QS_arith = '''
 ./emp-zk/bin/test_arith_circuit_scalability 2 12345 172.31.44.28
 '''
-print(JQv1_arith)
-subprocess.call(["bash", "-c", JQv1_arith])
+print(QS_arith)
+subprocess.call(["bash", "-c", QS_arith])
+
 
 # JQv2_arith = '''
 # ./JQv2/bin/test_arith_ostriple 2 12345 172.31.44.28
