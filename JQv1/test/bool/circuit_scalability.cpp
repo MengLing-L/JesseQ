@@ -20,7 +20,7 @@ using namespace std;
 
 int port, party;
 char *ip;
-const int threads = 2;
+const int threads = 4;
 
 std::string getCPUVendor() {
     std::ifstream cpuinfo("/proc/cpuinfo");
