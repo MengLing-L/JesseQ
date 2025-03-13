@@ -73,6 +73,10 @@ public:
     return val;
   }
 
+  void random_val_input(__uint128_t *label, int len) {
+    vole->extend(label, len);
+  }
+
   void auth_compute_mul_send_with_setup(const __uint128_t Ma,const __uint128_t Mb, uint64_t wa, uint64_t wb, __uint128_t &H1) {
     // uint64_t wc = mult_mod(wa,wb);
     uint64_t sa = PR - wa, sb = PR - wb;

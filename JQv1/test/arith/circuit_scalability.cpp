@@ -68,14 +68,10 @@ void test_circuit_zk(NetIO *ios[threads + 1], int party,
   
   auto start= clock_start();
   auto setup= 0;
-  auto circuit_independe_setup=0;
-  auto start_circuit_in =clock_start();
   auto prove= 0;
-  start_circuit_in = clock_start();
   a_u = ostriple.random_val_input();
   b_u = ostriple.random_val_input();
   b_u_0 = b_u;
-  circuit_independe_setup += time_from(start_circuit_in);
 
   start= clock_start();
   uint64_t ar = 2, br = 3;
@@ -87,15 +83,6 @@ void test_circuit_zk(NetIO *ios[threads + 1], int party,
 
   ar = 2, br = 3;
   for (int j = 0; j < num_of_chunk; ++j) {
-    start_circuit_in = clock_start();
-    for (int i = 0; i < chunk; ++i) {
-      if (party == ALICE) {
-        ao[i + 1] = ostriple.random_val_input();
-      } else {
-        ao[i + 1] = ostriple.random_val_input();
-      }
-    }
-    circuit_independe_setup += time_from(start_circuit_in);
     start = clock_start();
     for (int i = 0; i < chunk; ++i) {
       __uint128_t ab_, tmp;
@@ -103,6 +90,7 @@ void test_circuit_zk(NetIO *ios[threads + 1], int party,
         ao[i] = a_u;
       }
       if (party == ALICE) {
+        ao[i + 1] = ostriple.random_val_input();
         __uint128_t val = mod((ao[i] >> 64) + (b_u >> 64), pr);
         __uint128_t mac = mod((ao[i] & 0xFFFFFFFFFFFFFFFFULL) + (b_u & 0xFFFFFFFFFFFFFFFFULL), pr);
         b_u = (val << 64) ^ mac;
@@ -113,6 +101,7 @@ void test_circuit_zk(NetIO *ios[threads + 1], int party,
         ab[i] = add_mod(LOW64(tmp), LOW64(ab_));
         ab[i] = add_mod(ab[i], LOW64(ao[i + 1]));
       } else {
+        ao[i + 1] = ostriple.random_val_input();
         b_u = mod(ao[i] + b_u, pr);
         ab_ = mult_mod(ao[i], b_u);
         ab_ = PR - ab_;
@@ -206,10 +195,6 @@ void test_circuit_zk(NetIO *ios[threads + 1], int party,
     ostriple.reveal_check_recv(&(ao[chunk]), &ar, 1);
   }
 
-  cout << "Total Setup time: " << (setup + circuit_independe_setup) / 1000 << " ms " << party
-        << " " << endl;
-  cout << "Circui-independ Setup time: " << circuit_independe_setup / 1000 << " ms " << party
-        << " " << endl;
   cout << "Circui-depend Setup time: " << (setup) / 1000 << " ms " << party
         << " " << endl;
 
