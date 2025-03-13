@@ -78,5 +78,9 @@ public:
   __uint128_t auth_compute_mul(__uint128_t &a, __uint128_t &b) {
     return ostriple->auth_compute_mul_send(a, b);
   }
+
+  void mul_delta(__uint128_t &res, __uint128_t &a) {
+    
+  }
 };
 #endif

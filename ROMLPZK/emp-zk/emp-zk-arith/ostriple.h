@@ -138,6 +138,10 @@ public:
     H1 = add_mod(tmp, H1);
   }
 
+  void mul_delta(__uint128_t &res,const __uint128_t &a) {
+    res = mult_mod(a, delta);
+  }
+
   uint64_t auth_compute_mul_send_with_setup(__uint128_t &Ma, __uint128_t &Mb, __uint128_t &Mc,
                                                uint64_t Mabc, uint64_t wa, uint64_t wb) {
     uint64_t wc = mult_mod(wa,wb);
@@ -418,7 +422,8 @@ public:
   }
 
   /*
-   * authenticated bits for inputs of the prover
+   * authenticated bits for inputs of the prover in LPZK (witness place in the m position)
+   * namely, k = w (witness) - u\cdot x
    */
 
   __uint128_t authenticated_val_input(uint64_t w) {
@@ -426,9 +431,9 @@ public:
     vole->extend(&mac, 1);
 
     uint64_t lam = PR - w;
-    lam = add_mod(HIGH64(mac), lam);
+    lam = add_mod(LOW64(mac), lam);
     io->send_data(&lam, sizeof(uint64_t));
-    return (__uint128_t)makeBlock(w, LOW64(mac));
+    return (__uint128_t)makeBlock(HIGH64(mac), w);
   }
 
   void authenticated_val_input(__uint128_t *label, const uint64_t *w, int len) {
@@ -450,8 +455,7 @@ public:
 
     uint64_t lam;
     io->recv_data(&lam, sizeof(uint64_t));
-
-    lam = mult_mod(lam, delta);
+    lam = PR - lam;
     key = add_mod(key, lam);
 
     return key;

@@ -28,10 +28,10 @@ public:
   }
 
   IntFp(uint64_t input, bool flag=1) {
-      ZKFpExec::zk_exec->feed(value, input, d);
+      ZKFpExec::zk_exec->feed(value, input);
   }
 
-  __uint128_t get_u(){
+  __uint128_t get_w(){
     return this->value;
   }
 
@@ -83,6 +83,10 @@ public:
 //   return ZKFpExec::zk_exec->random_val_input();
 // }
 
+static inline void mul_delta(__uint128_t &res, __uint128_t &a){
+  ZKFpExec::zk_exec->mul_delta(res, a);
+}
+
 static inline __uint128_t auth_compute_mul(__uint128_t &a, __uint128_t &b){
   return ZKFpExec::zk_exec->auth_compute_mul(a, b);
 }
@@ -120,5 +124,10 @@ inline void fp_zkp_inner_prdt(IntFp *x, IntFp *y, uint64_t constant, int len) {
 template <typename IO>
 inline void fp_zkp_inner_prdt(__uint128_t *au, __uint128_t *bu, uint64_t *da, uint64_t *db, __uint128_t *mamb_my, uint64_t constant, int len) {
   FpPolyProof<IO>::fppolyproof->zkp_inner_prdt(au, bu, da, db, mamb_my, constant, len);
+}
+
+template <typename IO>
+inline void fp_zkp_inner_prdt_lpzk(__uint128_t *au, __uint128_t *bu, __uint128_t *mamb_my, uint64_t constant, int len) {
+  FpPolyProof<IO>::fppolyproof->zkp_inner_prdt_lpzk(au, bu, mamb_my, constant, len);
 }
 #endif

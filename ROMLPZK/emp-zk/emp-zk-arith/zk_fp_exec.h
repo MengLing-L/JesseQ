@@ -41,6 +41,8 @@ public:
   virtual void random_val_input(__uint128_t &label) = 0;
 
   virtual __uint128_t auth_compute_mul(__uint128_t &a, __uint128_t &b) = 0;
+
+  virtual void mul_delta(__uint128_t &res, __uint128_t &a) = 0;
 };
 
 // ZKFpExec * ZKFpExec::zk_exec = nullptr;

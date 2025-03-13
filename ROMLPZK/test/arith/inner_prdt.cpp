@@ -50,25 +50,31 @@ void test_inner_product(BoolIO<NetIO> *ios[threads], int party) {
   IntFp wit;
   for (int i = 0; i < 2 * sz; ++i) {
     wit = IntFp(witness[i], true);
-    x[i] = wit.get_u();
-    d[i] = wit.get_d();
+    x[i] = wit.get_w();
   }
-  __uint128_t ab_, tmp;
+  
+  // if (party == ALICE) {
+  //   ios[0]->send_data(&x[0], sizeof(__uint128_t));
+  // } else {
+  //   __uint128_t tmp, tmp1, tmp2;
+  //   ios[0]->recv_data(&tmp, sizeof(__uint128_t));
+  //   tmp1 = HIGH64(tmp);
+  //   mul_delta(tmp2, tmp1);
+  //   tmp2 = PR - tmp2;
+  //   tmp2 = add_mod(LOW64(tmp), tmp2);
+  //   if (tmp2 != x[0])
+  //       std::cout<<"authen fail!\n";
+  // }
+
+  __uint128_t ab_;
   if (party == ALICE) {
     for (int i = 0; i < sz; ++i) {
-      ab_ = auth_compute_mul(x[i],x[sz + i]);
-      ab_ = PR - LOW64(ab_);
-      tmp = mult_mod(LOW64(x[i]), LOW64(x[sz + i]));
-      tmp = PR - LOW64(tmp);
-      ab[i] = add_mod(LOW64(tmp), LOW64(ab_));
+      ab[i] = auth_compute_mul(x[i],x[sz + i]);
     }
   } else {
     for (int i = 0; i < sz; ++i) {
       ab_ = auth_compute_mul(x[i],x[sz + i]);
-      ab_ = PR - ab_;
-      tmp = mult_mod(x[i], x[sz + i]);
-      tmp = PR - tmp;
-      ab[i] = add_mod(ab_, tmp);
+      mul_delta(ab[i], ab_);
     }
   }
   double tt_0 = time_from(start);
@@ -78,7 +84,7 @@ void test_inner_product(BoolIO<NetIO> *ios[threads], int party) {
 
   start = clock_start();
   for (int j = 0; j < repeat; ++j) {
-    fp_zkp_inner_prdt<BoolIO<NetIO>>(x, x + sz, d, d + sz, ab, constant, sz);
+    fp_zkp_inner_prdt_lpzk<BoolIO<NetIO>>(x, x + sz, ab, constant, sz);
   }
   double tt_1 = time_from(start);
 

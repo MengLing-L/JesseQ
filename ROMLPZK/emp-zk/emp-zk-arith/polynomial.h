@@ -93,34 +93,28 @@ public:
     if (num == 0)
       return;
     io->flush();
+
     if (party == ALICE) {
-      blake3_hasher_update(&hasher, buffer, sizeof(uint64_t) * (num));
-      blake3_hasher_finalize(&hasher, output, BLAKE3_OUT_LEN);
-      io->send_data(&output, BLAKE3_OUT_LEN);
+      __uint128_t pro;
+      pro = buffer[0];
+      for (int i = 1; i < num; i++) {
+        pro = mult_mod(pro, buffer[i]);
+      } 
+      io->send_data(&pro, sizeof(__uint128_t));
     } else {
-      blake3_hasher_update(&hasher, buffer, sizeof(uint64_t) * (num));
-      blake3_hasher_finalize(&hasher, output, BLAKE3_OUT_LEN);
-      io->recv_data(&output_recv, BLAKE3_OUT_LEN);
-      if (memcmp(output, output_recv, BLAKE3_OUT_LEN) != 0)
-        std::cout<<"JQv1 fail!\n";
+      __uint128_t pro, output_recv;
+      io->recv_data(&output_recv, sizeof(__uint128_t));
+      pro = buffer[0];
+      output_recv = mult_mod(output_recv, delta);
+      for (int i = 1; i < num; i++) {
+        pro = mult_mod(pro, buffer[i]);
+        output_recv = mult_mod(output_recv, delta);
+      } 
+      if (HIGH64(pro) != HIGH64(output_recv) || LOW64(pro) != LOW64(output_recv))
+        std::cout<<"LPZK fail!\n";
+      else 
+        std::cout<<"LPZK sucess!\n";
     }
-    // if (party == ALICE) {
-    //   __uint128_t pro;
-    //   pro = buffer[0];
-    //   for (int i = 1; i < num; i++) {
-    //     pro = mult_mod(pro, buffer[i]);
-    //   } 
-    //   io->send_data(&pro, sizeof(__uint128_t));
-    // } else {
-    //   __uint128_t pro, output_recv;
-    //   pro = buffer[0];
-    //   for (int i = 1; i < num; i++) {
-    //     pro = mult_mod(pro, buffer[i]);
-    //   } 
-    //   io->recv_data(&output_recv, sizeof(__uint128_t));
-    //   if (HIGH64(pro) != HIGH64(output_recv) || LOW64(pro) != LOW64(output_recv))
-    //     std::cout<<"JQv1 fail!\n";
-    // }
     num = 0;
   }
 
@@ -235,6 +229,39 @@ public:
     }
 
     num++;
+   
+  }
+
+  inline void zkp_inner_prdt_lpzk(const __uint128_t *au, const __uint128_t *bu, const __uint128_t *aby,
+                             uint64_t constant, int len) {
+    if (num >= buffer_sz)
+      batch_check(1);
+
+    if (party == ALICE) {
+      uint64_t mzero = 0;
+      uint64_t M1, M2; 
+      for (int i = 0; i < len; ++i) {
+        M1 = mult_mod(HIGH64(bu[i]), LOW64(au[i])), M2 = mult_mod(LOW64(bu[i]), HIGH64(au[i]));
+        M1 = add_mod(M1,M2);
+        M1 = PR - M1;
+        mzero = add_mod(mzero,M1);
+        mzero = add_mod(mzero,aby[i]);
+      }
+      buffer[num] = mzero;
+    } else {
+      uint64_t kzero = 0;
+      uint64_t K1;
+      for (int i = 0; i < len; ++i) {
+        K1 = mult_mod(au[i], bu[i]);
+        kzero = add_mod(kzero, K1);
+        kzero = add_mod(kzero, aby[i]);
+      }
+      kzero = add_mod(kzero, constant);
+      buffer[num] = kzero;
+    }
+    
+    num++;
+    // batch_check(1);
    
   }
 };
