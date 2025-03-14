@@ -241,11 +241,14 @@ public:
       uint64_t mzero = 0;
       uint64_t M1, M2; 
       for (int i = 0; i < len; ++i) {
-        M1 = mult_mod(HIGH64(bu[i]), LOW64(au[i])), M2 = mult_mod(LOW64(bu[i]), HIGH64(au[i]));
-        M1 = add_mod(M1,M2);
+        M1 = add_mod(HIGH64(au[i]), LOW64(au[i])), M2 = add_mod(LOW64(bu[i]), HIGH64(bu[i]));
+        M1 = mult_mod(M1,M2);
         M1 = PR - M1;
         mzero = add_mod(mzero,M1);
-        mzero = add_mod(mzero,aby[i]);
+        M1 = mult_mod(LOW64(au[i]),LOW64(bu[i]));
+        mzero = add_mod(mzero,M1);
+        mzero = add_mod(mzero,LOW64(aby[i]));
+        mzero = add_mod(mzero,HIGH64(aby[i]));
       }
       buffer[num] = mzero;
     } else {
