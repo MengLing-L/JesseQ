@@ -101,11 +101,12 @@ public:
   }
 
 
-  void auth_compute_mul_send_with_setup(const __uint128_t Ma,const __uint128_t Mb, uint64_t da, uint64_t db, __uint128_t &H1) {
-  
-    uint64_t M1 = add_mod(db, LOW64(Mb)), M2 = add_mod(da, LOW64(Ma));
-    M1 = mult_mod(M1,M2);
-    H1 = add_mod(M1,H1);
+  void auth_compute_mul_send_with_setup(const __uint128_t Ma,const __uint128_t Mb, __uint128_t &H1) {
+
+    uint64_t M1 = mult_mod(HIGH64(Mb), LOW64(Ma)), M2 = mult_mod(LOW64(Mb), HIGH64(Ma));
+    M1 = add_mod(M1,M2);
+    M1 = PR - M1;
+    H1 = add_mod(M1,LOW64(H1));
   }
 
   void auth_scal_recv_with_setup( const uint64_t A, uint64_t d, __uint128_t &H1) {
@@ -122,20 +123,14 @@ public:
     H1 = add_mod(K1, H1);
   }
 
-  void auth_compute_mul_recv_with_setup(const __uint128_t Ka,const __uint128_t Kb, uint64_t da, uint64_t db, __uint128_t &H1) {
+  void auth_compute_mul_recv_with_setup(const __uint128_t Ka,const __uint128_t Kb, __uint128_t &H1) {
 
-    uint64_t K1 = add_mod(db, Kb), K2 = add_mod(da, Ka);
-    K1 = mult_mod(K1, K2);
-    K2 = mult_mod(da, db);
-    K2 = mult_mod(K2, delta);
-    K1 = add_mod(K1, K2);
-    H1 = add_mod(K1, H1);
+    uint64_t K1 = mult_mod(Ka, Kb);
+    H1 = add_mod(H1, K1);
   }
 
   void auth_constant(const uint64_t con, __uint128_t &H1) {
-    uint64_t tmp;
-    tmp = mult_mod(con, delta);
-    H1 = add_mod(tmp, H1);
+    H1 = add_mod(con, H1);
   }
 
   void mul_delta(__uint128_t &res,const __uint128_t &a) {
