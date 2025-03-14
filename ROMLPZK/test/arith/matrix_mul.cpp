@@ -66,6 +66,7 @@ void test_circuit_zk(NetIO *ios[threads + 1], int party, int matrix_sz) {
         if (party == ALICE) {
           ab = ostriple.auth_compute_mul_send(mat_a[i * matrix_sz + j], mat_b[j * matrix_sz + k]);
           mat_ab[i * matrix_sz + k] = add_mod(LOW64(mat_ab[i * matrix_sz + k]), LOW64(ab));
+          mat_ab[i * matrix_sz + k] = add_mod(LOW64(mat_ab[i * matrix_sz + k]), HIGH64(ab));
         } else {
           ab = ostriple.auth_compute_mul_recv(mat_a[i * matrix_sz + j], mat_b[j * matrix_sz + k]);
           ostriple.mul_delta(tmp, ab);

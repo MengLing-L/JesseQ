@@ -103,10 +103,12 @@ public:
 
   void auth_compute_mul_send_with_setup(const __uint128_t Ma,const __uint128_t Mb, __uint128_t &H1) {
 
-    uint64_t M1 = mult_mod(HIGH64(Mb), LOW64(Ma)), M2 = mult_mod(LOW64(Mb), HIGH64(Ma));
-    M1 = add_mod(M1,M2);
+    uint64_t M1 = add_mod(HIGH64(Ma), LOW64(Ma)), M2 = add_mod(LOW64(Mb), HIGH64(Mb));
+    M1 = mult_mod(M1,M2);
     M1 = PR - M1;
     H1 = add_mod(M1,LOW64(H1));
+    M1 = mult_mod(LOW64(Ma),LOW64(Mb));
+    H1 = add_mod(H1,M1);
   }
 
   void auth_scal_recv_with_setup( const uint64_t A, uint64_t vs, __uint128_t &H1) {

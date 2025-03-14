@@ -66,7 +66,7 @@ void test_sis_proof(NetIO *ios[threads + 1], int party, int n, int m) {
     __uint128_t ab;
     if (party == ALICE) {
       ab = ostriple.auth_compute_mul_send(vec_s[i], vec_s[i]);
-      vec_r[i] = LOW64(ab);
+      vec_r[i] = add_mod(LOW64(ab), HIGH64(ab));
     } else {
       ab = ostriple.auth_compute_mul_recv(vec_s[i], vec_s[i]);
       ostriple.mul_delta(vec_r[i], ab);
