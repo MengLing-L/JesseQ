@@ -109,18 +109,16 @@ public:
     H1 = add_mod(M1,LOW64(H1));
   }
 
-  void auth_scal_recv_with_setup( const uint64_t A, uint64_t d, __uint128_t &H1) {
-    uint64_t d_;
-    d_ = mult_mod(d, A);
-    uint64_t K1;
-    K1 = mult_mod(d_, delta);
-    H1 = add_mod(K1, H1);
+  void auth_scal_recv_with_setup( const uint64_t A, uint64_t vs, __uint128_t &H1) {
+    uint64_t tmp = mult_mod(vs, A);
+    H1 = add_mod(H1, tmp);
   }
 
-  void auth_add_recv_with_setup(uint64_t d, __uint128_t &H1) {
-    uint64_t K1;
-    K1 = mult_mod(d, delta);
-    H1 = add_mod(K1, H1);
+  void auth_add_recv_with_setup(uint64_t Kr, uint64_t Ks, __uint128_t &H1) {
+    H1 = add_mod(Kr, H1);
+    uint64_t tmp;
+    tmp = PR - Ks;
+    H1 = add_mod(tmp, H1);
   }
 
   void auth_compute_mul_recv_with_setup(const __uint128_t Ka,const __uint128_t Kb, __uint128_t &H1) {

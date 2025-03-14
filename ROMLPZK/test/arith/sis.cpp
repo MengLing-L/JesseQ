@@ -29,9 +29,6 @@ void test_sis_proof(NetIO *ios[threads + 1], int party, int n, int m) {
   srand(time(NULL));
 
   FpOSTriple<NetIO> ostriple(party, threads, ios);
-  blake3_hasher hasher;
-  blake3_hasher_init(&hasher);
-  uint8_t output[BLAKE3_OUT_LEN], output_recv[BLAKE3_OUT_LEN];
 
   int mat_size = n * m;
   uint64_t *A, *s, *t;
@@ -62,50 +59,17 @@ void test_sis_proof(NetIO *ios[threads + 1], int party, int n, int m) {
     vec_s[i] = ostriple.random_val_input();
 
   for (int i = 0; i < n + m; ++i) {
-    if (party == ALICE) {
-      vec_t[i] = ostriple.authenticated_val_input(0);
-    } else {
-      vec_t[i] = ostriple.authenticated_val_input();
-    }
+    vec_t[i] = 0;
   }
   // r[i] = s[i]^2
   for (int i = 0; i < m; ++i) {
-    __uint128_t ab, tmp;
+    __uint128_t ab;
     if (party == ALICE) {
-      tmp = ostriple.auth_compute_mul_send(vec_s[i], vec_s[i]);
-      tmp = PR - LOW64(tmp);
-      ab = mult_mod(LOW64(vec_s[i]), LOW64(vec_s[i]));
-      ab = PR - LOW64(ab);
-      vec_r[i] = add_mod(LOW64(tmp), LOW64(ab));
+      ab = ostriple.auth_compute_mul_send(vec_s[i], vec_s[i]);
+      vec_r[i] = LOW64(ab);
     } else {
-      tmp = ostriple.auth_compute_mul_recv(vec_s[i], vec_s[i]);
-      tmp = PR - tmp;
-      ab = mult_mod(vec_s[i], vec_s[i]);
-      ab = PR - ab;
-      vec_r[i] = add_mod(tmp, ab);
-    }
-  }
-
-  // y[i] = sum{A[j][i]*s[i]}
-  for (int i = 0; i < n; ++i) {
-    for (int j = 0; j < m; ++j) {
-      __uint128_t tmp;
-      if (party == ALICE) {
-        tmp = mult_mod(LOW64(vec_s[j]), A[i * m + j]);
-        vec_t[i] = add_mod(LOW64(vec_t[i]), tmp);
-      } else {
-        tmp = mult_mod(vec_s[j], A[i * m + j]);
-        vec_t[i] = add_mod(vec_t[i], tmp);
-      }
-    }
-  }
-
-  // y[i+n] = r[i] - s[i]
-  for (int i = 0; i < m; ++i) {
-    if (party == ALICE) {
-      vec_t[i + n] = add_mod(LOW64(vec_r[i]), LOW64(vec_s[i]));
-    } else {
-      vec_t[i + n] = add_mod(vec_r[i], vec_s[i]);
+      ab = ostriple.auth_compute_mul_recv(vec_s[i], vec_s[i]);
+      ostriple.mul_delta(vec_r[i], ab);
     }
   }
 
@@ -114,22 +78,24 @@ void test_sis_proof(NetIO *ios[threads + 1], int party, int n, int m) {
   for (int i = 0; i < m; ++i) {
     if (party == ALICE) {
       uint64_t sa = PR - s[i];
-      s[i] = add_mod(HIGH64(vec_s[i]), sa);
+      sa = add_mod(LOW64(vec_s[i]), sa);
+      ios[0]->send_data(&sa, sizeof(uint64_t));
+      vec_s[i] = (__uint128_t)makeBlock(HIGH64(vec_s[i]), s[i]);
+    } else {
+      uint64_t sa;
+      ios[0]->recv_data(&sa, sizeof(uint64_t));
+      sa = PR - sa;
+      vec_s[i] = add_mod(vec_s[i], sa);
     }
   }
 
-  if (party == ALICE) { 
-    ios[0]->send_data(s, sizeof(uint64_t) * m);
-  } else {
-    ios[0]->recv_data(s, sizeof(uint64_t) * m);
-  }
 
   // r[i] = s[i]^2
   for (int i = 0; i < m; ++i) {
     if (party == ALICE) {
-      ostriple.auth_compute_mul_send_with_setup(vec_s[i], vec_s[i], s[i], s[i], vec_t[i + n]);
+      ostriple.auth_compute_mul_send_with_setup(vec_s[i], vec_s[i], vec_t[i + n]);
     } else {
-      ostriple.auth_compute_mul_recv_with_setup(vec_s[i], vec_s[i], s[i], s[i], vec_t[i + n]);
+      ostriple.auth_compute_mul_recv_with_setup(vec_s[i], vec_s[i], vec_t[i + n]);
     }
   }
 
@@ -137,7 +103,12 @@ void test_sis_proof(NetIO *ios[threads + 1], int party, int n, int m) {
   for (int i = 0; i < n; ++i) {
     for (int j = 0; j < m; ++j) {
       if (party != ALICE) {
-        ostriple.auth_scal_recv_with_setup(A[i * m + j], s[j], vec_t[i]);
+        ostriple.auth_scal_recv_with_setup(A[i * m + j], vec_s[j], vec_t[i]);
+      } else {
+        __uint128_t tmp;
+        tmp = mult_mod(HIGH64(vec_s[j]), A[i * m + j]);
+        tmp = PR - tmp;
+        vec_t[i] = add_mod(vec_t[i], tmp);
       }
     }
   }
@@ -145,31 +116,37 @@ void test_sis_proof(NetIO *ios[threads + 1], int party, int n, int m) {
   // y[i+n] = r[i] - s[i]
   for (int i = 0; i < m; ++i) {
     if (party != ALICE) {
-      ostriple.auth_add_recv_with_setup(s[i], vec_t[i + n]);
+      ostriple.auth_add_recv_with_setup(vec_r[i], vec_s[i], vec_t[i + n]);
+    } else {
+      vec_t[i + n] = add_mod(vec_t[i + n], vec_r[i]);
+      vec_t[i + n] = add_mod(vec_t[i + n], HIGH64(vec_s[i]));
     }
   }
 
   if (party == ALICE) {
-    // __uint128_t pro;
-    // pro = vec_t[0];
-    // for (int i = 1; i < (n+m); i++) {
-    //   pro = mult_mod(pro, vec_t[i]);
-    // } 
-    // ios[0]->send_data(&pro, sizeof(__uint128_t));
-    blake3_hasher_update(&hasher, vec_t, sizeof(uint64_t) * (n+m));
-    blake3_hasher_finalize(&hasher, output, BLAKE3_OUT_LEN);
-    ios[0]->send_data(&output, BLAKE3_OUT_LEN);
+    __uint128_t pro;
+    pro = vec_t[0];
+    for (int i = 1; i < (n+m); i++) {
+      pro = mult_mod(pro, vec_t[i]);
+    } 
+    ios[0]->send_data(&pro,  sizeof(__uint128_t));
   } else {
-    for (int i = 0; i < (n+m); ++i) {
-      uint64_t constant = 0;
-      constant = t[i];
-      ostriple.auth_constant(constant, vec_t[i]);
+    __uint128_t pro, output_recv;
+    ios[0]->recv_data(&output_recv, sizeof(__uint128_t));
+    uint64_t constant = 0;
+    constant = PR - t[0];
+    ostriple.auth_constant(constant, vec_t[0]);
+    pro = vec_t[0];
+    ostriple.mul_delta(output_recv, output_recv);
+    for (int i = 1; i < (n+m); ++i) {
+        uint64_t constant = 0;
+        constant = PR - t[i];
+        ostriple.auth_constant(constant, vec_t[i]);
+        pro = mult_mod(pro, vec_t[i]);
+        ostriple.mul_delta(output_recv, output_recv);
     }
-    blake3_hasher_update(&hasher, vec_t, sizeof(uint64_t) * (n+m));
-    blake3_hasher_finalize(&hasher, output, BLAKE3_OUT_LEN);
-    ios[0]->recv_data(&output_recv, BLAKE3_OUT_LEN);
-    if (memcmp(output, output_recv, BLAKE3_OUT_LEN) != 0)
-      std::cout<<"JQv1 fail!\n";
+    if (HIGH64(pro) != HIGH64(output_recv) || LOW64(pro) != LOW64(output_recv))
+        std::cout<<"LPZK fail!\n";
     // __uint128_t pro, output_recv;
     // pro = vec_t[0];
     // for (int i = 1; i < (n+m); i++) {
