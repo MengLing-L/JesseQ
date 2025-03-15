@@ -69,7 +69,8 @@ void test_sis_proof(NetIO *ios[threads + 1], int party, int n, int m) {
       vec_r[i] = add_mod(LOW64(ab), HIGH64(ab));
     } else {
       ab = ostriple.auth_compute_mul_recv(vec_s[i], vec_s[i]);
-      ostriple.mul_delta(vec_r[i], ab);
+      // ostriple.mul_delta(vec_r[i], ab);
+      vec_r[i] = ab;
     }
   }
 

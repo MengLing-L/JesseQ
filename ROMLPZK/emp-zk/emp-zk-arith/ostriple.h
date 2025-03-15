@@ -117,8 +117,9 @@ public:
   }
 
   void auth_add_recv_with_setup(uint64_t Kr, uint64_t Ks, __uint128_t &H1) {
-    H1 = add_mod(Kr, H1);
     uint64_t tmp;
+    tmp = mult_mod(delta, Kr);
+    H1 = add_mod(tmp, H1);
     tmp = PR - Ks;
     H1 = add_mod(tmp, H1);
   }
