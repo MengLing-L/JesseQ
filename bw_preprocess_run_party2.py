@@ -10,20 +10,20 @@ print(ban)
 subprocess.call(["bash", "-c", ban])
 
 JQv1_arith = '''
-./JQv1/bin/test_arith_circuit_scalability 2 12345 0
+./JQv1/bin/test_arith_circuit_scalability 2 12345 172.31.2.131
 '''
 print(JQv1_arith)
 subprocess.call(["bash", "-c", JQv1_arith])
 
 JQv2_arith = '''
-./JQv2/bin/test_arith_ostriple 2 12345 0
+./JQv2/bin/test_arith_ostriple 2 12345 172.31.2.131
 '''
 print(JQv2_arith)
 subprocess.call(["bash", "-c", JQv2_arith])
 
 
 # QS_arith = '''
-# ./emp-zk/bin/test_arith_circuit_scalability 2 12345 0
+# ./emp-zk/bin/test_arith_circuit_scalability 2 12345 172.31.2.131
 # '''
 # print(QS_arith)
 # subprocess.call(["bash", "-c", QS_arith])
@@ -38,19 +38,19 @@ print(ban)
 subprocess.call(["bash", "-c", ban])
 
 JQv1_arith = '''
-./JQv1/bin/test_arith_circuit_scalability 2 12345 0
+./JQv1/bin/test_arith_circuit_scalability 2 12345 172.31.2.131
 '''
 print(JQv1_arith)
 subprocess.call(["bash", "-c", JQv1_arith])
 
 # QS_arith = '''
-# ./emp-zk/bin/test_arith_circuit_scalability 2 12345 0
+# ./emp-zk/bin/test_arith_circuit_scalability 2 12345 172.31.2.131
 # '''
 # print(QS_arith)
 # subprocess.call(["bash", "-c", QS_arith])
 
 JQv2_arith = '''
-./JQv2/bin/test_arith_ostriple 2 12345 0
+./JQv2/bin/test_arith_ostriple 2 12345 172.31.2.131
 '''
 print(JQv2_arith)
 subprocess.call(["bash", "-c", JQv2_arith])
@@ -64,19 +64,19 @@ print(ban)
 subprocess.call(["bash", "-c", ban])
 
 JQv1_arith = '''
-./JQv1/bin/test_arith_circuit_scalability 2 12345 0
+./JQv1/bin/test_arith_circuit_scalability 2 12345 172.31.2.131
 '''
 print(JQv1_arith)
 subprocess.call(["bash", "-c", JQv1_arith])
 
 # QS_arith = '''
-# ./emp-zk/bin/test_arith_circuit_scalability 2 12345 0
+# ./emp-zk/bin/test_arith_circuit_scalability 2 12345 172.31.2.131
 # '''
 # print(QS_arith)
 # subprocess.call(["bash", "-c", QS_arith])
 
 JQv2_arith = '''
-./JQv2/bin/test_arith_ostriple 2 12345 0
+./JQv2/bin/test_arith_ostriple 2 12345 172.31.2.131
 '''
 print(JQv2_arith)
 subprocess.call(["bash", "-c", JQv2_arith])
@@ -89,13 +89,13 @@ subprocess.call(["bash", "-c", JQv2_arith])
 # subprocess.call(["bash", "-c", ban])
 
 # JQv1_bool = '''
-# ./JQv1/bin/test_bool_circuit_scalability 2 12345 0
+# ./JQv1/bin/test_bool_circuit_scalability 2 12345 172.31.2.131
 # '''
 # print(JQv1_bool)
 # subprocess.call(["bash", "-c", JQv1_bool])
 
 # JQv2_bool = '''
-# ./JQv2/bin/test_bool_ostriple  2 12345 0
+# ./JQv2/bin/test_bool_ostriple  2 12345 172.31.2.131
 # '''
 # print(JQv2_bool)
 # subprocess.call(["bash", "-c", JQv2_bool])
@@ -108,13 +108,13 @@ subprocess.call(["bash", "-c", JQv2_arith])
 # subprocess.call(["bash", "-c", ban])
 
 # JQv1_bool = '''
-# ./JQv1/bin/test_bool_circuit_scalability 2 12345 0
+# ./JQv1/bin/test_bool_circuit_scalability 2 12345 172.31.2.131
 # '''
 # print(JQv1_bool)
 # subprocess.call(["bash", "-c", JQv1_bool])
 
 # JQv2_bool = '''
-# ./JQv2/bin/test_bool_ostriple  2 12345 0
+# ./JQv2/bin/test_bool_ostriple  2 12345 172.31.2.131
 # '''
 # print(JQv2_bool)
 # subprocess.call(["bash", "-c", JQv2_bool])
@@ -127,13 +127,13 @@ subprocess.call(["bash", "-c", JQv2_arith])
 # subprocess.call(["bash", "-c", ban])
 
 # JQv1_bool = '''
-# ./JQv1/bin/test_bool_circuit_scalability 2 12345 0
+# ./JQv1/bin/test_bool_circuit_scalability 2 12345 172.31.2.131
 # '''
 # print(JQv1_bool)
 # subprocess.call(["bash", "-c", JQv1_bool])
 
 # JQv2_bool = '''
-# ./JQv2/bin/test_bool_ostriple  2 12345 0
+# ./JQv2/bin/test_bool_ostriple  2 12345 172.31.2.131
 # '''
 # print(JQv2_bool)
 # subprocess.call(["bash", "-c", JQv2_bool])
@@ -146,13 +146,13 @@ subprocess.call(["bash", "-c", JQv2_arith])
 # subprocess.call(["bash", "-c", ban])
 
 # JQv1_bool = '''
-# ./JQv1/bin/test_bool_circuit_scalability 2 12345 0
+# ./JQv1/bin/test_bool_circuit_scalability 2 12345 172.31.2.131
 # '''
 # print(JQv1_bool)
 # subprocess.call(["bash", "-c", JQv1_bool])
 
 # JQv2_bool = '''
-# ./JQv2/bin/test_bool_ostriple  2 12345 0
+# ./JQv2/bin/test_bool_ostriple  2 12345 172.31.2.131
 # '''
 # print(JQv2_bool)
 # subprocess.call(["bash", "-c", JQv2_bool])
@@ -165,13 +165,13 @@ subprocess.call(["bash", "-c", JQv2_arith])
 # subprocess.call(["bash", "-c", ban])
 
 # JQv1_bool = '''
-# ./JQv1/bin/test_bool_circuit_scalability 2 12345 0
+# ./JQv1/bin/test_bool_circuit_scalability 2 12345 172.31.2.131
 # '''
 # print(JQv1_bool)
 # subprocess.call(["bash", "-c", JQv1_bool])
 
 # JQv2_bool = '''
-# ./JQv2/bin/test_bool_ostriple  2 12345 0
+# ./JQv2/bin/test_bool_ostriple  2 12345 172.31.2.131
 # '''
 # print(JQv2_bool)
 # subprocess.call(["bash", "-c", JQv2_bool])
