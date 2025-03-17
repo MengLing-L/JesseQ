@@ -72,7 +72,6 @@ void test_circuit_zk(NetIO *ios[threads + 1], int party,
   a_u = ostriple.random_val_input();
   b_u = ostriple.random_val_input();
   b_u_0 = b_u;
-
   start= clock_start();
   uint64_t ar = 2, br = 3;
   for (int i = 0; i < test_n; ++i) {
@@ -82,20 +81,21 @@ void test_circuit_zk(NetIO *ios[threads + 1], int party,
   cout << test_n << "Plant test eval\t" << double(test_n)/(time_from(start))*1000000 << "\t" << party << " " << endl;
 
   auto mul_circuit_independe_setup=0;
+  __uint128_t *c = new __uint128_t[test_n];
   auto start_independent_pre_mul =clock_start();
-  for (int j = 0; j < num_of_chunk; ++j) {
-    ostriple.random_val_input(ab, chunk);
-  }
+  ostriple.random_val_input(c, test_n);
   mul_circuit_independe_setup += time_from(start_independent_pre_mul);
-  ab = new __uint128_t[chunk];
+  // ab = new __uint128_t[chunk];
+
+  cout << "Gen VOLE " << (mul_circuit_independe_setup) / 1000 << " ms " << party
+        << " " << endl;
+
+  delete[] c;
+
+  // abort();
 
   ar = 2, br = 3;
-  auto independ_setup= clock_start();
-  auto independ_setup_time = 0;
   for (int j = 0; j < num_of_chunk; ++j) {
-    independ_setup= clock_start();
-    ostriple.random_val_input(ao+1, chunk);
-    independ_setup_time = independ_setup_time + time_from(independ_setup);
     start = clock_start();
     for (int i = 0; i < chunk; ++i) {
       __uint128_t ab_, tmp;
@@ -103,6 +103,7 @@ void test_circuit_zk(NetIO *ios[threads + 1], int party,
         ao[i] = a_u;
       }
       if (party == ALICE) {
+        ao[i + 1] = ostriple.random_val_input();
         __uint128_t val = mod((ao[i] >> 64) + (b_u >> 64), pr);
         __uint128_t mac = mod((ao[i] & 0xFFFFFFFFFFFFFFFFULL) + (b_u & 0xFFFFFFFFFFFFFFFFULL), pr);
         b_u = (val << 64) ^ mac;
@@ -113,6 +114,7 @@ void test_circuit_zk(NetIO *ios[threads + 1], int party,
         ab[i] = add_mod(LOW64(tmp), LOW64(ab_));
         ab[i] = add_mod(ab[i], LOW64(ao[i + 1]));
       } else {
+        ao[i + 1] = ostriple.random_val_input();
         b_u = mod(ao[i] + b_u, pr);
         ab_ = mult_mod(ao[i], b_u);
         ab_ = PR - ab_;
@@ -206,7 +208,7 @@ void test_circuit_zk(NetIO *ios[threads + 1], int party,
     ostriple.reveal_check_recv(&(ao[chunk]), &ar, 1);
   }
 
-  cout << "Circui-independ Setup time: " << (independ_setup_time + mul_circuit_independe_setup) / 1000 << " ms " << party
+  cout << "Circui-independ Setup time: " << (mul_circuit_independe_setup) / 1000 << " ms " << party
         << " " << endl;
   cout << "Circui-depend Setup time: " << (setup - mul_circuit_independe_setup) / 1000 << " ms " << party
         << " " << endl;

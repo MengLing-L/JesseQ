@@ -58,7 +58,7 @@ void test_compute_and_gate_check_JQv1(OSTriple<BoolIO<NetIO>> *os,
       std::cout << "Unknown CPU manufacturer.\n";
   }
   long long len = 1024 * 1024 * 10 * 10 * 3;
-  int chunk = 1024 * 1024 * 10;
+  int chunk = 1024 * 1024 * 10 * 3;
   int num_of_chunk = len / chunk;
   blake3_hasher hasher;
   blake3_hasher_init(&hasher);
@@ -77,29 +77,24 @@ void test_compute_and_gate_check_JQv1(OSTriple<BoolIO<NetIO>> *os,
   auto start= clock_start();
   auto setup= 0;
   auto prove= 0;
-  auto circuit_independe_setup=0;
-  auto start_circuit_in =clock_start();
-  start_circuit_in = clock_start();
+ 
+
+  auto mul_circuit_independe_setup=0;
+  block *c = new block[len];
+  auto start_independent_pre_mul =clock_start();
+  os->random_bits_input(c, len);
+  mul_circuit_independe_setup += time_from(start_independent_pre_mul);
+  // ab = new block[chunk];
+  delete[] c;
+  
+
+
+  start = clock_start();
   os->random_bits_input(a, chunk + 1);
   os->random_bits_input(&b_u, 1);
   a_u = a[0];
   b_u_0 = b_u;
-  circuit_independe_setup += time_from(start_circuit_in);
-
-  auto mul_circuit_independe_setup=0;
-  auto start_independent_pre_mul =clock_start();
-  for (int j = 0; j < num_of_chunk; ++j) {
-    os->random_bits_input(ab, chunk);
-  }
-  mul_circuit_independe_setup += time_from(start_independent_pre_mul);
-  ab = new block[chunk];
-  // start= clock_start();
-  // bool ar = true, br = false;
-  // for (int i = 0; i < len; ++i) {
-  //   br = ar ^ br;
-  //   ar = ar & br;
-  // }
-  // cout << len << "Plant test eval\t" << double(len)/(time_from(start))*1000000 << "\t" << party << " " << endl;
+  setup += time_from(start);
 
   bool ar = true, br = false;
   for (int j = 0; j < num_of_chunk; ++j) {
@@ -185,7 +180,7 @@ void test_compute_and_gate_check_JQv1(OSTriple<BoolIO<NetIO>> *os,
     prove += time_from(start);
   }
 
-  cout << "Circui-independ Setup time: " << (circuit_independe_setup + mul_circuit_independe_setup) / 1000 << " ms " << party
+  cout << "Circui-independ Setup time: " << (mul_circuit_independe_setup) / 1000 << " ms " << party
         << " " << endl;
   cout << "Circui-depend Setup time: " << (setup - mul_circuit_independe_setup) / 1000 << " ms " << party
         << " " << endl;

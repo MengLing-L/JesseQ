@@ -27,7 +27,7 @@ public:
 };
 
 const static PrimalLPNParameterFp61 fp_default = PrimalLPNParameterFp61(
-    10168320, 4965, 158000, 11, 166400, 2600, 5060, 6, 9600, 600, 1220, 4);
+    325386240, 4965, 158000, 16, 5324800, 2600, 5060, 11, 153600, 600, 1220, 8);
 
 template <typename IO> class VoleTriple {
 public:
