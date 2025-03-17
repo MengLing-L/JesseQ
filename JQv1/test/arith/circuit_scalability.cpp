@@ -81,11 +81,12 @@ void test_circuit_zk(NetIO *ios[threads + 1], int party,
   cout << test_n << "Plant test eval\t" << double(test_n)/(time_from(start))*1000000 << "\t" << party << " " << endl;
 
   auto mul_circuit_independe_setup=0;
-  __uint128_t *c = new __uint128_t[test_n];
+  // __uint128_t *c = new __uint128_t[test_n];
+  __uint128_t *c = new __uint128_t[186000000];
   auto start_independent_pre_mul =clock_start();
-  ostriple.random_val_input(c, test_n);
+  // ostriple.random_val_input(c, test_n);
+  ostriple.random_val_input(c, 186000000);
   mul_circuit_independe_setup += time_from(start_independent_pre_mul);
-  // ab = new __uint128_t[chunk];
 
   cout << "Gen VOLE " << (mul_circuit_independe_setup) / 1000 << " ms " << party
         << " " << endl;
