@@ -2,28 +2,28 @@
 import subprocess
 
 
-ban = '''
-sudo tc qdisc del dev ens5 root
-sudo tc qdisc add dev ens5 root handle 1: tbf rate 20Mbit latency 5ms burst 2000k 
-'''
-print(ban)
-subprocess.call(["bash", "-c", ban])
+# ban = '''
+# sudo tc qdisc del dev ens5 root
+# sudo tc qdisc add dev ens5 root handle 1: tbf rate 20Mbit latency 5ms burst 2000k 
+# '''
+# print(ban)
+# subprocess.call(["bash", "-c", ban])
 
-JQv1_arith = '''
-./JQv1/bin/test_bool_circuit_scalability 2 12345 172.31.2.131
-'''
-print(JQv1_arith)
-subprocess.call(["bash", "-c", JQv1_arith])
+# JQv1_arith = '''
+# ./JQv1/bin/test_bool_circuit_scalability 2 12345 172.31.10.247
+# '''
+# print(JQv1_arith)
+# subprocess.call(["bash", "-c", JQv1_arith])
 
 
-JQv2_arith = '''
-./JQv2/bin/test_bool_ostriple  2 12345 172.31.2.131
-'''
-print(JQv2_arith)
-subprocess.call(["bash", "-c", JQv2_arith])
+# JQv2_arith = '''
+# ./JQv2/bin/test_bool_ostriple  2 12345 172.31.10.247
+# '''
+# print(JQv2_arith)
+# subprocess.call(["bash", "-c", JQv2_arith])
 
 # QS_arith = '''
-# ./emp-zk/bin/test_bool_circuit_scalability 2 12345 172.31.2.131
+# ./emp-zk/bin/test_bool_circuit_scalability 2 12345 172.31.10.247
 # '''
 # print(QS_arith)
 # subprocess.call(["bash", "-c", QS_arith])
@@ -38,22 +38,22 @@ print(ban)
 subprocess.call(["bash", "-c", ban])
 
 JQv1_arith = '''
-./JQv1/bin/test_bool_circuit_scalability 2 12345 172.31.2.131
+./JQv1/bin/test_bool_circuit_scalability 2 12345 172.31.10.247
 '''
 print(JQv1_arith)
 subprocess.call(["bash", "-c", JQv1_arith])
 
 # QS_arith = '''
-# ./emp-zk/bin/test_bool_circuit_scalability 2 12345 172.31.2.131
+# ./emp-zk/bin/test_bool_circuit_scalability 2 12345 172.31.10.247
 # '''
 # print(QS_arith)
 # subprocess.call(["bash", "-c", QS_arith])
 
-JQv2_arith = '''
-./JQv2/bin/test_bool_ostriple  2 12345 172.31.2.131
-'''
-print(JQv2_arith)
-subprocess.call(["bash", "-c", JQv2_arith])
+# JQv2_arith = '''
+# ./JQv2/bin/test_bool_ostriple  2 12345 172.31.10.247
+# '''
+# print(JQv2_arith)
+# subprocess.call(["bash", "-c", JQv2_arith])
 
 
 ban = '''
@@ -64,22 +64,22 @@ print(ban)
 subprocess.call(["bash", "-c", ban])
 
 JQv1_arith = '''
-./JQv1/bin/test_bool_circuit_scalability 2 12345 172.31.2.131
+./JQv1/bin/test_bool_circuit_scalability 2 12345 172.31.10.247
 '''
 print(JQv1_arith)
 subprocess.call(["bash", "-c", JQv1_arith])
 
 # QS_arith = '''
-# ./emp-zk/bin/test_bool_circuit_scalability 2 12345 172.31.2.131
+# ./emp-zk/bin/test_bool_circuit_scalability 2 12345 172.31.10.247
 # '''
 # print(QS_arith)
 # subprocess.call(["bash", "-c", QS_arith])
 
-JQv2_arith = '''
-./JQv2/bin/test_bool_ostriple  2 12345 172.31.2.131
-'''
-print(JQv2_arith)
-subprocess.call(["bash", "-c", JQv2_arith])
+# JQv2_arith = '''
+# ./JQv2/bin/test_bool_ostriple  2 12345 172.31.10.247
+# '''
+# print(JQv2_arith)
+# subprocess.call(["bash", "-c", JQv2_arith])
 
 # ban = '''
 # sudo tc qdisc del dev ens5 root
@@ -89,13 +89,13 @@ subprocess.call(["bash", "-c", JQv2_arith])
 # subprocess.call(["bash", "-c", ban])
 
 # JQv1_bool = '''
-# ./JQv1/bin/test_bool_circuit_scalability 2 12345 172.31.2.131
+# ./JQv1/bin/test_bool_circuit_scalability 2 12345 172.31.10.247
 # '''
 # print(JQv1_bool)
 # subprocess.call(["bash", "-c", JQv1_bool])
 
 # JQv2_bool = '''
-# ./JQv2/bin/test_bool_ostriple  2 12345 172.31.2.131
+# ./JQv2/bin/test_bool_ostriple  2 12345 172.31.10.247
 # '''
 # print(JQv2_bool)
 # subprocess.call(["bash", "-c", JQv2_bool])
@@ -108,13 +108,13 @@ subprocess.call(["bash", "-c", JQv2_arith])
 # subprocess.call(["bash", "-c", ban])
 
 # JQv1_bool = '''
-# ./JQv1/bin/test_bool_circuit_scalability 2 12345 172.31.2.131
+# ./JQv1/bin/test_bool_circuit_scalability 2 12345 172.31.10.247
 # '''
 # print(JQv1_bool)
 # subprocess.call(["bash", "-c", JQv1_bool])
 
 # JQv2_bool = '''
-# ./JQv2/bin/test_bool_ostriple  2 12345 172.31.2.131
+# ./JQv2/bin/test_bool_ostriple  2 12345 172.31.10.247
 # '''
 # print(JQv2_bool)
 # subprocess.call(["bash", "-c", JQv2_bool])
@@ -127,13 +127,13 @@ subprocess.call(["bash", "-c", JQv2_arith])
 # subprocess.call(["bash", "-c", ban])
 
 # JQv1_bool = '''
-# ./JQv1/bin/test_bool_circuit_scalability 2 12345 172.31.2.131
+# ./JQv1/bin/test_bool_circuit_scalability 2 12345 172.31.10.247
 # '''
 # print(JQv1_bool)
 # subprocess.call(["bash", "-c", JQv1_bool])
 
 # JQv2_bool = '''
-# ./JQv2/bin/test_bool_ostriple  2 12345 172.31.2.131
+# ./JQv2/bin/test_bool_ostriple  2 12345 172.31.10.247
 # '''
 # print(JQv2_bool)
 # subprocess.call(["bash", "-c", JQv2_bool])
@@ -146,13 +146,13 @@ subprocess.call(["bash", "-c", JQv2_arith])
 # subprocess.call(["bash", "-c", ban])
 
 # JQv1_bool = '''
-# ./JQv1/bin/test_bool_circuit_scalability 2 12345 172.31.2.131
+# ./JQv1/bin/test_bool_circuit_scalability 2 12345 172.31.10.247
 # '''
 # print(JQv1_bool)
 # subprocess.call(["bash", "-c", JQv1_bool])
 
 # JQv2_bool = '''
-# ./JQv2/bin/test_bool_ostriple  2 12345 172.31.2.131
+# ./JQv2/bin/test_bool_ostriple  2 12345 172.31.10.247
 # '''
 # print(JQv2_bool)
 # subprocess.call(["bash", "-c", JQv2_bool])
@@ -165,13 +165,13 @@ subprocess.call(["bash", "-c", JQv2_arith])
 # subprocess.call(["bash", "-c", ban])
 
 # JQv1_bool = '''
-# ./JQv1/bin/test_bool_circuit_scalability 2 12345 172.31.2.131
+# ./JQv1/bin/test_bool_circuit_scalability 2 12345 172.31.10.247
 # '''
 # print(JQv1_bool)
 # subprocess.call(["bash", "-c", JQv1_bool])
 
 # JQv2_bool = '''
-# ./JQv2/bin/test_bool_ostriple  2 12345 172.31.2.131
+# ./JQv2/bin/test_bool_ostriple  2 12345 172.31.10.247
 # '''
 # print(JQv2_bool)
 # subprocess.call(["bash", "-c", JQv2_bool])
