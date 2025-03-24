@@ -80,11 +80,11 @@ void test_compute_and_gate_check_JQv1(OSTriple<BoolIO<NetIO>> *os,
  
 
   auto mul_circuit_independe_setup=0;
-  // block *c = new block[len];
-  block *c = new block[186000000];
+  block *c = new block[len];
+  // block *c = new block[186000000];
   auto start_independent_pre_mul =clock_start();
-  // os->random_bits_input(c, len);
-  os->random_bits_input(c, 186000000);
+  os->random_bits_input(c, len);
+  // os->random_bits_input(c, 186000000);
   mul_circuit_independe_setup += time_from(start_independent_pre_mul);
   // ab = new block[chunk];
   delete[] c;
