@@ -6,6 +6,7 @@ This is the implementation for the paper [JesseQ: Efficient Zero-Knowledge Proof
 We would like to acknowledge that our implementation is based on the QuickSilver repository (https://github.com/emp-toolkit/emp-zk) and the Batchman repository (https://github.com/gconeice/stacking-vole-zk). Specifically, we forked these repositories and built upon them for our development work. We also made some modifications to the EMP libraries.
 
 ## Installation
+We recommend using Ubuntu to run the experiments.
 - `git clone git@github.com:MengLing-L/JesseQ.git`
 - `cd JesseQ`
 - `python3 install.py --deps --tool --ot --zk --JQv1 --JQv2`
