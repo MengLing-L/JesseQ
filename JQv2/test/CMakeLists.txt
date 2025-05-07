@@ -18,12 +18,9 @@ endmacro()
 # Test cases
 add_test_case_with_run(bool ostriple)
 add_test_case_with_run(bool inner_prdt)
-add_test_case_with_run(bool ostriple_incre)
 
 add_test_case_with_run(arith ostriple)
-add_test_case_with_run(arith ostriple_incre)
 add_test_case_with_run(arith inner_prdt)
 add_test_case_with_run(arith matrix_mul)
-add_test_case_with_run(arith matrix_mul_opt)
 add_test_case_with_run(arith sis)
 

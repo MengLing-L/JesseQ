@@ -69,26 +69,10 @@ void test_compute_and_gate_check_JQv1(OSTriple<BoolIO<NetIO>> *os,
   block a_u, b_u, b_u_0;
   bool db;
   
-  
-  // if (party == ALICE) {
-  //   prg.random_bool(ain, 2 * chunk);
-  // }
 
   auto start= clock_start();
   auto setup= 0;
   auto prove= 0;
- 
-
-  auto mul_circuit_independe_setup=0;
-  block *c = new block[len];
-  // block *c = new block[186000000];
-  auto start_independent_pre_mul =clock_start();
-  os->random_bits_input(c, len);
-  // os->random_bits_input(c, 186000000);
-  mul_circuit_independe_setup += time_from(start_independent_pre_mul);
-  // ab = new block[chunk];
-  delete[] c;
-  
 
 
   start = clock_start();
@@ -129,12 +113,9 @@ void test_compute_and_gate_check_JQv1(OSTriple<BoolIO<NetIO>> *os,
           ar = ar & br;
         }
         d[chunk] = getLSB(a[chunk]) ^ ar;
-
-        // io[0].send_data_internal(d, chunk + 1);
         io[0].send_bit(ar);
         io[0].send_bit(d[0]);
       } else {
-        // io[0].recv_data_internal(d, chunk + 1);
         ar = io[0].recv_bit();
         d[0] = io[0].recv_bit();
       }
@@ -158,7 +139,7 @@ void test_compute_and_gate_check_JQv1(OSTriple<BoolIO<NetIO>> *os,
 
     if (party == ALICE) {
       if (cpu_flag) {
-        block hash_output = Hash::hash_for_block(ab, sizeof(uint64_t) * (chunk));
+        block hash_output = Hash::hash_for_block(ab, sizeof(block) * (chunk));
         io[0].send_data(&hash_output, sizeof(block));
       } else {
         blake3_hasher_update(&hasher, ab, sizeof(block) * (chunk));
@@ -167,7 +148,7 @@ void test_compute_and_gate_check_JQv1(OSTriple<BoolIO<NetIO>> *os,
       }
     } else {
       if (cpu_flag) {
-        block hash_output = Hash::hash_for_block(ab, sizeof(uint64_t) * (chunk));
+        block hash_output = Hash::hash_for_block(ab, sizeof(block) * (chunk));
         io[0].recv_data(&output_recv, sizeof(block));
         if (memcmp(&hash_output, &output_recv, sizeof(block)) != 0)
           std::cout<<"JQv1 fail!\n";
@@ -182,13 +163,10 @@ void test_compute_and_gate_check_JQv1(OSTriple<BoolIO<NetIO>> *os,
     prove += time_from(start);
   }
 
-  cout << "Circui-independ Setup time: " << (mul_circuit_independe_setup) / 1000 << " ms " << party
-        << " " << endl;
-  cout << "Circui-depend Setup time: " << (setup - mul_circuit_independe_setup) / 1000 << " ms " << party
+  cout << "Preprocessing time: " << (setup) / 1000 << " ms " << party
         << " " << endl;
 
-  // cout << len << "\t" << (prove) << "\t" << party << " " << endl;
-  cout << len << "\t Prove time: " << (prove)/ 1000 << " ms " << "\t" << party << " " << endl;
+  cout << len << "\t Online Proving time: " << (prove)/ 1000 << " ms " << "\t" << party << " " << endl;
 
   cout << len << "\t" << double(len)/(prove)*1000000 << "\t" << party << " " << endl;
 

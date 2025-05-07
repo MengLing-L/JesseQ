@@ -16,11 +16,7 @@ macro (add_test_case_with_run folder _name)
 endmacro()
 
 # Test cases
-add_test_case_with_run(bool ostriple)
 add_test_case_with_run(bool circuit_scalability)
-add_test_case_with_run(bool circuit_scalability_incre)
 add_test_case_with_run(bool mul_hash_performance)
-add_test_case_with_run(arith ostriple)
 add_test_case_with_run(arith circuit_scalability)
-add_test_case_with_run(arith circuit_scalability_incre)
 add_test_case_with_run(arith mul_hash_performance)

@@ -63,7 +63,6 @@ void test_circuit_zk(NetIO *ios[threads + 1], int party,
   __uint128_t *ab = new __uint128_t[chunk];
   __uint128_t a_u, b_u, b_u_0;
   uint64_t db;
-  // ao[0] = ostriple.random_val_input();
 
   
   auto start= clock_start();
@@ -80,20 +79,6 @@ void test_circuit_zk(NetIO *ios[threads + 1], int party,
   }
   cout << test_n << "Plant test eval\t" << double(test_n)/(time_from(start))*1000000 << "\t" << party << " " << endl;
 
-  auto mul_circuit_independe_setup=0;
-  // __uint128_t *c = new __uint128_t[test_n];
-  __uint128_t *c = new __uint128_t[186000000];
-  auto start_independent_pre_mul =clock_start();
-  // ostriple.random_val_input(c, test_n);
-  ostriple.random_val_input(c, 186000000);
-  mul_circuit_independe_setup += time_from(start_independent_pre_mul);
-
-  cout << "Gen VOLE " << (mul_circuit_independe_setup) / 1000 << " ms " << party
-        << " " << endl;
-
-  delete[] c;
-
-  // abort();
 
   ar = 2, br = 3;
   for (int j = 0; j < num_of_chunk; ++j) {
@@ -209,12 +194,11 @@ void test_circuit_zk(NetIO *ios[threads + 1], int party,
     ostriple.reveal_check_recv(&(ao[chunk]), &ar, 1);
   }
 
-  cout << "Circui-independ Setup time: " << (mul_circuit_independe_setup) / 1000 << " ms " << party
-        << " " << endl;
-  cout << "Circui-depend Setup time: " << (setup - mul_circuit_independe_setup) / 1000 << " ms " << party
+
+  cout << "Preprocessing time: " << (setup) / 1000 << " ms " << party
         << " " << endl;
 
-  cout << test_n << "\t Prove time: " << (prove)/ 1000 << " ms " << "\t" << party << " " << endl;
+  cout << test_n << "\tOnline Proving time: " << (prove)/ 1000 << " ms " << "\t" << party << " " << endl;
   cout << test_n << "\t" << double(test_n)/(prove)*1000000 << "\t M/s " << party << " " << endl;
   std::cout << std::endl;
 
