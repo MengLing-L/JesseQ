@@ -191,7 +191,7 @@ $$a_1=w_{\alpha} w_{\rho} - w_{\upsilon} = 0$$
 
 ### JQv2 面向任意域上的分层电路
 
-JQv2 将分层电路中每个乘法门由证明者发送的域元素数量（均摊值）降低至 $\frac{1}{2}$ 。这一优化基于与 LPZKv2 相似的观察：$g(X) = d_\rho \cdot p_{\alpha}(X) + d_\alpha \cdot p_{\rho}(X) + p_y(X) + d_\rho \cdot d_\alpha \cdot X=a_0 + a_1\cdot X$
+JQv2 将分层电路中每个乘法门由证明者发送的域元素数量（均摊值）降低至 $\frac{1}{2}$ 。这一优化基于与 LPZKv2 相似的观察：$g(X) = d_{\rho} \cdot p_{\alpha}(X) + d_{\alpha} \cdot p_{\rho}(X) + p_y(X) + d_{\rho} \cdot d_{\alpha} \cdot X=a_0 + a_1\cdot X$
 
 其中：
 - $a_0 = d_{\rho} \cdot m_{u_{\alpha}} + d_{\alpha} \cdot m_{u_{\rho}} + m_{y}$
