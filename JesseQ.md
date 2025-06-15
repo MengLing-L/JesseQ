@@ -96,7 +96,7 @@ $$f(X)= a_0 + a_1\cdot X + a_2\cdot X^2$$
 3. Prover计算聚合多项式 $F(X):=\sum_{j=1}^L f_j(X) \cdot \chi^j = A + B\cdot X$ 并发送$A,B$
 4. Verifier验证 $A+B\cdot x \stackrel{?}{=} \sum_{j=1}^L f_j(x) \cdot \chi^j$ 
 
-*注：为实现零知识性，需额外VOLE关联值来掩盖$A$和$B$，此处暂不展开。*
+*注：为实现零知识性，需额外VOLE关联值来掩盖 $A$ 和 $B$ ，此处暂不展开。*
 
 **小域场景的增强**：上述方案在大域（如 $\mathbb{F}_p$ ）算术电路上有效，但在小域（如 $\mathbb{F}_p$ 布尔电路）存在安全风险——攻击者可非不可忽略概率猜测全局密钥 $x$ 从而伪造IT-MAC。为此，QuickSilver引入子域VOLE（sVOLE）变体，其关联随机数形式为 $k = m + u \cdot x$  ，其中 $u  \in  \mathbb{F}_p^n$ ， $k , m \in \mathbb{F}_{p^r}^n$ ， $x \in \mathbb{F}_{p^r}$ 。
 
