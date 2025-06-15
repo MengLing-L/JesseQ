@@ -159,37 +159,39 @@ $$g(x)=p_{\alpha}(x)\cdot p_{\rho}(x) - x \cdot p_y(x) = a_0 + a_1\cdot x$$
 **验证多项式构造**  
 
 1. **线性多项式定义**：  
-   $p_{i}(X) = m_{u_i} + u_i\cdot X$ （$i\in \{\alpha,\rho \}$）  
+   $p_{i}(X) = m_{u_i} + u_i\cdot X$ （ $i\in \{\alpha,\rho \}$ ）  
    $p_{\upsilon}(X) = m_{w_\upsilon} + w_\upsilon\cdot X$  
    $p_y(X) = m_y + y\cdot X$
 
 2. **一次多项式构造**：  
-   $f(X) = d_\rho\cdot p_{\alpha}(X)+ d_\alpha\cdot p_{\rho}(X) + p_y(X) + d_\rho\cdot d_\alpha\cdot X - p_v(X)$  
-   $= \underbrace{a_0}_{d_{\rho}\cdot m_{u_{\alpha}} + d_{\alpha}\cdot m_{u_{\rho}} + m_{y}- m_{w_\upsilon}} + \underbrace{a_1}_{(u_{\alpha} + d_{\alpha})\cdot(u_{\rho} + d_{\rho}) - w_\upsilon}\cdot X$
+   $f(X) = d_\rho\cdot p_{\alpha}(X)+ d_\alpha\cdot p_{\rho}(X) + p_y(X) + d_\rho\cdot d_\alpha\cdot X - p_v(X)= a_0 + a_1\cdot X$
 
+其中：
+- $a_0 = d_{\rho}\cdot m_{u_{\alpha}} + d_{\alpha}\cdot m_{u_{\rho}} + m_{y}- m_{w_\upsilon}$
+- $a_1 = (u_{\alpha} + d_{\alpha})\cdot(u_{\rho} + d_{\rho}) - w_\upsilon$
 
 **验证逻辑**  
 当且仅当乘法门计算正确时：
 $$a_1=w_{\alpha} w_{\rho} - w_{\upsilon} = 0$$
-此时$f(X)$退化为常数多项式。虽然Prover可发送$a_0$供Verifier验证$a_0 \stackrel{?}{=}f(x)$，但会导致每门传输一个域元素。
+此时$f(X)$退化为常数多项式。虽然Prover可发送$a_0$供Verifier验证 $a_0 \stackrel{?}{=}f(x)$ ，但会导致每门传输一个域元素。
 
 #### 高效批量验证协议
 我们采用随机预言机模型下的哈希函数$\mathsf{H}$实现批量验证：
-1. 对于$L$个待验证常数多项式$f_j(X)=a_{0,j}$
-2. Prover 计算并发送$h=H(a_{0,1} || \cdots || a_{0,L})$
-3. Verifier 验证$h \stackrel{?}{=} H(f_1(x)||\cdots||f_L(x))$
+1. 对于 $L$ 个待验证常数多项式 $f_j(X)=a_{0,j}$ 
+2. Prover 计算并发送 $h=H(a_{0,1} || \cdots || a_{0,L})$ 
+3. Verifier 验证 $h \stackrel{?}{=} H(f_1(x)||\cdots||f_L(x))$ 
 
 **方案扩展性**  
 如LPZKv2，本方案可从标准算术电路推广至任意二次多项式门电路（详见第~\ref{sec:jqv1}节）。
 
 #### 技术优势说明：  
-1. **布尔电路优化**：一次多项式$f(X)$的构造避免了扩域元素乘法运算。在$\mathbb{F}_2$电路中，标量乘法（如$d_{\alpha}\cdot m_{u_{\rho}}$）比扩域乘法（如$m_{w_{\rho}}\cdot m_{w_{\alpha}}$）效率显著提升
-2. **批量验证效率**：相比QuickSilver与LPZKv2分别需要的$\mathbb{F}_{p^r}$三次乘法和$\mathbb{F}_p$一次乘法，基于哈希的验证具有更优实际性能。例如在Amazon EC2m5.2xlarge 实例上，BLAKE3 处理1000万61/128位域元素的速度至少是同规模域乘法运算的2倍（详见第~\ref{sec:mulhash}节）
+1. **布尔电路优化**：一次多项式$f(X)$的构造避免了扩域元素乘法运算。在 $\mathbb{F}_2$ 电路中，标量乘法（如 $d_{\alpha}\cdot m_{u_{\rho}}$ ）比扩域乘法（如 $m_{w_{\rho}}\cdot m_{w_{\alpha}}$ ）效率显著提升
+2. **批量验证效率**：相比QuickSilver与LPZKv2分别需要的 $\mathbb{F}_{p^r}$ 三次乘法和 $\mathbb{F}_p$ 一次乘法，基于哈希的验证具有更优实际性能。例如在Amazon EC2m5.2xlarge 实例上，BLAKE3 处理1000万61/128位域元素的速度至少是同规模域乘法运算的2倍（详见第~\ref{sec:mulhash}节）
 
 
 ### JQv2 面向任意域上的分层电路
 
-JQv2 将分层电路中每个乘法门由证明者发送的域元素数量（均摊值）降低至 $\frac{1}{2}$。这一优化基于与 LPZKv2 相似的观察：
+JQv2 将分层电路中每个乘法门由证明者发送的域元素数量（均摊值）降低至 $\frac{1}{2}$ 。这一优化基于与 LPZKv2 相似的观察：
 
 $$
 \begin{aligned}
