@@ -33,7 +33,7 @@
 ### 消息认证码与VOLE
 
 大多数基于VOLE的零知识证明将VOLE关联性用作信息论消息认证码（IT-MAC）[17], [18], [19], [20]，使得证明者（Prover）能够向验证者（Verifier）提交线值承诺。  
-设 $\mathbb{F}_p$ 为有限域, $x \in \mathbb{F}_p$ 是验证者已知的全局密钥，$u\in\mathbb{F}_p$ 是证明者已知的值。对 $u$ 的IT-MAC承诺由一对值 $(m, k)$ 组成，其中 $m$ 由证明者持有，$k$ 由验证者持有，且满足关系式 $m = k - u\cdot x$。  
+设 $\mathbb{F}_p$ 为有限域， $x \in \mathbb{F}_p$ 是验证者已知的全局密钥， $u\in\mathbb{F}_p$ 是证明者已知的值。对 $u$ 的IT-MAC承诺由一对值 $(m, k)$ 组成，其中 $m$ 由证明者持有，$k$ 由验证者持有，且满足关系式 $m = k - u\cdot x$。  
 
 - **承诺打开阶段**：证明者发送 $(m, u)$ 给验证者，验证者检查是否满足 $m = k - u \cdot x$。  
 - **符号表示**：记全局密钥 $x$ 下对 $u$ 的承诺为 $[u]$，也称 $[u]$ 为认证值，$m$ 是 $u$ 的MAC标签。  
@@ -43,8 +43,8 @@
 
 #### VOLE功能  
 VOLE功能允许证明者和验证者共同构造一组认证随机值。调用后：  
-- 证明者获得两个随机域元素向量 ($\boldsymbol{m}, \boldsymbol{u}$)；  
-- 验证者获得全局密钥 $x$ 和向量 $\boldsymbol{k}$，且满足 $\boldsymbol{k} = \boldsymbol{m} + \boldsymbol{u} \cdot x$。  
+- 证明者获得两个随机域元素向量 ( $\boldsymbol{m}, \boldsymbol{u}$ )；  
+- 验证者获得全局密钥 $x$ 和向量 $\boldsymbol{k}$ ，且满足 $\boldsymbol{k} = \boldsymbol{m} + \boldsymbol{u} \cdot x$ 。  
 该过程实现了对随机向量 $[\boldsymbol{u}]$ 的认证。  
 
 #### 承诺转换  
