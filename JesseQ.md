@@ -191,13 +191,12 @@ $$a_1=w_{\alpha} w_{\rho} - w_{\upsilon} = 0$$
 
 ### JQv2 面向任意域上的分层电路
 
-JQv2 将分层电路中每个乘法门由证明者发送的域元素数量（均摊值）降低至 $\frac{1}{2}$ 。这一优化基于与 LPZKv2 相似的观察：
+JQv2 将分层电路中每个乘法门由证明者发送的域元素数量（均摊值）降低至 $\frac{1}{2}$ 。这一优化基于与 LPZKv2 相似的观察：$g(X) = d_\rho \cdot p_{\alpha}(X) + d_\alpha \cdot p_{\rho}(X) + p_y(X) + d_\rho \cdot d_\alpha \cdot X=a_0 + a_1\cdot X$
 
-$$
-g(X) = d_\rho \cdot p_{\alpha}(X) + d_\alpha \cdot p_{\rho}(X) + p_y(X) + d_\rho \cdot d_\alpha \cdot X $$
-$$= \underbrace{a_0}_{d_{\rho} \cdot m_{u_{\alpha}} + d_{\alpha} \cdot m_{u_{\rho}} + m_{y}} + \underbrace{a_1}_{(u_{\alpha} + d_{\alpha}) \cdot (u_{\rho} + d_{\rho})} \cdot X
-$$
-
+其中：
+- $a_0 = d_{\rho} \cdot m_{u_{\alpha}} + d_{\alpha} \cdot m_{u_{\rho}} + m_{y}$
+- $a_1 = (u_{\alpha} + d_{\alpha}) \cdot (u_{\rho} + d_{\rho})$
+  
 该多项式已能直接认证 $w_{\alpha} \cdot w_{\rho}$ 而无需任何通信。为简化描述，此处假设偶数层的导线数量多于奇数层。具体而言，我们允许证明者和验证者直接使用输入导线关联的值计算偶数层门输出的 $[w_{\upsilon}]$，从而避免证明者向验证者发送 $d_{\upsilon}$。但对于奇数层的门，证明者仍需发送 $d_{\upsilon}$ 供验证者计算 $[w_{\upsilon}]$。由于奇数层输入（偶数层输出）的关联值不再是随机值 $u$ 与双方已知值 $d$ 的简单线性组合，JQv1 中的校验方法在此不适用。
 
 因此，在给定输入输出导线的认证值后，我们采用与 QuickSliver 相似的基于二次多项式在 $x$ 处求值的校验方法，具体细节将在章节 \ref{sec:lay:cir} 中阐述。
