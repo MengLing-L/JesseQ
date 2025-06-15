@@ -43,7 +43,7 @@
 
 #### VOLE功能  
 VOLE功能允许证明者和验证者共同构造一组认证随机值。调用后：  
-- 证明者获得两个随机域元素向量 ( $\boldsymbol{m}, \boldsymbol{u}$ )；  
+- 证明者获得两个随机域元素向量 ( `\boldsymbol{m}, \boldsymbol{u}` )；  
 - 验证者获得全局密钥 $x$ 和向量 $\boldsymbol{k}$ ，且满足 $\boldsymbol{k} = \boldsymbol{m} + \boldsymbol{u} \cdot x$ 。  
 该过程实现了对随机向量 $[\boldsymbol{u}]$ 的认证。  
 
