@@ -115,21 +115,21 @@ $$k_y = m_y + u_y \cdot x \quad \text{其中} \quad u_y = u_{\alpha}\cdot u_{\be
 该机制显著降低复杂度，具体原理如下：
 
 **乘法验证流程**  
-1. **承诺阶段**：采用常数项承诺形式$k_i=w_i + u_i \cdot x$（$i\in\{\alpha, \rho, \upsilon\}$）
-2. **预处理阶段**：通过qVOLE获取$(m_y, u_y)$（Prover）和$(k_y, x)$（Verifier），满足$u_y = u_{\alpha}\cdot u_{\rho}$
+1. **承诺阶段**：采用常数项承诺形式 $k_i=w_i + u_i \cdot x$ （ $i\in\{\alpha, \rho, \upsilon\}$ ）
+2. **预处理阶段**：通过qVOLE获取 $(m_y, u_y)$ （Prover）和 $(k_y, x)$ （Verifier），满足 $u_y = u_{\alpha}\cdot u_{\rho}$ 
 3. **多项式构造**：定义二次多项式
    $$f(X) = p_{\alpha}(X)\cdot p_{\rho}(X) - p_{\upsilon}(X) - X \cdot p_y(X)$$
-   - Verifier已知$f(x) = k_{w_\alpha}\cdot k_{w_\rho} - k_{w_\upsilon} - x \cdot k_y$
+   - Verifier已知 $f(x) = k_{w_\alpha}\cdot k_{w_\rho} - k_{w_\upsilon} - x \cdot k_y$ 
    - Prover掌握其系数：
      $$f(X) = a_0 + a_1\cdot X + a_2\cdot X^2$$
      其中：
      - $a_0 = w_{\alpha}\cdot w_{\rho} - w_{\upsilon}$
      - $a_1 = w_{\alpha}\cdot u_{w_{\rho}} + w_{\rho}\cdot u_{w_{\alpha}} - u_{\upsilon} - m_y$
-     - $a_2 = u_{\alpha} \cdot u_{\rho} - u_y \equiv 0$（因$u_y=u_{\alpha}\cdot u_{\rho}$）
+     - $a_2 = u_{\alpha} \cdot u_{\rho} - u_y \equiv 0$（因 $u_y=u_{\alpha}\cdot u_{\rho}$ ）
 
 4. **验证阶段**：
-   - 当且仅当$w_{\alpha}\cdot w_{\rho} = w_{\upsilon}$时$a_0=0$
-   - Prover发送$a_1$，Verifier验证$a_1\cdot x \stackrel{?}{=} k_{w_\alpha}\cdot k_{w_\rho} - k_{w_\upsilon} - x\cdot k_y$
+   - 当且仅当 $w_{\alpha}\cdot w_{\rho} = w_{\upsilon}$ 时 $a_0=0$ 
+   - Prover发送 $a_1$ ，Verifier验证 $a_1\cdot x \stackrel{?}{=} k_{w_\alpha}\cdot k_{w_\rho} - k_{w_\upsilon} - x\cdot k_y$ 
 
 **批量验证协议**  
 对于$L$个需验证的常数多项式$f_j(X) / X = a_{j, 1}$（Verifier已知$f_j(x)$）：
