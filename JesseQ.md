@@ -185,7 +185,7 @@ $$a_1=w_{\alpha} w_{\rho} - w_{\upsilon} = 0$$
 如LPZKv2，本方案可从标准算术电路推广至任意二次多项式门电路（详见第~\ref{sec:jqv1}节）。
 
 #### 技术优势说明：  
-1. **布尔电路优化**：一次多项式$f(X)$的构造避免了扩域元素乘法运算。在 $\mathbb{F}_2$ 电路中，标量乘法， 如 $d_{\alpha} \cdot m_{u_{\rho}}$ ，比扩域乘法，如 $m_{w_{\rho}}\cdot m_{w_{\alpha}}$ 效率显著提升
+1. **布尔电路优化**：一次多项式 $f(X)$ 的构造避免了扩域元素乘法运算。在 $\mathbb{F}_2$ 电路中，标量乘法， 如 $d_{\alpha} \cdot m_{u_{\rho}}$ ，比扩域乘法，如 $m_{w_{\rho}}\cdot m_{w_{\alpha}}$ 效率显著提升
 2. **批量验证效率**：相比QuickSilver与LPZKv2分别需要的 $\mathbb{F}_{p^r}$ 三次乘法和 $\mathbb{F}_p$ 一次乘法，基于哈希的验证具有更优实际性能。例如在Amazon EC2m5.2xlarge 实例上，BLAKE3 处理1000万61/128位域元素的速度至少是同规模域乘法运算的2倍（详见第~\ref{sec:mulhash}节）
 
 
