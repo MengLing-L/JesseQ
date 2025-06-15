@@ -100,7 +100,7 @@ $$f(X)= a_0 + a_1\cdot X + a_2\cdot X^2$$
 $\require{bm}$  
 $\bm{k} = \bm{m} + \bm{u} \cdot x$
 
-**小域场景的增强**：上述方案在大域（如 $\mathbb{F}_p$ ）算术电路上有效，但在小域（如 $\mathbb{F}_2$ 布尔电路）存在安全风险——攻击者可非不可忽略概率猜测全局密钥 $x$ 从而伪造IT-MAC。为此，QuickSilver引入子域VOLE（sVOLE）变体，其关联随机数形式为 $\mathbb{k}=\mathbb{m}+\mathbb{u}\cdot x$ ，其中 $\boldsymbol{u} \in \mathbb{F}_p^n$ ， $\boldsymbol{k}, \boldsymbol{m} \in \mathbb{F}_{p^r}^n$ ， $x\in\mathbb{F}_{p^r}$ 。
+**小域场景的增强**：上述方案在大域（如 $\mathbb{F}_p$ ）算术电路上有效，但在小域（如 $\mathbb{F}_2$ 布尔电路）存在安全风险——攻击者可非不可忽略概率猜测全局密钥 $x$ 从而伪造IT-MAC。为此，QuickSilver引入子域VOLE（sVOLE）变体，其关联随机数形式为 $\mathbf{k}=\mathbf{m}+\mathbf{u}\cdot x$ ，其中 $\boldsymbol{u} \in \mathbb{F}_p^n$ ， $\boldsymbol{k}, \boldsymbol{m} \in \mathbb{F}_{p^r}^n$ ， $x\in\mathbb{F}_{p^r}$ 。
 
 ### 乘法验证：LPZKv2改进方案
 LPZKv2通过两项技术改进实现了对LPZK的优化：
