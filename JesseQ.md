@@ -79,9 +79,9 @@ VOLE功能允许证明者和验证者共同构造一组认证随机值。调用�
 **核心差异**：现有恒定轮次VOLE-ZKP方案的主要区别在于步骤 `step:3` 的实现方式。
 
 ### 乘法验证：LPZK与QuickSilver方案
-LPZK 及其后续改进方案 QuickSilver采用了相似的思路来验证乘法运算的正确性。下面我们将具体阐述 Prover 如何在承诺线值后向 Verifier 证明乘法门的正确计算。假设某乘法门的输入线为$w_{\alpha},w_{\rho}$，输出线为$w_{\upsilon}$，给定承诺值$[w_{\alpha}], [w_{\rho} ], [w_{\upsilon}]$，Prover 需证明$w_{\alpha} \cdot w_{\rho} = w_{\upsilon}$。
+LPZK 及其后续改进方案 QuickSilver采用了相似的思路来验证乘法运算的正确性。下面我们将具体阐述 Prover 如何在承诺线值后向 Verifier 证明乘法门的正确计算。假设某乘法门的输入线为 $w_{\alpha},w_{\rho}$ ，输出线为 $w_{\upsilon}$ ，给定承诺值 $[w_{\alpha}], [w_{\rho} ], [w_{\upsilon}]$ ，Prover 需证明 $w_{\alpha} \cdot w_{\rho} = w_{\upsilon}$ 。
 
-**核心思想**是将IT-MACs解释为$X$的线性多项式：定义$p_{i}(X) = m_{w_i} + w_i\cdot X$（其中$i\in\{\alpha, \rho, \upsilon\}$），构造二次多项式$f(X) = p_{\alpha}(X)\cdot p_{\rho}(X) - X\cdot p_{\upsilon}(X)$。Verifier 已知其在$x$处的取值$f(x) = k_{w_\alpha}\cdot k_{w_\rho} - x \cdot k_{w_\upsilon}$，而 Prover 掌握其系数。具体展开为：
+**核心思想**是将IT-MACs解释为$X$的线性多项式：定义 $p_{i}(X) = m_{w_i} + w_i\cdot X$ （其中  $i\in\{\alpha, \rho, \upsilon\}$ ），构造二次多项式 $f(X) = p_{\alpha}(X)\cdot p_{\rho}(X) - X\cdot p_{\upsilon}(X)$ 。Verifier 已知其在 $x$ 处的取值 $f(x) = k_{w_\alpha}\cdot k_{w_\rho} - x \cdot k_{w_\upsilon}$ ，而 Prover 掌握其系数。具体展开为：
 $$f(X)= a_0 + a_1\cdot X + a_2\cdot X^2$$
 其中系数分别为：
 - $a_0 = m_{w_{\alpha}}\cdot m_{w_{\rho}}$
