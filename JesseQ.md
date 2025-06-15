@@ -132,9 +132,9 @@ $$k_y = m_y + u_y \cdot x \quad \text{其中} \quad u_y = u_{\alpha}\cdot u_{\be
    - Prover发送 $a_1$ ，Verifier验证 $a_1\cdot x \stackrel{?}{=} k_{w_\alpha}\cdot k_{w_\rho} - k_{w_\upsilon} - x\cdot k_y$ 
 
 **批量验证协议**  
-对于$L$个需验证的常数多项式$f_j(X) / X = a_{j, 1}$（Verifier已知$f_j(x)$）：
-1. Prover 计算并发送$A = \prod_{j=1}^{L} a_{j, 1}$
-2. Verifier 验证$A \stackrel{?}{=} \prod_{j=1}^{L} f_j(x) / x$
+对于$L$个需验证的常数多项式 $f_j(X) / X = a_{j, 1}$ （Verifier已知 $f_j(x)$ ）：
+1. Prover 计算并发送 $A = \prod_{j=1}^{L} a_{j, 1}$ 
+2. Verifier 验证 $A \stackrel{?}{=} \prod_{j=1}^{L} f_j(x) / x$ 
 *核心原理*：当且仅当所有多项式均为常数时，其乘积才是常数多项式。
 
 **电路优化扩展**  
@@ -143,18 +143,18 @@ $$g(x)=p_{\alpha}(x)\cdot p_{\rho}(x) - x \cdot p_y(x) = a_0 + a_1\cdot x$$
 其中：
 - $a_0 = w_\alpha\cdot w_\rho$
 - $a_1 = w_\alpha\cdot u_{\rho} + w_\rho\cdot u_{\alpha} - m_y$
-天然构成对$w_{\alpha} \cdot w_{\rho}$的认证，且无需任何通信开销。
+天然构成对 $w_{\alpha} \cdot w_{\rho}$ 的认证，且无需任何通信开销。
 
 ## JesseQ方案技术概览 
 本节阐述JesseQ的设计原理。我们通过二次子域VOLE(qsVOLE)技术融合QuickSilver与LPZKv2的优势，并设计了适配qsVOLE的高效乘法验证协议。相较于现有基于二次多项式的方法，我们的方案采用一次多项式实现更高效的验证，同时设计了创新的批量验证机制。
 
 ### 通用域电路方案JQv1
-对于输入线$(w_{\alpha}, w_{\rho})$和输出线$w_{\upsilon}$的乘法门：
+对于输入线 $(w_{\alpha}, w_{\rho})$ 和输出线 $w_{\upsilon}$ 的乘法门：
 
 **预处理阶段**  
-1. 双方通过qsVOLE获取随机认证值$[u_\alpha], [u_\rho], [u_\upsilon]$及$[y=u_\alpha\cdot u_\rho]$
-2. Prover发送差值$d_i := w_i - u_i$ （$i \in {\alpha,\rho, \upsilon}$）
-3. 双方计算$[w_\upsilon] = [u_\upsilon] + d_\upsilon$
+1. 双方通过qsVOLE获取随机认证值 $[u_\alpha], [u_\rho], [u_\upsilon]$ 及 $[y=u_\alpha\cdot u_\rho]$ 
+2. Prover发送差值 $d_i := w_i - u_i$  （ $i \in {\alpha,\rho, \upsilon}$ ）
+3. 双方计算 $[w_\upsilon] = [u_\upsilon] + d_\upsilon$ 
 
 **验证多项式构造**  
 
