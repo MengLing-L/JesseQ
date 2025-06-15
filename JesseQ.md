@@ -43,26 +43,26 @@
 
 #### VOLE功能  
 VOLE功能允许证明者和验证者共同构造一组认证随机值。调用后：  
-- 证明者获得两个随机域元素向量 ( `\boldsymbol{m}, \boldsymbol{u}` )；  
-- 验证者获得全局密钥 $x$ 和向量 $\boldsymbol{k}$ ，且满足 $\boldsymbol{k} = \boldsymbol{m} + \boldsymbol{u} \cdot x$ 。  
-该过程实现了对随机向量 $[\boldsymbol{u}]$ 的认证。  
+- 证明者获得两个随机域元素向量 ( $\bold{m},\bold{u}$ )；  
+- 验证者获得全局密钥 $x$ 和向量 $\bold{k}$ ，且满足 $\bold{k} = \bold{m} + \bold{u} \cdot x$ 。  
+该过程实现了对随机向量 $[\bold{u}]$ 的认证。  
 
 #### 承诺转换  
-若证明者已知某向量 $[\boldsymbol{w}]$ 的承诺，可将随机向量 $[\boldsymbol{u}]$ 的承诺转换为 $[\boldsymbol{w}]$ 的承诺：  
-1. 证明者发送差值向量 $\boldsymbol{d} := \boldsymbol{w} - \boldsymbol{u}$ 给验证者；  
-2. 验证者更新 $\boldsymbol{k}$ 为 $\boldsymbol{k} + \boldsymbol{d}\cdot x$。  
+若证明者已知某向量 $[\bold{w}]$ 的承诺，可将随机向量 $[\bold{u}]$ 的承诺转换为 $[\bold{w}]$ 的承诺：  
+1. 证明者发送差值向量 $\bold{d} := \bold{w} - \bold{u}$ 给验证者；  
+2. 验证者更新 $\bold{k}$ 为 $\bold{k} + \bold{d}\cdot x$。  
 
 ### 基于VOLE的零知识证明框架 
 
 大多数恒定轮次的基于VOLE的零知识证明遵循"承诺-证明"框架，并包含预处理阶段以提高效率。具体包含以下阶段：
 
 1. **预处理阶段**  
-   Prover 和 Verifier 调用VOLE功能，获得对随机向量 $\boldsymbol{u}$ 的承诺 $[\boldsymbol{u}]$，这些值将在在线阶段被消耗。  
+   Prover 和 Verifier 调用VOLE功能，获得对随机向量 $\bold{u}$ 的承诺 $[\bold{u}]$，这些值将在在线阶段被消耗。  
    *（对应步骤标签 `step:1`）*
 
 2. **在线阶段 - 承诺**  
    Prover 将电路中所有线值承诺给 Verifier：  
-   - 对于电路的输入线和乘法门的输出线，Prover 发送差值向量 $\boldsymbol{d}:= \boldsymbol{w} - \boldsymbol{u}$  
+   - 对于电路的输入线和乘法门的输出线，Prover 发送差值向量 $\bold{d}:= \bold{w} - \bold{u}$  
    - 通过该操作，将预处理阶段生成的随机值承诺转换为线值承诺  
    - 由于IT-MAC的加法同态性，加法门输出线的承诺可由双方在本地计算  
    - 发送的域元素总数 = 乘法门数量 + 输入线数量  
@@ -98,7 +98,7 @@ $$f(X)= a_0 + a_1\cdot X + a_2\cdot X^2$$
 
 *注：为实现零知识性，需额外VOLE关联值来掩盖$A$和$B$，此处暂不展开。*
 
-**小域场景的增强**：上述方案在大域（如 $\mathbb{F}_p$ ）算术电路上有效，但在小域（如 $\mathbb{F}_2$ 布尔电路）存在安全风险——攻击者可非不可忽略概率猜测全局密钥 $x$ 从而伪造IT-MAC。为此，QuickSilver引入子域VOLE（sVOLE）变体，其关联随机数形式为 $\mathbf{k}=\mathbf{m}+\mathbf{u}\cdot x$ ，其中 $\boldsymbol{u} \in \mathbb{F}_p^n$ ， $\boldsymbol{k}, \boldsymbol{m} \in \mathbb{F}_{p^r}^n$ ， $x\in\mathbb{F}_{p^r}$ 。
+**小域场景的增强**：上述方案在大域（如 $\mathbb{F}_p$ ）算术电路上有效，但在小域（如 $\mathbb{F}_2$ 布尔电路）存在安全风险——攻击者可非不可忽略概率猜测全局密钥 $x$ 从而伪造IT-MAC。为此，QuickSilver引入子域VOLE（sVOLE）变体，其关联随机数形式为 $\mathbf{k}=\mathbf{m}+\mathbf{u}\cdot x$ ，其中 $\bold{u} \in \mathbb{F}_p^n$ ， $\bold{k}, \bold{m} \in \mathbb{F}_{p^r}^n$ ， $x\in\mathbb{F}_{p^r}$ 。
 
 ### 乘法验证：LPZKv2改进方案
 LPZKv2通过两项技术改进实现了对LPZK的优化：
@@ -109,7 +109,7 @@ LPZKv2通过两项技术改进实现了对LPZK的优化：
 - 优势：Verifier在收到Prover发送的 $d:=w - m$ 后，可直接通过 $k + d$ 更新 $k$ （原方案需计算 $k+ d\cdot x$ ），每门节省一次乘法运算
 
 **技术改进2：二次VOLE（qVOLE）**  
-通过生成额外关联随机数提升在线阶段效率。除基础关联式$k_i = m_i + u_i \cdot x$（$i\in\{\alpha, \rho, \upsilon\}$）外，qVOLE还生成：
+通过生成额外关联随机数提升在线阶段效率。除基础关联式 $k_i = m_i + u_i \cdot x$ （ $i\in\{\alpha, \rho, \upsilon\}$ ）外，qVOLE还生成：
 $$k_y = m_y + u_y \cdot x \quad \text{其中} \quad u_y = u_{\alpha}\cdot u_{\beta}$$
 该机制显著降低复杂度，具体原理如下：
 
