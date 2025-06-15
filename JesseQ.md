@@ -88,25 +88,25 @@ $$f(X)= a_0 + a_1\cdot X + a_2\cdot X^2$$
 - $a_1 = w_{\alpha}\cdot m_{w_{\rho}} + w_{\rho}\cdot m_{w_{\alpha}} - m_{w_{\upsilon}}$
 - $a_2 = w_{\alpha}\cdot w_{\rho} - w_{\upsilon}$
 
-**关键性质**：当且仅当$w_{\alpha}\cdot w_{\rho} = w_{\upsilon}$时，$f(X)$退化为线性多项式。为证明这一点，Prover可发送$a_0$和$a_1$给Verifier，后者验证$a_0+ a_1\cdot x \stackrel{?}{=} k_{w_\alpha}\cdot k_{w_\rho} - x \cdot k_{w_\upsilon}$。但直接发送每个门的两个域元素效率低下，因此QuickSilver采用批量验证策略：
+**关键性质**：当且仅当 $w_{\alpha}\cdot w_{\rho} = w_{\upsilon}$时，$f(X)$ 退化为线性多项式。为证明这一点，Prover可发送$a_0$和$a_1$给Verifier，后者验证 $a_0+ a_1\cdot x \stackrel{?}{=} k_{w_\alpha}\cdot k_{w_\rho} - x \cdot k_{w_\upsilon}$ 。但直接发送每个门的两个域元素效率低下，因此QuickSilver采用批量验证策略：
 
 **批量验证流程**：
-1. 设有$L$个乘法门对应线性多项式$f_j(X)$（$j=1$至$L$）
-2. Verifier发送随机挑战值$\chi$
-3. Prover计算聚合多项式$F(X):=\sum_{j=1}^L f_j(X) \cdot \chi^j = A + B\cdot X$并发送$A,B$
-4. Verifier验证$A+B\cdot x \stackrel{?}{=} \sum_{j=1}^L f_j(x) \cdot \chi^j$
+1. 设有 $L$ 个乘法门对应线性多项式$f_j(X)$（$j=1$至$L$）
+2. Verifier发送随机挑战值 $\chi$ 
+3. Prover计算聚合多项式 $F(X):=\sum_{j=1}^L f_j(X) \cdot \chi^j = A + B\cdot X$ 并发送$A,B$
+4. Verifier验证 $A+B\cdot x \stackrel{?}{=} \sum_{j=1}^L f_j(x) \cdot \chi^j$ 
 
 *注：为实现零知识性，需额外VOLE关联值来掩盖$A$和$B$，此处暂不展开。*
 
-**小域场景的增强**：上述方案在大域（如$\mathbb{F}_p$）算术电路上有效，但在小域（如$\mathbb{F}_2$布尔电路）存在安全风险——攻击者可非不可忽略概率猜测全局密钥$x$从而伪造IT-MAC。为此，QuickSilver引入子域VOLE（sVOLE）变体，其关联随机数形式为$\boldsymbol{k} = \boldsymbol{m} + \boldsymbol{u} \cdot x$，其中$\boldsymbol{u} \in \mathbb{F}_p^n$，$\boldsymbol{k}, \boldsymbol{m} \in \mathbb{F}_{p^r}^n$，$x\in\mathbb{F}_{p^r}$。
+**小域场景的增强**：上述方案在大域（如 $\mathbb{F}_p$ ）算术电路上有效，但在小域（如 $\mathbb{F}_2$ 布尔电路）存在安全风险——攻击者可非不可忽略概率猜测全局密钥 $x$ 从而伪造IT-MAC。为此，QuickSilver引入子域VOLE（sVOLE）变体，其关联随机数形式为 $\boldsymbol{k} = \boldsymbol{m} + \boldsymbol{u} \cdot x$ ，其中 $\boldsymbol{u} \in \mathbb{F}_p^n$ ， $\boldsymbol{k}, \boldsymbol{m} \in \mathbb{F}_{p^r}^n$ ， $x\in\mathbb{F}_{p^r}$ 。
 
 ### 乘法验证：LPZKv2改进方案
 LPZKv2通过两项技术改进实现了对LPZK的优化：
 
 **技术改进1：IT-MAC重构**  
-将见证值置于$m$而非$u$中。新架构下：
-- 认证$m$时，Prover持有$u$，Verifier持有$k$和$x$，满足$k=m+u\cdot x$
-- 优势：Verifier在收到Prover发送的$d:=w - m$后，可直接通过$k + d$更新$k$（原方案需计算$k+ d\cdot x$），每门节省一次乘法运算
+将见证值置于 $m$ 而非 $u$ 中。新架构下：
+- 认证 $m$ 时，Prover持有 $u$ ，Verifier持有 $k$ 和 $x$ ，满足 $k=m+u\cdot x$ 
+- 优势：Verifier在收到Prover发送的 $d:=w - m$ 后，可直接通过 $k + d$ 更新 $k$ （原方案需计算 $k+ d\cdot x$ ），每门节省一次乘法运算
 
 **技术改进2：二次VOLE（qVOLE）**  
 通过生成额外关联随机数提升在线阶段效率。除基础关联式$k_i = m_i + u_i \cdot x$（$i\in\{\alpha, \rho, \upsilon\}$）外，qVOLE还生成：
