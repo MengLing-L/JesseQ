@@ -83,10 +83,7 @@ LPZK 及其后续改进方案 QuickSilver采用了相似的思路来验证乘法
 
 **核心思想**是将IT-MACs解释为$X$的线性多项式：定义 $p_{i}(X) = m_{w_i} + w_i\cdot X$ （其中  $i\in\{\alpha, \rho, \upsilon\}$ ），构造二次多项式 $f(X) = p_{\alpha}(X)\cdot p_{\rho}(X) - X\cdot p_{\upsilon}(X)$ 。Verifier 已知其在 $x$ 处的取值 $f(x) = k_{w_\alpha}\cdot k_{w_\rho} - x \cdot k_{w_\upsilon}$ ，而 Prover 掌握其系数。具体展开为：
 $$f(X)= a_0 + a_1\cdot X + a_2\cdot X^2$$
-其中系数分别为：
-- $a_0 = m_{w_{\alpha}}\cdot m_{w_{\rho}}$
-- $a_1 = w_{\alpha}\cdot m_{w_{\rho}} + w_{\rho}\cdot m_{w_{\alpha}} - m_{w_{\upsilon}}$
-- $a_2 = w_{\alpha}\cdot w_{\rho} - w_{\upsilon}$
+其中系数分别为：$a_0 = m_{w_{\alpha}}\cdot m_{w_{\rho}}$ ， $a_1 = w_{\alpha}\cdot m_{w_{\rho}} + w_{\rho}\cdot m_{w_{\alpha}} - m_{w_{\upsilon}}$ ， $a_2 = w_{\alpha}\cdot w_{\rho} - w_{\upsilon}$
 
 **关键性质**：当且仅当 $w_{\alpha}\cdot w_{\rho} = w_{\upsilon}$时， $f(X)$ 退化为线性多项式。为证明这一点，Prover可发送 $a_0$ 和 $a_1$ 给Verifier，后者验证 $a_0+ a_1\cdot x \stackrel{?}{=} k_{w_\alpha}\cdot k_{w_\rho} - x \cdot k_{w_\upsilon}$ 。但直接发送每个门的两个域元素效率低下，因此QuickSilver采用批量验证策略：
 
