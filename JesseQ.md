@@ -91,7 +91,7 @@ $$f(X)= a_0 + a_1\cdot X + a_2\cdot X^2$$
 **关键性质**：当且仅当 $w_{\alpha}\cdot w_{\rho} = w_{\upsilon}$时， $f(X)$ 退化为线性多项式。为证明这一点，Prover可发送$a_0$和$a_1$给Verifier，后者验证 $a_0+ a_1\cdot x \stackrel{?}{=} k_{w_\alpha}\cdot k_{w_\rho} - x \cdot k_{w_\upsilon}$ 。但直接发送每个门的两个域元素效率低下，因此QuickSilver采用批量验证策略：
 
 **批量验证流程**：
-1. 设有 $L$ 个乘法门对应线性多项式$f_j(X)$（$j=1$至$L$）
+1. 设有 $L$ 个乘法门对应线性多项式 $f_j(X)$ （ $j=1$ 至 $L$ ）
 2. Verifier发送随机挑战值 $\chi$ 
 3. Prover计算聚合多项式 $F(X):=\sum_{j=1}^L f_j(X) \cdot \chi^j = A + B\cdot X$ 并发送$A,B$
 4. Verifier验证 $A+B\cdot x \stackrel{?}{=} \sum_{j=1}^L f_j(x) \cdot \chi^j$ 
