@@ -93,7 +93,7 @@ $$f(X)= a_0 + a_1\cdot X + a_2\cdot X^2$$
 **批量验证流程**：
 1. 设有 $L$ 个乘法门对应线性多项式 $f_j(X)$ （ $j=1$ 至 $L$ ）
 2. Verifier发送随机挑战值 $\chi$ 
-3. Prover计算聚合多项式 $F(X):=\sum_{j=1}^L f_j(X) \cdot \chi^j = A + B\cdot X$ 并发送$A,B$
+3. Prover计算聚合多项式 $F(X):=\sum_{j=1}^L f_j(X) \cdot \chi^j = A + B\cdot X$ 并发送 $A,B$ 
 4. Verifier验证 $A+B\cdot x \stackrel{?}{=} \sum_{j=1}^L f_j(x) \cdot \chi^j$ 
 
 *注：为实现零知识性，需额外VOLE关联值来掩盖 $A$ 和 $B$ ，此处暂不展开。
