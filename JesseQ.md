@@ -132,7 +132,7 @@ $$k_y = m_y + u_y \cdot x \quad \text{其中} \quad u_y = u_{\alpha}\cdot u_{\be
    - Prover发送 $a_1$ ，Verifier验证 $a_1\cdot x \stackrel{?}{=} k_{w_\alpha}\cdot k_{w_\rho} - k_{w_\upsilon} - x\cdot k_y$ 
 
 **批量验证协议**  
-对于$L$个需验证的常数多项式 $f_j(X) / X = a_{j, 1}$ （Verifier已知 $f_j(x)$ ）：
+对于 $L$ 个需验证的常数多项式 $f_j(X) / X = a_{j, 1}$ （Verifier已知 $f_j(x)$ ）：
 1. Prover 计算并发送 $A = \prod_{j=1}^{L} a_{j, 1}$ 
 2. Verifier 验证 $A \stackrel{?}{=} \prod_{j=1}^{L} f_j(x) / x$ 
 *核心原理*：当且仅当所有多项式均为常数时，其乘积才是常数多项式。
