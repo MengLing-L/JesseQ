@@ -173,10 +173,10 @@ $$g(x)=p_{\alpha}(x)\cdot p_{\rho}(x) - x \cdot p_y(x) = a_0 + a_1\cdot x$$
 **验证逻辑**  
 当且仅当乘法门计算正确时：
 $$a_1=w_{\alpha} w_{\rho} - w_{\upsilon} = 0$$
-此时$f(X)$退化为常数多项式。虽然Prover可发送$a_0$供Verifier验证 $a_0 \stackrel{?}{=}f(x)$ ，但会导致每门传输一个域元素。
+此时 $f(X)$ 退化为常数多项式。虽然Prover可发送 $a_0$ 供Verifier验证 $a_0 \stackrel{?}{=}f(x)$ ，但会导致每门传输一个域元素。
 
 #### 高效批量验证协议
-我们采用随机预言机模型下的哈希函数$\mathsf{H}$实现批量验证：
+我们采用随机预言机模型下的哈希函数 $\mathsf{H}$ 实现批量验证：
 1. 对于 $L$ 个待验证常数多项式 $f_j(X)=a_{0,j}$ 
 2. Prover 计算并发送 $h=H(a_{0,1} || \cdots || a_{0,L})$ 
 3. Verifier 验证 $h \stackrel{?}{=} H(f_1(x)||\cdots||f_L(x))$ 
