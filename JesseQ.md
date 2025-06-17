@@ -7,18 +7,18 @@
 基于VOLE的常数轮ZKPs性能如下表所示。在该范式下，线点零知识协议（LPZK）首次实现大域算术电路中每个逻辑门约1个通信元素的里程碑，后续QuickSilver将其改进为支持任意数域。另一改进方向LPZKv2则将通信量减半并降低计算成本。这些方案的通信复杂度与电路规模呈线性关系。AntMan首次实现 $\mathcal{O}(|C|^{3/4})$ 的亚线性通信构造（ $|\mathcal{C}|$ 为大域算术电路规模），虽然计算成本仍保持高效，但引入了 $\mathcal{O}(\log |C|)$ 的开销。在计算效率方面，QuickSilver和LPZKv2分别在布尔电路和大域算术电路中表现最优。值得注意的是，支持任意数域的VOLE-ZKPs与仅适用于大域的方案存在显著性能差异。
 
 另一研究方向针对特定结构电路（如表示析取式 $\mathcal{C}_1(w)=1\vee\mathcal{C}_2(w)=1\cdots\vee\mathcal{C}_B(w)=1$ 的 $B$ 分支子电路）进行优化。最先进的Batchman实现了批量析取式的亚线性通信和计算，其框架可通过黑盒方式实例化基于VOLE的常数轮ZKPs来处理乘法运算。
-|      Boolean      |            |             |    Arithmetic     |            |             |
-| :---------------: | :--------: | :---------: | :---------------: | :--------: | :---------: |
-|   Scheme&nbsp;    | Size&nbsp; | Speed&nbsp; |   Scheme&nbsp;    | Size&nbsp; | Speed&nbsp; |
-|  Wolverine    |     7      | 1.25 M/sec  |  Wolverine   |     4      | 0.96 M/sec  |
-| Mac‘n‘Cheese  |     -      |      -      | Mac‘n‘Cheese |     3      |  3.6 M/sec  |
-|   IT-LPZK    |     -      |      -      |   IT-LPZK   |   2+1/t    | 19.6 M/sec  |
-|  QuickSilver  |     1      |  8.6 M/sec  |  QuickSilver |     1      |  7.8 M/sec  |
-|   IT-LPZKv2  |     -      |      -      |   IT-LPZKv2   |   1+1/t    | 21.8 M/sec  |
+|   Boolean    |            |             |  Arithmetic  |            |             |
+| :----------: | :--------: | :---------: | :----------: | :--------: | :---------: |
+| Scheme&nbsp; | Size&nbsp; | Speed&nbsp; | Scheme&nbsp; | Size&nbsp; | Speed&nbsp; |
+|  Wolverine   |     7      | 1.25 M/sec  |  Wolverine   |     4      | 0.96 M/sec  |
+| Mac‘n‘Cheese |     -      |      -      | Mac‘n‘Cheese |     3      |  3.6 M/sec  |
+|   IT-LPZK    |     -      |      -      |   IT-LPZK    |   2+1/t    | 19.6 M/sec  |
+| QuickSilver  |     1      |  8.6 M/sec  | QuickSilver  |     1      |  7.8 M/sec  |
+|  IT-LPZKv2   |     -      |      -      |  IT-LPZKv2   |   1+1/t    | 21.8 M/sec  |
 |  ROM-LPZKv2  |     -      |      -      |  ROM-LPZKv2  |    1/2     |  9.8 M/sec  |
-|    AntMan   |     -      |      -      |    AntMan   | sublinear  | 7.01 M/sec  |
-|       JQv1        |     1      | 64.1 M/sec  |       JQv1        |     1      | 23.3 M/sec  |
-|       JQv2        |    1/2     | 34.2 M/sec  |       JQv2        |    1/2     | 13.7 M/sec  |
+|    AntMan    |     -      |      -      |    AntMan    | sublinear  | 7.01 M/sec  |
+|     JQv1     |     1      | 64.1 M/sec  |     JQv1     |     1      | 23.3 M/sec  |
+|     JQv2     |    1/2     | 34.2 M/sec  |     JQv2     |    1/2     | 13.7 M/sec  |
 - 本表格将我们的工作（JQv1 和 JQv2）与先前相关工作的证明者成本进行了对比，数据来源包括他们研究中报告的结果以及在相同硬件上运行的实验（AntMan 除外，其使用了更高配置的实例）。
   
 - **Size** 表示每个乘法门需要发送的域元素数量（AntMan 除外，其具有亚线性通信特性）。  
