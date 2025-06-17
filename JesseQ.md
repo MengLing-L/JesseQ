@@ -6,7 +6,7 @@
 
 基于VOLE的ZKPs性能如下表所示。在该框架下，零知识证明协议（LPZK）首次实现大域算术电路中每个逻辑门约1个通信元素的里程碑，后续QuickSilver将其改进为支持任意数域。另一改进方向LPZKv2则将通信量减半并降低计算成本。这些方案的通信复杂度与电路规模呈线性关系。AntMan首次实现 $\mathcal{O}(|C|^{3/4})$ 的亚线性通信构造（ $|\mathcal{C}|$ 为大域算术电路规模），虽然计算成本仍保持高效，但引入了 $\mathcal{O}(\log |C|)$ 的开销。在计算效率方面，QuickSilver和LPZKv2分别在布尔电路和大域算术电路中表现最优。值得注意的是，支持任意数域的VOLE-ZKPs与仅适用于大域的方案存在显著性能差异。
 
-另一研究方向针对特定结构电路（如表示析取式 $\mathcal{C}_1(w)=1\vee\mathcal{C}_2(w)=1\cdots\vee\mathcal{C}_B(w)=1$ 的 $B$ 分支子电路）进行优化。最先进的Batchman实现了批量析取式的亚线性通信和计算，其框架可通过黑盒方式实例化基于VOLE的常数轮ZKPs来处理乘法运算。
+另一研究方向针对特定结构电路（如表示析取式 $\mathcal{C}_1(w)=1\vee\mathcal{C}_2(w)=1\cdots\vee\mathcal{C}_B(w)=1$ 的 $B$ 分支子电路）进行优化。最先进的Batchman实现了批量析取式的亚线性通信和计算，其框架可通过黑盒方式实例化基于VOLE的ZKPs来处理乘法运算。
 |   Boolean    |            |             |  Arithmetic  |            |             |
 | :----------: | :--------: | :---------: | :----------: | :--------: | :---------: |
 | Scheme&nbsp; | Size&nbsp; | Speed&nbsp; | Scheme&nbsp; | Size&nbsp; | Speed&nbsp; |
