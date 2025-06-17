@@ -1,19 +1,22 @@
 # JesseQ: 面向任意域上电路的高效零知识证明系统
-基于向量不经意线性评估（VOLE）[1]-[5]的常数轮零知识证明（ZKPs）近期因其高效性和可扩展性获得显著关注。最新实现方案[6][7]每秒可证明数千万逻辑门，并能平滑扩展至万亿级逻辑门验证。相较于现有简洁零知识证明系统，这类方案显著降低了证明方的计算开销。具体而言，文献[7]表明在验证百万级逻辑门时，基于VOLE的ZKPs比现有常数轮方案（如Groth16[8]、Virgo[9]、Cerberus[10]）快3-10倍。
+>
+> 我将简单介绍我们最近发表在 IEEE S&P(Oakland) 2025 上的文章 JesseQ: Efficient Zero-Knowledge Proofs for Circuits over Any Field
+>
+基于向量不经意线性评估（VOLE）的零知识证明（ZKPs）近期因其高效性和可扩展性获得显著关注。最新实现方案每秒可证明数千万逻辑门，并能平滑扩展至万亿级逻辑门验证。相较于现有简洁零知识证明系统，这类方案显著降低了证明方的计算开销。具体而言，工作LPZKv2表明在验证百万级逻辑门时，基于VOLE的ZKPs比现有常数轮方案（如Groth16、Virgo、Cerberus）快3-10倍。
 
-基于VOLE的常数轮ZKPs性能如下表所示。在该范式下，线点零知识协议（LPZK）[13]首次实现大域算术电路中每个逻辑门约1个通信元素的里程碑，后续QuickSilver[6]将其改进为支持任意数域。另一改进方向LPZKv2[7]则将通信量减半并降低计算成本。这些方案的通信复杂度与电路规模呈线性关系。AntMan[14]首次实现 $\mathcal{O}(|C|^{3/4})$ 的亚线性通信构造（ $|\mathcal{C}|$ 为大域算术电路规模），虽然计算成本仍保持高效，但引入了 $\mathcal{O}(\log |C|)$ 的开销。在计算效率方面，QuickSilver和LPZKv2分别在布尔电路和大域算术电路中表现最优。值得注意的是，支持任意数域的VOLE-ZKPs与仅适用于大域的方案存在显著性能差异。
+基于VOLE的常数轮ZKPs性能如下表所示。在该范式下，线点零知识协议（LPZK）首次实现大域算术电路中每个逻辑门约1个通信元素的里程碑，后续QuickSilver将其改进为支持任意数域。另一改进方向LPZKv2则将通信量减半并降低计算成本。这些方案的通信复杂度与电路规模呈线性关系。AntMan首次实现 $\mathcal{O}(|C|^{3/4})$ 的亚线性通信构造（ $|\mathcal{C}|$ 为大域算术电路规模），虽然计算成本仍保持高效，但引入了 $\mathcal{O}(\log |C|)$ 的开销。在计算效率方面，QuickSilver和LPZKv2分别在布尔电路和大域算术电路中表现最优。值得注意的是，支持任意数域的VOLE-ZKPs与仅适用于大域的方案存在显著性能差异。
 
-另一研究方向针对特定结构电路（如表示析取式 $\mathcal{C}_1(w)=1\vee\mathcal{C}_2(w)=1\cdots\vee\mathcal{C}_B(w)=1$ 的 $B$ 分支子电路）进行优化。最先进的Batchman[15]实现了批量析取式的亚线性通信和计算，其框架可通过黑盒方式实例化基于VOLE的常数轮ZKPs来处理乘法运算。
+另一研究方向针对特定结构电路（如表示析取式 $\mathcal{C}_1(w)=1\vee\mathcal{C}_2(w)=1\cdots\vee\mathcal{C}_B(w)=1$ 的 $B$ 分支子电路）进行优化。最先进的Batchman实现了批量析取式的亚线性通信和计算，其框架可通过黑盒方式实例化基于VOLE的常数轮ZKPs来处理乘法运算。
 |      Boolean      |            |             |    Arithmetic     |            |             |
 | :---------------: | :--------: | :---------: | :---------------: | :--------: | :---------: |
 |   Scheme&nbsp;    | Size&nbsp; | Speed&nbsp; |   Scheme&nbsp;    | Size&nbsp; | Speed&nbsp; |
-|  Wolverine [11]   |     7      | 1.25 M/sec  |  Wolverine [11]   |     4      | 0.96 M/sec  |
-| Mac‘n‘Cheese [12] |     -      |      -      | Mac‘n‘Cheese [12] |     3      |  3.6 M/sec  |
-|   IT-LPZK [13]    |     -      |      -      |   IT-LPZK [13]    |   2+1/t    | 19.6 M/sec  |
-|  QuickSilver [6]  |     1      |  8.6 M/sec  |  QuickSilver [6]  |     1      |  7.8 M/sec  |
-|   IT-LPZKv2 [7]   |     -      |      -      |   IT-LPZKv2 [7]   |   1+1/t    | 21.8 M/sec  |
-|  ROM-LPZKv2 [7]   |     -      |      -      |  ROM-LPZKv2 [7]   |    1/2     |  9.8 M/sec  |
-|    AntMan [14]    |     -      |      -      |    AntMan [14]    | sublinear  | 7.01 M/sec  |
+|  Wolverine    |     7      | 1.25 M/sec  |  Wolverine   |     4      | 0.96 M/sec  |
+| Mac‘n‘Cheese  |     -      |      -      | Mac‘n‘Cheese |     3      |  3.6 M/sec  |
+|   IT-LPZK    |     -      |      -      |   IT-LPZK   |   2+1/t    | 19.6 M/sec  |
+|  QuickSilver  |     1      |  8.6 M/sec  |  QuickSilver |     1      |  7.8 M/sec  |
+|   IT-LPZKv2  |     -      |      -      |   IT-LPZKv2   |   1+1/t    | 21.8 M/sec  |
+|  ROM-LPZKv2  |     -      |      -      |  ROM-LPZKv2  |    1/2     |  9.8 M/sec  |
+|    AntMan   |     -      |      -      |    AntMan   | sublinear  | 7.01 M/sec  |
 |       JQv1        |     1      | 64.1 M/sec  |       JQv1        |     1      | 23.3 M/sec  |
 |       JQv2        |    1/2     | 34.2 M/sec  |       JQv2        |    1/2     | 13.7 M/sec  |
 - 本表格将我们的工作（JQv1 和 JQv2）与先前相关工作的证明者成本进行了对比，数据来源包括他们研究中报告的结果以及在相同硬件上运行的实验（AntMan 除外，其使用了更高配置的实例）。
@@ -32,7 +35,7 @@
 
 ### 消息认证码与VOLE
 
-大多数基于VOLE的零知识证明将VOLE关联性用作信息论消息认证码（IT-MAC）[17], [18], [19], [20]，使得证明者（Prover）能够向验证者（Verifier）提交线值承诺。  
+大多数基于VOLE的零知识证明将VOLE关联性用作信息论消息认证码（IT-MAC，使得证明者（Prover）能够向验证者（Verifier）提交线值承诺。  
 设 $\mathbb{F}_p$ 为有限域， $x \in \mathbb{F}_p$ 是验证者已知的全局密钥， $u\in\mathbb{F}_p$ 是证明者已知的值。对 $u$ 的IT-MAC承诺由一对值 $(m, k)$ 组成，其中 $m$ 由证明者持有， $k$ 由验证者持有，且满足关系式 $m = k - u\cdot x$。  
 
 - **承诺打开阶段**：证明者发送 $(m, u)$ 给验证者，验证者检查是否满足 $m = k - u \cdot x$。  
@@ -182,11 +185,11 @@ $$a_1=w_{\alpha} w_{\rho} - w_{\upsilon} = 0$$
 3. Verifier 验证 $h \stackrel{?}{=} H(f_1(x)||\cdots||f_L(x))$ 
 
 **方案扩展性**  
-如LPZKv2，本方案可从标准算术电路推广至任意二次多项式门电路（详见第~\ref{sec:jqv1}节）。
+如LPZKv2，本方案可从标准算术电路推广至任意二次多项式门电路[[详见文章第3节]](https://eprint.iacr.org/2025/533)。
 
 #### 技术优势说明：  
 1. **布尔电路优化**：一次多项式 $f(X)$ 的构造避免了扩域元素乘法运算。在布尔电路中，标量乘法， 如 $d_{\alpha} \cdot m_{u_{\rho}}$ ，比扩域乘法，如 $m_{w_{\rho}}\cdot m_{w_{\alpha}}$ 效率显著提升
-2. **批量验证效率**：相比QuickSilver与LPZKv2分别需要的 $\mathbb{F}_{p^r}$ 三次乘法和 $\mathbb{F}_p$ 一次乘法，基于哈希的验证具有更优实际性能。例如在Amazon EC2m5.2xlarge 实例上，BLAKE3 处理1000万61/128位域元素的速度至少是同规模域乘法运算的2倍（详见第~\ref{sec:mulhash}节）
+2. **批量验证效率**：相比QuickSilver与LPZKv2分别需要的 $\mathbb{F}_{p^r}$ 三次乘法和 $\mathbb{F}_p$ 一次乘法，基于哈希的验证具有更优实际性能。例如在Amazon EC2m5.2xlarge 实例上，BLAKE3 处理1000万61/128位域元素的速度至少是同规模域乘法运算的2倍[[详见文章第6.4节]](https://eprint.iacr.org/2025/533)
 
 
 ### JQv2 面向任意域上的分层电路
@@ -200,31 +203,11 @@ $g(X) = d_\rho\cdot p_{\alpha}(X)+ d_\alpha\cdot p_{\rho}(X) + p_y(X) + d_\rho\c
   
 该多项式已能直接认证 $w_{\alpha} \cdot w_{\rho}$ 而无需任何通信。为简化描述，此处假设偶数层的导线数量多于奇数层。具体而言，我们允许证明者和验证者直接使用输入导线关联的值计算偶数层门输出的 $[w_{\upsilon}]$，从而避免证明者向验证者发送 $d_{\upsilon}$。但对于奇数层的门，证明者仍需发送 $d_{\upsilon}$ 供验证者计算 $[w_{\upsilon}]$。由于奇数层输入（偶数层输出）的关联值不再是随机值 $u$ 与双方已知值 $d$ 的简单线性组合，JQv1 中的校验方法在此不适用。
 
-因此，在给定输入输出导线的认证值后，我们采用与 QuickSliver 相似的基于二次多项式在 $x$ 处求值的校验方法，具体细节将在章节 \ref{sec:lay:cir} 中阐述。
+因此，在给定输入输出导线的认证值后，我们采用与 QuickSliver 相似的基于二次多项式在 $x$ 处求值的校验方法，具体细节在 [[文章第4节]](https://eprint.iacr.org/2025/533)中阐述。
 
 
+>
+> 作者&联系方式：刘梦玲（https://mengling-l.github.io/）
+>
  ## 参考文献
-
-[1] E. Boyle, G. Couteau, N. Gilboa, and Y. Ishai, “Compressing vector ole,” in Proceedings of the 2018 ACM SIGSAC Conference on Computer and Communications Security, 2018, pp. 896–912.
-
-[2] E. Boyle, G. Couteau, N. Gilboa, Y. Ishai, L. Kohl, and P. Scholl, “Efficient pseudorandom correlation generators: Silent ot extension and more,” in Advances in Cryptology–CRYPTO 2019: 39th Annual International Cryptology Conference, Santa Barbara, CA, USA, Au- gust 18–22, 2019, Proceedings, Part III 39. Springer, 2019, pp. 489–518.
-
-[3] P. Schoppmann, A. Gasco ́n, L. Reichert, and M. Raykova, “Distributed vector-ole: Improved constructions and implementation,” in Proceedings of the 2019 ACM SIGSAC Conference on Computer and Communications Security, 2019, pp. 1055–1072.
-
-[4] E. Boyle, G. Couteau, N. Gilboa, Y. Ishai, L. Kohl, P. Rindal, and P. Scholl, “Efficient two-round ot extension and silent non-interactive secure computation,” in Proceedings of the 2019 ACM SIGSAC Conference on Computer and Communications Security, 2019, pp. 291–308.
-
-[5] K. Yang, C. Weng, X. Lan, J. Zhang, and X. Wang, “Ferret: Fast ex- tension for correlated ot with small communication,” in Proceedings of the 2020 ACM SIGSAC Conference on Computer and Communications Security, 2020, pp. 1607–1626.
-
-[6] K. Yang, P. Sarkar, C. Weng, and X. Wang, “Quicksilver: Efficient and affordable zero-knowledge proofs for circuits and polynomials over any field,” in Proceedings of the 2021 ACM SIGSAC Conference on Computer and Communications Security, 2021, pp. 2986–3001.
-
-[7] S. Dittmer, Y. Ishai, S. Lu, and R. Ostrovsky, “Improving line-point zero knowledge: Two multiplications for the price of one,” in Proceedings of the 2022 ACM SIGSAC Conference on Computer and Communications Security, 2022, pp. 829–841.
-
-[8] J. Groth, “On the size of pairing-based non-interactive arguments,” in Advances in Cryptology–EUROCRYPT 2016: 35th Annual Interna- tional Conference on the Theory and Applications of Cryptographic Techniques, Vienna, Austria, May 8-12, 2016, Proceedings, Part II 35. Springer, 2016, pp. 305–326.
-
-[9] J. Zhang, T. Xie, Y. Zhang, and D. Song, “Transparent polynomial delegation and its applications to zero knowledge proof,” in 2020 IEEE Symposium on Security and Privacy (SP). IEEE, 2020, pp. 859–876.
-
-[10] J. Lee, S. Setty, J. Thaler, and R. Wahby, “Linear-time and post- quantum zero-knowledge snarks for r1cs,” Cryptology ePrint Archive, 2021.
-
-[11] C. Weng, K. Yang, J. Katz, and X. Wang, “Wolverine: fast, scalable, and communication-efficient zero-knowledge proofs for boolean and arithmetic circuits,” in 2021 IEEE Symposium on Security and Privacy (SP). IEEE, 2021, pp. 1074–1091.
-
-[12] C. Baum, A. J. Malozemoff, M. B. Rosen, and P. Scholl, “Mac’n’cheese mac’ n’ cheese: Zero-knowledge proofs for boolean and arithmetic circuits with nested disjunctions,” in Advances in Cryptology–CRYPTO 2021: 41st Annual International Cryptology Conference, CRYPTO 2021, Virtual Event, August 16–20, 2021, Pro- ceedings, Part IV 41. Springer, 2021, pp. 92–122.
+我们的在线版本: https://eprint.iacr.org/2025/533
